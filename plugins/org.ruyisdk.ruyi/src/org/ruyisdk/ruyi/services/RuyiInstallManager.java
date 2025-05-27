@@ -53,7 +53,6 @@ public class RuyiInstallManager {
 	}
 
 	// ========== 安装管理方法 ==========
-
 	public void install(IProgressMonitor monitor, InstallationListener listener) throws Exception {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, "Installing Ruyi", 100);
 
@@ -82,11 +81,11 @@ public class RuyiInstallManager {
 			listener.logMessage("Ruyi " + getVersionFromPackage() + " installed successfully");
 
 
-			// 阶段3: 验证安装 
+			// 阶段4: 验证安装 
 			validateInstallation(installPath, listener);
 			listener.logMessage("Installation completed successfully");
 
-			// 阶段4: 安装后设置 
+			// 阶段5: 安装后设置 
 			ruyiConfig(installPath, listener);
 
 		} catch (Exception e) {
