@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.part.ViewPart;
 import org.ruyisdk.packages.PackageExplorerView.OutputLiveDialog;
+import org.ruyisdk.ruyi.util.RuyiFileUtils;
 import org.eclipse.jface.viewers.ICheckStateProvider;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
@@ -38,15 +39,19 @@ public class PackageExplorerView extends ViewPart {
     private Process bashProcess;
     private BufferedWriter bashWriter;
     private BufferedReader bashReader;
+    private String chosenType;
 
     @Override
     public void createPartControl(Composite parent) {
         
         parent.setLayout(new GridLayout(1, false));
-        
+        chosenType = showHardwareTypeSelectionDialog(parent.getShell());
+        if (chosenType != null) {
+            refreshList();
+        }
         // 创建按钮容器
         Composite buttonComposite = new Composite(parent, SWT.NONE);
-        buttonComposite.setLayout(new GridLayout(5, false));
+        buttonComposite.setLayout(new GridLayout(6, false));
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         // 添加刷新按钮
@@ -83,6 +88,9 @@ public class PackageExplorerView extends ViewPart {
                 String dataHome = System.getenv("XDG_DATA_HOME");
                 String arch = System.getProperty("os.arch");
                     if ("amd64".equals(arch)) {
+                        arch = "x86_64";
+                    }
+                    if ("i386".equals(arch)) {
                         arch = "x86_64";
                     }
                 String binariesDir;
@@ -146,6 +154,19 @@ public class PackageExplorerView extends ViewPart {
                 }
             }
         });
+                // ...existing code...
+        // 添加“切换开发板”按钮
+        Button switchBoardButton = new Button(buttonComposite, SWT.PUSH);
+        switchBoardButton.setText("选择开发板");
+        switchBoardButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        switchBoardButton.addListener(SWT.Selection, event -> {
+            String newType = showHardwareTypeSelectionDialog(parent.getShell());
+            if (newType != null && !newType.equals(chosenType)) {
+                chosenType = newType;
+                refreshList();
+            }
+        });
+        // ...existing code...
 
         viewer = new CheckboxTreeViewer(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
         Tree tree = viewer.getTree();
@@ -180,12 +201,6 @@ public class PackageExplorerView extends ViewPart {
         // 启动持久的 Bash 会话并开启实验模式
         startBashSession();
 
-        // 弹出对话框让用户选择硬件类型
-        String chosenType = showHardwareTypeSelectionDialog(parent.getShell());
-        if (chosenType != null) {
-            String command = "ruyi --porcelain list --related-to-entity device:sipeed-" + chosenType + " ; echo RUYI_DONE";
-            executeCommandInBackground(command);
-        }
         Display.getDefault().asyncExec(() -> {
         try {
             IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
@@ -196,24 +211,6 @@ public class PackageExplorerView extends ViewPart {
     });
     }
 
-//     private java.util.Set<String> getDownloadedFiles() {
-//     java.util.Set<String> files = new java.util.HashSet<>();
-//     String cacheHome = System.getenv("XDG_CACHE_HOME");
-//     String downloadDir;
-//     if (cacheHome != null && !cacheHome.isEmpty()) {
-//         downloadDir = cacheHome + "/ruyi/distfiles";
-//     } else {
-//         downloadDir = System.getProperty("user.home") + "/.cache/ruyi/distfiles";
-//     }
-//     try (java.nio.file.DirectoryStream<java.nio.file.Path> stream = java.nio.file.Files.newDirectoryStream(java.nio.file.Paths.get(downloadDir))) {
-//         for (java.nio.file.Path entry : stream) {
-//             files.add(entry.getFileName().toString());
-//         }
-//     } catch (Exception e) {
-//         // 目录不存在或无权限时忽略
-//     }
-//     return files;
-// }
 
 
     private java.util.Set<String> getDownloadedFiles() {
@@ -349,14 +346,16 @@ public class PackageExplorerView extends ViewPart {
                 outputBuilder.append("]");
                 String jsonData = outputBuilder.toString();
 
+
                 process.waitFor();
                 reader.close();
-
+                System.out.println("当前环境变量: " + pb.environment());
+                System.out.println(command);
                 System.out.println("接收到的 JSON 数据: " + jsonData);
 
                 Display.getDefault().asyncExec(() -> {
                     try {
-                        TreeNode root = JsonParser.parseJson(jsonData, getDownloadedFiles());
+                        TreeNode root = JsonParser.parseJson(jsonData, getDownloadedFiles(), chosenType);
                         viewer.setInput(root);
                         viewer.expandAll();
                         markDownloadedNodes(root);
@@ -372,76 +371,7 @@ public class PackageExplorerView extends ViewPart {
             }
         }).start();
     }
-
-    //     private void executeCommandInBackground(String command) {
-    //     new Thread(() -> {
-    //         try {
-    //             bashWriter.write(command + "\n");
-    //             bashWriter.flush();
-    //             System.out.println("执行命令: " + command);
-    
-    //             StringBuilder outputBuilder = new StringBuilder();
-    //             String line;
-    
-    //             // outputBuilder.append("[");
-    //             // while ((line = bashReader.readLine()) != null) {
-    //             //     if (line.contains("RUYI_DONE")) {
-    //             //         break;
-    //             //     }
-    //             //     if (!line.trim().isEmpty()) {
-    //             //         outputBuilder.append(line).append(",");
-    //             //     }
-    //             // }
-    
-    //             // if (outputBuilder.length() > 1) {
-    //             //     outputBuilder.setLength(outputBuilder.length() - 1);
-    //             // }
-    //             // outputBuilder.append("]");
-    
-    //             // String jsonData = outputBuilder.toString();
-
-
-    //             outputBuilder.append("[");
-    //             boolean first = true;
-    //             while ((line = bashReader.readLine()) != null) {
-    //                 if (line.contains("RUYI_DONE")) {
-    //                     break;
-    //                 }
-    //                 line = line.trim();
-    //                 if (!line.isEmpty()) {
-    //                     if (!first) {
-    //                         outputBuilder.append(",");
-    //                     }
-    //                     outputBuilder.append(line);
-    //                     first = false;
-    //                 }
-    //             }
-    //             outputBuilder.append("]");
-    //             String jsonData = outputBuilder.toString();
-
-
-    //             System.out.println("接收到的 JSON 数据: " + jsonData);
-    
-    //             Display.getDefault().asyncExec(() -> {
-    //                 try {
-    //                     // 传入已下载文件列表
-    //                     TreeNode root = JsonParser.parseJson(jsonData, getDownloadedFiles());
-    //                     viewer.setInput(root);
-    //                     viewer.expandAll();
-    //                     markDownloadedNodes(root); // 标记已下载节点为选中且灰化
-    //                 } catch (Exception e) {
-    //                     MessageDialog.openError(Display.getDefault().getActiveShell(), "错误", "解析 JSON 数据失败：" + e.getMessage());
-    //                 }
-    //             });
-    //         } catch (IOException e) {
-    //             e.printStackTrace();
-    //             Display.getDefault().asyncExec(() -> {
-    //                 MessageDialog.openError(Display.getDefault().getActiveShell(), "错误", "执行命令失败：" + e.getMessage());
-    //             });
-    //         }
-    //     }).start();
-    // }
-    
+ 
     // 递归标记已下载节点
     private void markDownloadedNodes(TreeNode node) {
         if (node.isLeaf() && node.isDownloaded()) {
@@ -454,8 +384,6 @@ public class PackageExplorerView extends ViewPart {
             }
         }
     }
-
-
 
 
 
@@ -491,34 +419,6 @@ public class PackageExplorerView extends ViewPart {
             return container;
         }
     
-        // private void startCommand() {
-        //     new Thread(() -> {
-        //         try {
-        //             bashWriter.write(installCommand + "\n");
-        //             bashWriter.flush();
-    
-        //             String line;
-        //             while ((line = bashReader.readLine()) != null) {
-        //                 final String outputLine = line + "\n";
-        //                 Display.getDefault().asyncExec(() -> {
-        //                     if (text != null && !text.isDisposed()) {
-        //                         text.append(outputLine);
-        //                     }
-        //                 });
-        //                 if (line.contains("RUYI_DONE")) {
-
-        //                     break;
-        //                 }
-        //             }
-        //         } catch (IOException e) {
-        //             Display.getDefault().asyncExec(() -> {
-        //                 if (text != null && !text.isDisposed()) {
-        //                     text.append("执行安装命令失败：" + e.getMessage() + "\n");
-        //                 }
-        //             });
-        //         }
-        //     }).start();
-        // }
 
 
         private void startCommand() {
@@ -573,6 +473,10 @@ public class PackageExplorerView extends ViewPart {
         protected org.eclipse.swt.graphics.Point getInitialSize() {
             return new org.eclipse.swt.graphics.Point(600, 400);
         }
+        @Override
+        protected void createButtonsForButtonBar(Composite parent) {
+            createButton(parent, OK, "确定", true); // 只创建“确定”按钮
+        }
     }
 // 自定义对话框
 class OutputDialog extends Dialog {
@@ -592,21 +496,38 @@ class OutputDialog extends Dialog {
     }
     @Override
     protected org.eclipse.swt.graphics.Point getInitialSize() {
-        // 设置弹窗初始大小（比如宽600，高400）
+        // 设置弹窗初始大小
         return new org.eclipse.swt.graphics.Point(600, 400);
+    }
+    @Override
+    protected void createButtonsForButtonBar(Composite parent) {
+        createButton(parent, OK, "确定", true); // 只创建“确定”按钮
     }
 }
 
 
 
-    private void refreshList() {
-        System.out.println("开始刷新列表...");
-        String command = "ruyi --porcelain list --related-to-entity device:sipeed-lpi4a && echo RUYI_DONE";
+    // private void refreshList() {
+    //     if (chosenType == null || chosenType.isEmpty()) {
+    //         System.out.println("未选择硬件类型，无法刷新列表。");
+    //         return;
+    //     }
+    //     System.out.println("开始刷新列表...");
+    //     String command = "ruyi --porcelain list --related-to-entity device:" + chosenType + " ; echo RUYI_DONE";
+    //     executeCommandInBackground(command);
+    // }
+        private void refreshList() {
+        if (chosenType == null || chosenType.isEmpty()) {
+            System.out.println("未选择硬件类型，无法刷新列表。");
+            return;
+        }
+        String ruyiPath = RuyiFileUtils.getInstallPath() + "/ruyi";
+        String command = ruyiPath + " --porcelain list --related-to-entity device:" + chosenType + " ; echo RUYI_DONE";
         executeCommandInBackground(command);
     }
 
     private String showHardwareTypeSelectionDialog(Shell shell) {
-        String[] hardwareTypes = { "lpi4a" };
+        String[] hardwareTypes = { "sipeed-lpi4a" ,"milkv-duos"};
         ListDialog dialog = new ListDialog(shell, hardwareTypes);
         return dialog.open();
     }
