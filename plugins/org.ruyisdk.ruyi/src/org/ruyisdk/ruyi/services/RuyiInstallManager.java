@@ -1,6 +1,8 @@
 package org.ruyisdk.ruyi.services;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
@@ -9,7 +11,10 @@ import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -53,20 +58,15 @@ public class RuyiInstallManager {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, "Installing Ruyi", 100);
 
 		try {
-			// 阶段1: 准备安装 (10%)
-			subMonitor.subTask("Preparing installation");
+			// 阶段1: 准备安装 
 			prepareInstallation(listener);
-			subMonitor.split(10);
 
 			// 清理/备份旧文件
 
-			// 阶段2: 下载Ruyi (50%)
-			subMonitor.subTask("Downloading components");
-			downloadRuyi(subMonitor.split(50), listener);
-			subMonitor.split(50);
+			// 阶段2: 下载Ruyi (100%)	
+			downloadRuyi(monitor, listener);
 			
-			// 阶段3: 完成安装 (10%)
-			subMonitor.subTask("Finalizing installation");
+			// 阶段3: 完成安装 
 //	         // 文件预处理
 //			listener.logMessage("Rename ruyi file ...");
 //          prepareExecutable(Paths.get(installPath, latestRelease.getFilename()), 
@@ -74,21 +74,21 @@ public class RuyiInstallManager {
 //          		listener);
 			
 			// 环境变量配置
-			listener.logMessage("Setting up environment...");
-			addToPathIfNeeded(installPath, listener);
-			subMonitor.split(10);
+//			listener.logMessage("Setting up environment...");
+//			addToPathIfNeeded(installPath, listener);
+			// 为ruyi设置可执行权限
+			listener.logMessage("Setting executable permissions...");
+			setExecutablePermissions(installPath, listener);
 			listener.logMessage("Ruyi " + getVersionFromPackage() + " installed successfully");
 
-			// 阶段3: 验证安装 (10%)
-			subMonitor.subTask("Validating installation");
+
+			// 阶段3: 验证安装 
 			validateInstallation(installPath, listener);
-			subMonitor.split(10);
 			listener.logMessage("Installation completed successfully");
-			
-			// 阶段4: 安装后设置 (10%)
-			subMonitor.subTask("Ruyi config");
+
+			// 阶段4: 安装后设置 
 			ruyiConfig(installPath, listener);
-			subMonitor.split(20);
+
 		} catch (Exception e) {
 			listener.logMessage("Installation failed: " + e.getMessage());
 			throw e;
@@ -165,6 +165,11 @@ public class RuyiInstallManager {
 		};
 
 		Exception lastException = null;
+		int[] lastPercent = {0}; // 用于记录上次进度（数组形式以便在lambda内修改）
+		
+		// 初始化进度为0
+	    monitor.beginTask("Downloading Ruyi", 100);
+	    monitor.worked(0);
 
 		for (int i = 0; i < downloadSources.length; i++) {
 			String sourceName = i == 0 ? "镜像源" : "GitHub源";
@@ -177,11 +182,30 @@ public class RuyiInstallManager {
 
 				RuyiNetworkUtils.downloadFile(ruyiDownloadUrl, ruyiInstallPath.toString(), monitor,
 						(transferred, total) -> {
+							
+							if (total <= 0) return; // 防止除零错误
+							
 							int percent = (int) ((double) transferred / total * 100);
-							listener.progressChanged(10 + percent / 2,
+							percent = Math.min(percent, 100); // 确保不超过100%
+							
+//							System.out.println(transferred+"/"+total+"="+percent+"||"+lastPercent[0]);
+							
+							 // 仅当进度实际变化时更新
+		                    if (percent > lastPercent[0]) {
+		                    	monitor.worked(percent - lastPercent[0]); // 更新增量进度
+		                        lastPercent[0] = percent;
+		                    }
+							listener.progressChanged(percent,
 									String.format("从%s下载中 (%d/%d KB)", sourceName, transferred / 1024, total / 1024));
 						});
-				listener.logMessage("下载成功");
+				
+				  // 下载完成后确保进度为100%
+	            if (lastPercent[0] < 100) {
+	                monitor.worked(100 - lastPercent[0]);
+	                listener.progressChanged(100, "下载完成");
+	            }
+	            
+				listener.logMessage("下载成功");		
 				return; // 下载成功则直接返回
 
 			} catch (Exception e) {
@@ -257,6 +281,56 @@ public class RuyiInstallManager {
 		}
 //        listener.logMessage("Successfully set executable permission for: " + ruyiExecutable);
 		listener.logMessage("验证成功: " + ruyiExecutable + " 已获得可执行权限");
+	}
+	
+	private void setExecutablePermissions(String path, InstallationListener listener) throws Exception {
+		Path ruyipath = Paths.get(path, "ruyi");
+		File file = new File(ruyipath.toString());
+	    
+	    // 首先检查文件是否存在
+	    if (!file.exists()) {
+	        throw new FileNotFoundException("File not found: " + path);
+	    }
+	    
+	    // 检查是否已经是可执行文件
+	    if (file.canExecute()) {
+	        if (listener != null) {
+	            listener.logMessage(path + " is already executable");
+	        }
+	        return;
+	    }
+	    
+	    // 尝试使用Java标准方法设置可执行权限
+	    boolean success = file.setExecutable(true, false); // false表示不限制只有所有者可以设置
+	    
+	    if (!success) {
+	        // 如果标准方法失败，尝试使用POSIX权限设置（适用于Linux/Unix）
+	        try {
+	            Path filePath = file.toPath();
+	            Set<PosixFilePermission> perms = new HashSet<>(Files.getPosixFilePermissions(filePath));
+	            perms.add(PosixFilePermission.OWNER_EXECUTE);
+	            perms.add(PosixFilePermission.GROUP_EXECUTE);
+	            perms.add(PosixFilePermission.OTHERS_EXECUTE);
+	            Files.setPosixFilePermissions(filePath, perms);
+	            
+	            if (listener != null) {
+	                listener.logMessage("Successfully set executable permissions using POSIX API: " + path);
+	            }
+	        } catch (UnsupportedOperationException e) {
+	            // 非POSIX文件系统（如Windows）
+	            throw new Exception("Failed to set executable permissions on non-POSIX system: " + path);
+	        }
+	    } else {
+	        if (listener != null) {
+	            listener.logMessage("Successfully set executable permissions: " + path);
+	        }
+	    }
+	    
+	    // 最终确认权限是否设置成功
+	    if (!file.canExecute()) {
+	        throw new Exception("Failed to set executable permissions for: " + path + 
+	                          ". You may need root/sudo privileges.");
+	    }
 	}
 
 	private boolean showConfirmationDialog(String title, String message) {
@@ -401,7 +475,7 @@ public class RuyiInstallManager {
 
 	private String getVersionFromPackage() throws Exception {
 		// 从安装包中提取版本信息
-		Path versionFile = Paths.get(installPath, "VERSION");
+		Path versionFile = Paths.get(installPath+ "/ruyi","VERSION");
 		if (Files.exists(versionFile)) {
 			return RuyiFileUtils.readFileContent(versionFile.toString()).trim();
 		}

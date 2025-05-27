@@ -16,3 +16,4 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="3.31.100",
 Automatic-Module-Name: org.ruyisdk.ruyi
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
+Export-Package: org.ruyisdk.ruyi.util

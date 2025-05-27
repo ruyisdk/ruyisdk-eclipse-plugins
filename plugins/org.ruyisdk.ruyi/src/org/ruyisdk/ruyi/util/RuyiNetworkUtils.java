@@ -37,7 +37,7 @@ public class RuyiNetworkUtils {
             }
 
             long fileSize = connection.getContentLengthLong();
-            SubMonitor subMonitor = SubMonitor.convert(monitor, "Downloading " + url.getFile(), 100);
+//            SubMonitor subMonitor = SubMonitor.convert(monitor, "Downloading " + url.getFile(), 100);
 
             input = connection.getInputStream();
             output = new BufferedOutputStream(new FileOutputStream(destinationPath));
@@ -46,24 +46,26 @@ public class RuyiNetworkUtils {
             long totalRead = 0;
             int bytesRead;
             
-            while ((bytesRead = input.read(buffer)) != -1 && !subMonitor.isCanceled()) {
+//            while ((bytesRead = input.read(buffer)) != -1 && !subMonitor.isCanceled()) {
+            while ((bytesRead = input.read(buffer)) != -1 && !monitor.isCanceled()) {
                 output.write(buffer, 0, bytesRead);
                 totalRead += bytesRead;
                 
                 if (fileSize > 0) {
-                    int percentDone = (int)(totalRead * 100 / fileSize);
-                    subMonitor.setWorkRemaining(100 - percentDone);
-                    subMonitor.worked(1);
-                    
+//                    int percentDone = (int)(totalRead * 100 / fileSize);
+//                    subMonitor.setWorkRemaining(100 - percentDone);
+//                    subMonitor.worked(1);
+//                    
                     if (progressCallback != null) {
                         progressCallback.accept(totalRead, fileSize);
                     }
-                } else {
-                    subMonitor.worked(1);
+//                } else {
+//                    subMonitor.worked(1);
                 }
             }
 
-            if (subMonitor.isCanceled()) {
+//            if (subMonitor.isCanceled()) {
+            if (monitor.isCanceled()) {
                 throw new InterruptedIOException("Download cancelled by user");
             }
         } finally {
@@ -72,9 +74,9 @@ public class RuyiNetworkUtils {
             if (connection != null) {
                 connection.disconnect();
             }
-            if (monitor != null) {
-                monitor.done();
-            }
+//            if (monitor != null) {
+//                monitor.done();
+//            }
         }
     }
     
