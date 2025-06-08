@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to RUYIIDE</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="welcome-grid-container">
+        <!-- Top Row -->
+        <div class="quadrant quadrant-one">
+            <img src="../icons/ruyi_logo.png" alt="RUYIIDE Logo" class="main-logo">
+        </div>
+
+        <div class="quadrant quadrant-two">
+            <h1>欢迎使用RuyiIde</h1>
+            <p class="intro-text">
+                RuyiSDK 是一个由 PLCT Lab 所启动的开源项目，该项目旨在为 RISC-V 开发者提供一个便捷、完善的开发环境。其提供了相关最新的硬件信息、软件支持，例如在支持的设备中有提供相关支持硬件情况；软件层面提供了镜像（如 RevyOS）、工具链、包管理器等。
+                其最终目标是希望为 RISC-V 开发者提供一个完善、便捷的开发环境，使得 RISC-V 成为主流架构，以及建设并运营一个完善的社区以便开发者交流。最终希望 RuyiSDK 可以走向国际化，为全球的 RISC-V 开发者提供开发的便捷。
+            </p>
+            <div class="web-links">
+                <a href="https://ruyisdk.org/" class="button">访问RuyiSDK官网</a>
+                <a href="https://ruyisdk.org/blog" class="button">博客</a>
+                <a href="https://ruyisdk.org/contact" class="button">关于我们</a>
+            </div>
+        </div>
+
+        <!-- Bottom Row: IDE Actions -->
+        <div class="quadrant quadrant-three-four">
+            <div class="ide-actions-panel-container">
+                <!-- Panel 1: New -->
+                <div class="action-panel">
+                    <div class="panel-header">
+                        <img src="../icons/icon_new.png" alt="New" class="panel-icon">
+                        <h2>New</h2>
+                    </div>
+                    <a href="http://org.eclipse.ui.intro/execute?command=org.eclipse.ui.newWizard" class="button ide-button">New Project...</a>
+                </div>
+
+                <!-- Panel 2: Open -->
+                <div class="action-panel">
+                    <div class="panel-header">
+                        <img src="../icons/icon_open.png" alt="Open" class="panel-icon">
+                        <h2>Open</h2>
+                    </div>
+                    <a href="http://org.eclipse.ui.intro/execute?command=org.eclipse.ui.file.import" class="button ide-button">Open/Import Project...</a>
+                </div>
+
+                <!-- Panel 3: Setting -->
+                <div class="action-panel">
+                    <div class="panel-header">
+                        <img src="../icons/icon_settings.png" alt="Settings" class="panel-icon">
+                        <h2>Setting</h2>
+                    </div>
+                    <a href="http://org.eclipse.ui.intro/execute?command=org.eclipse.ui.window.preferences" class="button ide-button">Open Settings</a>
+                    <!-- <a href="#" onclick="return confirmResetSettings();" class="button ide-button reset-button">Reset Settings</a> --> 
+                </div>
+
+                <!-- Panel 4: Documents -->
+                <div class="action-panel">
+                    <div class="panel-header">
+                        <img src="../icons/icon_docs.png" alt="Documents" class="panel-icon">
+                        <h2>Documents</h2>
+                    </div>
+                    <a href="https://ruyisdk.org/docs/intro" class="button ide-button">获取文档</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- <script type="text/javascript">
+        function confirmResetSettings() {
+            if (confirm("Are you sure you want to reset all settings to their defaults? This action cannot be undone.")) {
+
+                alert("Settings reset to default (placeholder action). Actual reset functionality needs to be implemented via an Eclipse command.");
+            }
+            return false; // Prevents the link from navigating if it's an <a> tag with href="#"
+        }
+    </script> -->
+</body>
+</html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.intro">
+      <intro
+            class="org.ruyisdk.intro.CustomIntroPart"
+            icon="icons/ruyi_logo.png"
+            id="org.ruyisdk.intro.main">
+      </intro>
+      <introProductBinding
+            introId="org.ruyisdk.intro.main"
+            productId="org.eclipse.epp.package.rcp.product"> <!-- 适用于标准 Eclipse IDE -->
+            
+      </introProductBinding>
+   </extension>
+
+   <extension point="org.eclipse.core.runtime.products">
+     <product
+           application="org.eclipse.ui.ide.workbench"
+           name="RuyiSDK Intro Product">
+        <property
+              name="appName"
+              value="RuyiSDK Intro Product">
+        </property>
+     </product>
+   </extension>
+
+</plugin>
