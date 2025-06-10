@@ -3,11 +3,15 @@ Bundle-ManifestVersion: 2
 Bundle-Name: RuyiSDK Intro
 Bundle-SymbolicName: org.ruyisdk.intro;singleton:=true
 Bundle-Version: 1.0.0.qualifier
+Export-Package: org.ruyisdk.intro
 Bundle-Activator: org.ruyisdk.intro.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.swt,
  org.eclipse.ui.intro
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.ruyisdk.intro
+Bundle-ClassPath: .,
+ html/,
+ icons/

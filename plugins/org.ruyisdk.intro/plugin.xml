@@ -1,30 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+	<extension point="org.eclipse.ui.commands">
+		<command
+			id="org.ruyisdk.intro.openBrowser.blog"
+			name="Open Blog"
+			defaultHandler="org.ruyisdk.intro.OpenBrowserHandler" />
+		<command
+			id="org.ruyisdk.intro.openBrowser.home"
+			name="Open Homepage"
+			defaultHandler="org.ruyisdk.intro.OpenBrowserHandler" />
+		<command
+			id="org.ruyisdk.intro.openBrowser.contact"
+			name="Open About"
+			defaultHandler="org.ruyisdk.intro.OpenBrowserHandler" />
 
-   <extension
-         point="org.eclipse.ui.intro">
-      <intro
-            class="org.ruyisdk.intro.CustomIntroPart"
-            icon="icons/ruyi_logo.png"
-            id="org.ruyisdk.intro.main">
-      </intro>
-      <introProductBinding
-            introId="org.ruyisdk.intro.main"
-            productId="org.eclipse.epp.package.rcp.product"> <!-- 适用于标准 Eclipse IDE -->
-            
-      </introProductBinding>
-   </extension>
+		<command
+			id="org.ruyisdk.intro.openBrowser.matrix"
+			name="Open About"
+			defaultHandler="org.ruyisdk.intro.OpenBrowserHandler" />
+		<command
+			id="org.ruyisdk.intro.openBrowser.docs"
+			name="Open About"
+			defaultHandler="org.ruyisdk.intro.OpenBrowserHandler" />
+		<command
+			id="org.ruyisdk.intro.openBrowser.discussions"
+			name="Open About"
+			defaultHandler="org.ruyisdk.intro.OpenBrowserHandler" />
+	</extension>
+	<extension
+		point="org.eclipse.ui.intro">
+		<intro
+			class="org.ruyisdk.intro.CustomIntroPart"
+			icon="/icons/ruyisdk-icon16.png"
+			id="org.ruyisdk.intro.main">
+		</intro>
+		<introProductBinding
+			introId="org.ruyisdk.intro.main"
+			productId="org.eclipse.epp.package.rcp.product"> <!-- 这里的productId必须与被加载的IDE 的 productId一致 : rcp/embedcpp-->
+		</introProductBinding>
+	</extension>
 
-   <extension point="org.eclipse.core.runtime.products">
-     <product
-           application="org.eclipse.ui.ide.workbench"
-           name="RuyiSDK Intro Product">
-        <property
-              name="appName"
-              value="RuyiSDK Intro Product">
-        </property>
-     </product>
-   </extension>
+	<extension point="org.eclipse.core.runtime.products">
+		<product
+			application="org.eclipse.ui.ide.workbench"
+			name="RuyiSDK Intro Product">
+			<property
+				name="appName"
+				value="RuyiSDK Intro Product">
+			</property>
+		</product>
+	</extension>
 
 </plugin>
