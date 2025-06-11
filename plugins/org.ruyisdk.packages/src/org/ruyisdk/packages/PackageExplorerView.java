@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.io.IOException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -30,6 +31,7 @@ import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Control;
+import org.ruyisdk.packages.JsonParser;
 
 
 
@@ -506,16 +508,6 @@ class OutputDialog extends Dialog {
 }
 
 
-
-    // private void refreshList() {
-    //     if (chosenType == null || chosenType.isEmpty()) {
-    //         System.out.println("未选择硬件类型，无法刷新列表。");
-    //         return;
-    //     }
-    //     System.out.println("开始刷新列表...");
-    //     String command = "ruyi --porcelain list --related-to-entity device:" + chosenType + " ; echo RUYI_DONE";
-    //     executeCommandInBackground(command);
-    // }
         private void refreshList() {
         if (chosenType == null || chosenType.isEmpty()) {
             System.out.println("未选择硬件类型，无法刷新列表。");
@@ -526,9 +518,42 @@ class OutputDialog extends Dialog {
         executeCommandInBackground(command);
     }
 
+    // private String showHardwareTypeSelectionDialog(Shell shell) {
+    //     String[] hardwareTypes = { "sipeed-lpi4a" ,"milkv-duos"};
+    //     ListDialog dialog = new ListDialog(shell, hardwareTypes);
+    //     return dialog.open();
+    // }
+    
+
+    private String[] fetchHardwareEntities() {
+        List<String> entityIds = new ArrayList<>();
+        String command = "RUYI_EXPERIMENTAL=x ruyi --porcelain entity list -t device";
+        try {
+            ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+    
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                StringBuilder outputBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    outputBuilder.append(line.trim());
+                }
+                process.waitFor();
+                // 调用JsonParser解析所有entity_id
+                entityIds = JsonParser.parseAllEntityIdsInOneLine(outputBuilder.toString());
+                System.out.println("提取到的硬件实体 ID: " + entityIds);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return entityIds.toArray(new String[0]);
+    }
+
     private String showHardwareTypeSelectionDialog(Shell shell) {
-        String[] hardwareTypes = { "sipeed-lpi4a" ,"milkv-duos"};
+        String[] hardwareTypes = fetchHardwareEntities();
         ListDialog dialog = new ListDialog(shell, hardwareTypes);
         return dialog.open();
     }
+    
 }
