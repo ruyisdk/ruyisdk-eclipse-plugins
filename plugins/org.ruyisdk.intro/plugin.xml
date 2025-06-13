@@ -37,7 +37,7 @@
 		</intro>
 		<introProductBinding
 			introId="org.ruyisdk.intro.main"
-			productId="org.eclipse.epp.package.rcp.product"> <!-- 这里的productId必须与被加载的IDE 的 productId一致 : rcp/embedcpp-->
+			productId="org.eclipse.epp.package.embedcpp.product"> <!-- 这里的productId必须与被加载的IDE 的 productId一致 :实例测试环境内为：org.eclipse.epp.package.rcp.product，ruyiide为：org.eclipse.epp.package.embedcpp.product -->
 		</introProductBinding>
 	</extension>
 
