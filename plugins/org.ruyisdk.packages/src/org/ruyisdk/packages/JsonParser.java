@@ -115,7 +115,7 @@ public class JsonParser {
             JsonValue value = reader.read();
             collectEntityIds(value, entityIds); 
         } catch (Exception e) {
-            System.err.println("无法解析的 JSON 对象: " + jsonStr);
+            System.err.println("Unparseable JSON object:" + jsonStr);
         }
     }
     
