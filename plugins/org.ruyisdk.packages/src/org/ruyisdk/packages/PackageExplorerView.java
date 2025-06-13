@@ -51,20 +51,20 @@ public class PackageExplorerView extends ViewPart {
         if (chosenType != null) {
             refreshList();
         }
-        // 创建按钮容器
+        // build button docker
         Composite buttonComposite = new Composite(parent, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(6, false));
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-        // 添加刷新按钮
+        // add refresh button
         Button refreshButton = new Button(buttonComposite, SWT.PUSH);
-        refreshButton.setText("刷新列表");
+        refreshButton.setText("Refresh List");
         refreshButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         refreshButton.addListener(SWT.Selection, event -> refreshList());
 
-        // 添加“打开下载目录”按钮
+        // add openDownloadDirectory button
         Button openDirButton = new Button(buttonComposite, SWT.PUSH);
-        openDirButton.setText("打开压缩包下载目录");
+        openDirButton.setText("Open Pkg Dir");
         openDirButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         openDirButton.addListener(SWT.Selection, event -> {
             try {
@@ -77,13 +77,13 @@ public class PackageExplorerView extends ViewPart {
                 }
                 Runtime.getRuntime().exec(new String[] { "xdg-open", downloadDir });
             } catch (IOException e) {
-                MessageDialog.openError(Display.getDefault().getActiveShell(), "错误", "无法打开压缩包下载目录：" + e.getMessage());
+                MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Cannot open compressed package download directory: " + e.getMessage());
             }
         });
 
-        // 添加“打开二进制文件下载目录”按钮
+        // add open BinaryDirectory button
         Button openBinariesButton = new Button(buttonComposite, SWT.PUSH);
-        openBinariesButton.setText("打开二进制文件下载目录");
+        openBinariesButton.setText("Open Binaries Dir");
         openBinariesButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         openBinariesButton.addListener(SWT.Selection, event -> {
             try {
@@ -104,13 +104,13 @@ public class PackageExplorerView extends ViewPart {
                 }
                 Runtime.getRuntime().exec(new String[] { "xdg-open", binariesDir });
             } catch (IOException e) {
-                MessageDialog.openError(Display.getDefault().getActiveShell(), "错误", "无法打开二进制文件下载目录：" + e.getMessage());
+                MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Cannot open binary files download directory: " + e.getMessage());
             }
         });
-        
-        // 添加“打开镜像文件下载目录”按钮
+
+        // add open imageDirectory button
         Button openBlobsButton = new Button(buttonComposite, SWT.PUSH);
-        openBlobsButton.setText("打开镜像文件下载目录");
+        openBlobsButton.setText("Open Images Dir");
         openBlobsButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         openBlobsButton.addListener(SWT.Selection, event -> {
             try {
@@ -123,20 +123,20 @@ public class PackageExplorerView extends ViewPart {
                 }
                 Runtime.getRuntime().exec(new String[] { "xdg-open", blobsDir });
             } catch (IOException e) {
-                MessageDialog.openError(Display.getDefault().getActiveShell(), "错误", "无法打开镜像文件下载目录：" + e.getMessage());
+                MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Cannot open image files download directory: " + e.getMessage());
             }
         });
 
         
 
-        // 添加下载按钮
+        // add download button
         Button downloadButton = new Button(buttonComposite, SWT.PUSH);
-        downloadButton.setText("下载");
+        downloadButton.setText("Download");
         downloadButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         downloadButton.addListener(SWT.Selection, event -> {
             Object[] checkedElements = viewer.getCheckedElements();
             List<TreeNode> selectedNodes = new ArrayList<>();
-            for (Object obj : checkedElements) {//下载监听
+            for (Object obj : checkedElements) {//Download Monitor
                 if (obj instanceof TreeNode) {
                     TreeNode node = (TreeNode) obj;
                     if (node.isLeaf()&&!node.isDownloaded()) {
@@ -145,19 +145,19 @@ public class PackageExplorerView extends ViewPart {
                 }
             }
             if (selectedNodes.isEmpty()) {
-                MessageDialog.openInformation(Display.getDefault().getActiveShell(), "提示", "未选中任何文件！");
+                MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Point:", "No files selected!");
                 return;
             }
-            boolean confirmed = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "确认下载", "是否确认下载选中的文件？");
+            boolean confirmed = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Download", "Are you sure you want to download the selected files?");
             if (confirmed) {
                 for (TreeNode node : selectedNodes) {
                     executeInstallCommand(node.getInstallCommand());
                 }
             }
         });
-        // 添加“切换开发板”按钮
+        //add switch board button
         Button switchBoardButton = new Button(buttonComposite, SWT.PUSH);
-        switchBoardButton.setText("选择开发板");
+        switchBoardButton.setText("Select Development Board");
         switchBoardButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         switchBoardButton.addListener(SWT.Selection, event -> {
             String newType = showHardwareTypeSelectionDialog(parent.getShell());
@@ -173,15 +173,15 @@ public class PackageExplorerView extends ViewPart {
         viewer.setContentProvider(new TreeContentProvider());
         viewer.setLabelProvider(new TreeLabelProvider());
 
-        // 只让叶子节点有复选框
+        // Only let leaf nodes have checkboxes
         viewer.setCheckStateProvider(new ICheckStateProvider() {
             @Override
             public boolean isChecked(Object element) {
-                return false; // 默认不选中
+                return false;
             }
             @Override
             public boolean isGrayed(Object element) {
-                // 非叶子节点灰掉（不可选）
+                
                 if (element instanceof TreeNode) {
                     return !((TreeNode) element).isLeaf();
                 }
@@ -189,15 +189,15 @@ public class PackageExplorerView extends ViewPart {
             }
         });
 
-        // 禁止非叶子节点被选中
+        // Prevent non-leaf nodes from being selected
         viewer.addCheckStateListener(event -> {
             Object element = event.getElement();
             if (element instanceof TreeNode && !((TreeNode) element).isLeaf()) {
                 viewer.setChecked(element, false);
             }
         });
-        
-        // 启动持久的 Bash 会话并开启实验模式
+
+        // Start a persistent Bash session and enable experimental mode
         startBashSession();
 
         Display.getDefault().asyncExec(() -> {
@@ -239,7 +239,7 @@ public class PackageExplorerView extends ViewPart {
         return files;
     }
 
-    // 辅助方法：将目录下所有文件名加入集合
+    // Helper method: Add all file names in the directory to the set
     private void addFilesFromDir(java.util.Set<String> files, String dirPath) {
         try (java.nio.file.DirectoryStream<java.nio.file.Path> stream =
                     java.nio.file.Files.newDirectoryStream(java.nio.file.Paths.get(dirPath))) {
@@ -247,7 +247,7 @@ public class PackageExplorerView extends ViewPart {
                 files.add(entry.getFileName().toString());
             }
         } catch (Exception e) {
-            // 目录不存在或无权限时忽略
+            // Ignore if the directory does not exist or is not accessible
         }
     }
 
@@ -285,7 +285,7 @@ public class PackageExplorerView extends ViewPart {
             }).start();
         } catch (IOException e) {
             e.printStackTrace();
-            MessageDialog.openError(Display.getDefault().getActiveShell(), "错误", "无法启动 Bash 会话：" + e.getMessage());
+            MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Cannot start Bash session: " + e.getMessage());
         }
     }
 
@@ -330,7 +330,7 @@ public class PackageExplorerView extends ViewPart {
                         break;
                     }
                     line = line.trim();
-                    // 只拼接包数据，过滤日志
+                    // Only concatenate packet data and filter logs
                     if (!line.isEmpty() && line.startsWith("{") && !line.contains("\"ty\":\"log-v1\"")) {
                         if (!first) {
                             outputBuilder.append(",");
@@ -353,19 +353,19 @@ public class PackageExplorerView extends ViewPart {
                         viewer.expandAll();
                         markDownloadedNodes(root);
                     } catch (Exception e) {
-                        MessageDialog.openError(Display.getDefault().getActiveShell(), "错误", "解析 JSON 数据失败：" + e.getMessage());
+                        MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Failed to parse JSON data: " + e.getMessage());
                     }
                 });
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
                 Display.getDefault().asyncExec(() -> {
-                    MessageDialog.openError(Display.getDefault().getActiveShell(), "错误", "执行命令失败：" + e.getMessage());
+                    MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Failed to execute command: " + e.getMessage());
                 });
             }
         }).start();
     }
- 
-    // 递归标记已下载节点
+
+    // Recursively mark downloaded nodes
     private void markDownloadedNodes(TreeNode node) {
         if (node.isLeaf() && node.isDownloaded()) {
             viewer.setChecked(node, true);
@@ -387,8 +387,8 @@ public class PackageExplorerView extends ViewPart {
             dialog.open();
         });
     }
-    
-    // 实时输出对话框
+
+    // Real-time output dialog
     class OutputLiveDialog extends Dialog {
         private String installCommand;
         private Text text;
@@ -404,7 +404,7 @@ public class PackageExplorerView extends ViewPart {
             container.setLayout(new GridLayout(1, false));
             text = new Text(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            text.setText("执行命令:\n" + installCommand + "\n\n输出结果:\n");
+            text.setText("Executing command:\n" + installCommand + "\n\nOutput:\n");
             startCommand();
             return container;
         }
@@ -417,13 +417,12 @@ public class PackageExplorerView extends ViewPart {
                     List<String> cmdList = new ArrayList<>();
                     cmdList.add("bash");
                     cmdList.add("-c");
-                    // 直接执行 installCommand，不加实验模式
                     cmdList.add(installCommand + " && echo RUYI_DONE");
         
                     ProcessBuilder pb = new ProcessBuilder(cmdList);
                     pb.redirectErrorStream(true);
         
-                    // 保证 HOME 和 XDG_CACHE_HOME 环境变量一致
+                    // Ensure that HOME and XDG_CACHE_HOME environment variables are consistent
                     String home = System.getProperty("user.home");
                     pb.environment().put("HOME", home);
                     String xdgCacheHome = System.getenv("XDG_CACHE_HOME");
@@ -452,7 +451,7 @@ public class PackageExplorerView extends ViewPart {
                 } catch (IOException | InterruptedException e) {
                     Display.getDefault().asyncExec(() -> {
                         if (text != null && !text.isDisposed()) {
-                            text.append("执行安装命令失败：" + e.getMessage() + "\n");
+                            text.append("Failed to execute the installation command: " + e.getMessage() + "\n");
                         }
                     });
                 }
@@ -465,10 +464,10 @@ public class PackageExplorerView extends ViewPart {
         }
         @Override
         protected void createButtonsForButtonBar(Composite parent) {
-            createButton(parent, OK, "确定", true); // 只创建“确定”按钮
+            createButton(parent, OK, "OK", true); // Only create "OK" button
         }
     }
-// 自定义对话框
+// Custom dialog
 class OutputDialog extends Dialog {
     private String content;
     public OutputDialog(Shell parentShell, String content) {
@@ -486,12 +485,12 @@ class OutputDialog extends Dialog {
     }
     @Override
     protected org.eclipse.swt.graphics.Point getInitialSize() {
-        // 设置弹窗初始大小
+        // Set the initial size of the dialog
         return new org.eclipse.swt.graphics.Point(600, 400);
     }
     @Override
     protected void createButtonsForButtonBar(Composite parent) {
-        createButton(parent, OK, "确定", true); // 只创建“确定”按钮
+        createButton(parent, OK, "OK", true); // Only create "OK" button
     }
 }
 
@@ -524,7 +523,7 @@ class OutputDialog extends Dialog {
                     outputBuilder.append(line.trim());
                 }
                 process.waitFor();
-                // 调用JsonParser解析所有entity_id
+                // Call JsonParser to parse all entity_id
                 entityIds = JsonParser.parseAllEntityIdsInOneLine(outputBuilder.toString());
             }
         } catch (Exception e) {

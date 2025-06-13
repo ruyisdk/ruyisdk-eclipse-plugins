@@ -24,7 +24,7 @@ public class PackageLabelProvider extends LabelProvider {
             case ARRAY:
                 return "[...]";
             case STRING:
-                return value.toString().replace("\"", ""); // 去掉引号
+                return value.toString().replace("\"", ""); 
             case NUMBER:
                 return value.toString();
             case TRUE:

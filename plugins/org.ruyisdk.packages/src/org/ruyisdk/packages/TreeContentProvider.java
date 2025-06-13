@@ -21,7 +21,7 @@ public class TreeContentProvider implements ITreeContentProvider {
 
     @Override
     public Object getParent(Object element) {
-        return null; // 不需要实现父节点逻辑
+        return null; 
     }
 
     @Override
