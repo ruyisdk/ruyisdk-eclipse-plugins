@@ -81,7 +81,7 @@ public class PackageExplorerView extends ViewPart {
             }
         });
 
-                // 添加“打开二进制文件下载目录”按钮
+        // 添加“打开二进制文件下载目录”按钮
         Button openBinariesButton = new Button(buttonComposite, SWT.PUSH);
         openBinariesButton.setText("打开二进制文件下载目录");
         openBinariesButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -134,7 +134,6 @@ public class PackageExplorerView extends ViewPart {
         downloadButton.setText("下载");
         downloadButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         downloadButton.addListener(SWT.Selection, event -> {
-            System.out.println("下载按钮被点击");
             Object[] checkedElements = viewer.getCheckedElements();
             List<TreeNode> selectedNodes = new ArrayList<>();
             for (Object obj : checkedElements) {//下载监听
@@ -156,7 +155,6 @@ public class PackageExplorerView extends ViewPart {
                 }
             }
         });
-                // ...existing code...
         // 添加“切换开发板”按钮
         Button switchBoardButton = new Button(buttonComposite, SWT.PUSH);
         switchBoardButton.setText("选择开发板");
@@ -168,7 +166,6 @@ public class PackageExplorerView extends ViewPart {
                 refreshList();
             }
         });
-        // ...existing code...
 
         viewer = new CheckboxTreeViewer(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
         Tree tree = viewer.getTree();
@@ -276,13 +273,11 @@ public class PackageExplorerView extends ViewPart {
 
             bashWriter.write("export RUYI_EXPERIMENTAL=true\n");
             bashWriter.flush();
-            System.out.println("实验模式已开启");
 
             new Thread(() -> {
                 try {
                     String line;
                     while ((line = bashReader.readLine()) != null) {
-                        System.out.println("[Bash Output] " + line);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -307,7 +302,6 @@ public class PackageExplorerView extends ViewPart {
             if (bashProcess != null) {
                 bashProcess.destroy();
             }
-            System.out.println("Bash 会话已关闭");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -351,9 +345,6 @@ public class PackageExplorerView extends ViewPart {
 
                 process.waitFor();
                 reader.close();
-                System.out.println("当前环境变量: " + pb.environment());
-                System.out.println(command);
-                System.out.println("接收到的 JSON 数据: " + jsonData);
 
                 Display.getDefault().asyncExec(() -> {
                     try {
@@ -390,9 +381,6 @@ public class PackageExplorerView extends ViewPart {
 
 
 
-
-
-
     private void executeInstallCommand(String installCommand) {
         Display.getDefault().asyncExec(() -> {
             OutputLiveDialog dialog = new OutputLiveDialog(Display.getDefault().getActiveShell(), installCommand);
@@ -400,7 +388,7 @@ public class PackageExplorerView extends ViewPart {
         });
     }
     
-    // 新的实时输出对话框
+    // 实时输出对话框
     class OutputLiveDialog extends Dialog {
         private String installCommand;
         private Text text;
@@ -508,9 +496,8 @@ class OutputDialog extends Dialog {
 }
 
 
-        private void refreshList() {
+    private void refreshList() {
         if (chosenType == null || chosenType.isEmpty()) {
-            System.out.println("未选择硬件类型，无法刷新列表。");
             return;
         }
         String ruyiPath = RuyiFileUtils.getInstallPath() + "/ruyi";
@@ -518,18 +505,15 @@ class OutputDialog extends Dialog {
         executeCommandInBackground(command);
     }
 
-    // private String showHardwareTypeSelectionDialog(Shell shell) {
-    //     String[] hardwareTypes = { "sipeed-lpi4a" ,"milkv-duos"};
-    //     ListDialog dialog = new ListDialog(shell, hardwareTypes);
-    //     return dialog.open();
-    // }
-    
+
 
     private String[] fetchHardwareEntities() {
-        List<String> entityIds = new ArrayList<>();
-        String command = "RUYI_EXPERIMENTAL=x ruyi --porcelain entity list -t device";
-        try {
-            ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
+            List<String> entityIds = new ArrayList<>();
+            String ruyiPath = RuyiFileUtils.getInstallPath() + "/ruyi";
+            String command = "RUYI_EXPERIMENTAL=x " + ruyiPath + " --porcelain entity list -t device";
+            
+            try {
+                ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
             pb.redirectErrorStream(true);
             Process process = pb.start();
     
@@ -542,7 +526,6 @@ class OutputDialog extends Dialog {
                 process.waitFor();
                 // 调用JsonParser解析所有entity_id
                 entityIds = JsonParser.parseAllEntityIdsInOneLine(outputBuilder.toString());
-                System.out.println("提取到的硬件实体 ID: " + entityIds);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -41,7 +41,61 @@ public class JsonParser {
 
 
 
-        private static void parseJsonObject(JsonObject rootObject, TreeNode root, java.util.Set<String> downloadedFiles) {
+    // private static void parseJsonObject(JsonObject rootObject, TreeNode root, java.util.Set<String> downloadedFiles) {
+    //     if (!rootObject.containsKey("category") || !rootObject.containsKey("name")) {
+    //         return;
+    //     }
+    //     String category = rootObject.getString("category");
+    //     TreeNode categoryNode = findOrCreateCategoryNode(root, category);
+    
+    //     String name = rootObject.getString("name");
+    //     TreeNode packageNode = new TreeNode(name, null);
+    //     categoryNode.addChild(packageNode);
+    
+    //     JsonArray versions = rootObject.getJsonArray("vers");
+    //     if (versions != null) {
+    //         for (JsonValue versionValue : versions) {
+    //             JsonObject versionObject = versionValue.asJsonObject();
+    //             if (!versionObject.containsKey("semver")) {
+    //                 continue;
+    //             }
+    //             String semver = versionObject.getString("semver");
+    //             JsonArray remarks = versionObject.getJsonArray("remarks");
+    //             String remark = (remarks != null && !remarks.isEmpty()) ? " [" + remarks.getString(0) + "]" : "";
+
+    //             // 放在这里 ↓↓↓
+    //             boolean isDownloaded = false;
+    //             if (versionObject.containsKey("pm")) {
+    //                 JsonObject pmObj = versionObject.getJsonObject("pm");
+    //                 if (pmObj.containsKey("distfiles")) {
+    //                     JsonArray distfiles = pmObj.getJsonArray("distfiles");
+    //                     if (distfiles != null && !distfiles.isEmpty()) {
+    //                         for (int i = 0; i < distfiles.size(); i++) {
+    //                             JsonObject distfileObj = distfiles.getJsonObject(i);
+    //                             if (distfileObj.containsKey("name")) {
+    //                                 String fileName = distfileObj.getString("name");
+    //                                 if (downloadedFiles != null && downloadedFiles.contains(fileName)) {
+    //                                     isDownloaded = true;
+    //                                     break; // 有一个文件已下载就算已下载
+    //                                 }
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             }
+
+    //             // String installCommand = "ruyi install '" + name + "(" + semver + ")'";
+    //             System.out.println("Ruyi 路径: " + RuyiFileUtils.getInstallPath());
+    //             String installCommand = RuyiFileUtils.getInstallPath() + "/ruyi install '" + name + "(" + semver + ")'";
+    //             TreeNode versionNode = new TreeNode(semver + remark, null, installCommand);
+    //             versionNode.setLeaf(true);
+    //             versionNode.setDownloaded(isDownloaded);
+    //             packageNode.addChild(versionNode);
+    //         }
+    //     }
+    // }
+
+    private static void parseJsonObject(JsonObject rootObject, TreeNode root, java.util.Set<String> downloadedFiles) {
         if (!rootObject.containsKey("category") || !rootObject.containsKey("name")) {
             return;
         }
@@ -62,30 +116,10 @@ public class JsonParser {
                 String semver = versionObject.getString("semver");
                 JsonArray remarks = versionObject.getJsonArray("remarks");
                 String remark = (remarks != null && !remarks.isEmpty()) ? " [" + remarks.getString(0) + "]" : "";
-
-                // 放在这里 ↓↓↓
-                boolean isDownloaded = false;
-                if (versionObject.containsKey("pm")) {
-                    JsonObject pmObj = versionObject.getJsonObject("pm");
-                    if (pmObj.containsKey("distfiles")) {
-                        JsonArray distfiles = pmObj.getJsonArray("distfiles");
-                        if (distfiles != null && !distfiles.isEmpty()) {
-                            for (int i = 0; i < distfiles.size(); i++) {
-                                JsonObject distfileObj = distfiles.getJsonObject(i);
-                                if (distfileObj.containsKey("name")) {
-                                    String fileName = distfileObj.getString("name");
-                                    if (downloadedFiles != null && downloadedFiles.contains(fileName)) {
-                                        isDownloaded = true;
-                                        break; // 有一个文件已下载就算已下载
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // String installCommand = "ruyi install '" + name + "(" + semver + ")'";
-                System.out.println("Ruyi 路径: " + RuyiFileUtils.getInstallPath());
+    
+                // 只根据 is_installed 字段判断
+                boolean isDownloaded = versionObject.getBoolean("is_installed", false);
+    
                 String installCommand = RuyiFileUtils.getInstallPath() + "/ruyi install '" + name + "(" + semver + ")'";
                 TreeNode versionNode = new TreeNode(semver + remark, null, installCommand);
                 versionNode.setLeaf(true);
