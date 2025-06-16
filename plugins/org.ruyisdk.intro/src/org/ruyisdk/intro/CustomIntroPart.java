@@ -44,8 +44,6 @@ public class CustomIntroPart implements IIntroPart {
     public void createPartControl(Composite parent) {
         parent.setLayout(new FillLayout());
         browser = new Browser(parent, SWT.NONE);
-
-
         try {
             Bundle bundle = Activator.getDefault() != null ? Activator.getDefault().getBundle() : FrameworkUtil.getBundle(getClass());
             if (bundle == null) {

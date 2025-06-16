@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Locale;
 
 public class OpenBrowserHandler extends AbstractHandler {
 	// URL Mapping Table
@@ -59,9 +60,9 @@ public class OpenBrowserHandler extends AbstractHandler {
         // L2: System commands (highest compatibility)
         try {
             String[] cmd;
-            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+            if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win")) {
                 cmd = new String[]{"cmd", "/c", "start", url};
-            } else if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+            } else if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("mac")) {
                 cmd = new String[]{"open", url};
             } else {
                 cmd = new String[]{"xdg-open", url};
@@ -85,7 +86,7 @@ public class OpenBrowserHandler extends AbstractHandler {
     
     private void openUrlAbsolutely(String url) {
         try {
-            String os = System.getProperty("os.name").toLowerCase();
+            String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
             ProcessBuilder pb = new ProcessBuilder();
 
             if (os.contains("win")) {
