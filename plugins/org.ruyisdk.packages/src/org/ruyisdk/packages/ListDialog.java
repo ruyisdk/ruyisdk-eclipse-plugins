@@ -20,19 +20,19 @@ public class ListDialog extends Dialog {
 
     public String open() {
         Shell shell = new Shell(getParent(), getStyle());
-        shell.setText("选择开发板");
+        shell.setText("Select Development Board");
         shell.setLayout(new GridLayout(2, false));
 
-        // 创建列表
+        // build list
         List list = new List(shell, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL);
         list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 2));
         for (String item : items) {
             list.add(item);
         }
 
-        // 创建按钮
+        // bulid button
         Button okButton = new Button(shell, SWT.PUSH);
-        okButton.setText("确定");
+        okButton.setText("Confirm");
         okButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
         okButton.addListener(SWT.Selection, e -> {
             int selectionIndex = list.getSelectionIndex();
@@ -43,7 +43,7 @@ public class ListDialog extends Dialog {
         });
 
         Button cancelButton = new Button(shell, SWT.PUSH);
-        cancelButton.setText("取消");
+        cancelButton.setText("Cancel");
         cancelButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
         cancelButton.addListener(SWT.Selection, e -> {
             selectedItem = null;

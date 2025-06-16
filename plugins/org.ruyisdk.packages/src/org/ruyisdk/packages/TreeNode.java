@@ -7,10 +7,10 @@ public class TreeNode {
     private String name;
     private String details;
     private String installCommand;
-    private boolean selected; // 记录复选框是否选中
-    private boolean isLeaf; // 标记是否为最末级节点
+    private boolean selected; // Record whether the checkbox is selected
+    private boolean isLeaf; // Mark whether it is the last node
     private List<TreeNode> children;
-    private boolean downloaded = false;//下载标记字段
+    private boolean downloaded = false;// Download mark field
 
     public TreeNode(String name, String details) {
         this(name, details, null);
@@ -21,8 +21,8 @@ public class TreeNode {
         this.details = details;
         this.installCommand = installCommand;
         this.children = new ArrayList<>();
-        this.selected = false; // 默认未选中
-        this.isLeaf = false; // 默认不是叶子节点
+        this.selected = false; // Default not selected
+        this.isLeaf = false; // Default not a leaf node
     }
 
     public String getName() {

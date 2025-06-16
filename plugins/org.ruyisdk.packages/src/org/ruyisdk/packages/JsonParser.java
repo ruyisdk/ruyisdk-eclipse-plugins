@@ -19,7 +19,7 @@ public class JsonParser {
         public static TreeNode parseJson(String jsonData, java.util.Set<String> downloadedFiles, String hardwareType) {
             try (JsonReader reader = Json.createReader(new StringReader(jsonData))) {
                 JsonStructure jsonStructure = reader.read();
-                // 用 hardwareType 作为根节点名
+                // use hardwareType as root node name
                 TreeNode root = new TreeNode(hardwareType, null);
                 if (jsonStructure instanceof JsonObject) {
                     parseJsonObject((JsonObject) jsonStructure, root, downloadedFiles);
@@ -33,15 +33,12 @@ public class JsonParser {
                 }
                 return root;
             } catch (Exception e) {
-                throw new RuntimeException("解析 JSON 数据失败：" + e.getMessage(), e);
+                throw new RuntimeException("Failed to parse JSON data:" + e.getMessage(), e);
             }
         }
 
 
-
-
-
-        private static void parseJsonObject(JsonObject rootObject, TreeNode root, java.util.Set<String> downloadedFiles) {
+    private static void parseJsonObject(JsonObject rootObject, TreeNode root, java.util.Set<String> downloadedFiles) {
         if (!rootObject.containsKey("category") || !rootObject.containsKey("name")) {
             return;
         }
@@ -62,30 +59,9 @@ public class JsonParser {
                 String semver = versionObject.getString("semver");
                 JsonArray remarks = versionObject.getJsonArray("remarks");
                 String remark = (remarks != null && !remarks.isEmpty()) ? " [" + remarks.getString(0) + "]" : "";
-
-                // 放在这里 ↓↓↓
-                boolean isDownloaded = false;
-                if (versionObject.containsKey("pm")) {
-                    JsonObject pmObj = versionObject.getJsonObject("pm");
-                    if (pmObj.containsKey("distfiles")) {
-                        JsonArray distfiles = pmObj.getJsonArray("distfiles");
-                        if (distfiles != null && !distfiles.isEmpty()) {
-                            for (int i = 0; i < distfiles.size(); i++) {
-                                JsonObject distfileObj = distfiles.getJsonObject(i);
-                                if (distfileObj.containsKey("name")) {
-                                    String fileName = distfileObj.getString("name");
-                                    if (downloadedFiles != null && downloadedFiles.contains(fileName)) {
-                                        isDownloaded = true;
-                                        break; // 有一个文件已下载就算已下载
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // String installCommand = "ruyi install '" + name + "(" + semver + ")'";
-                System.out.println("Ruyi 路径: " + RuyiFileUtils.getInstallPath());
+    
+                boolean isDownloaded = versionObject.getBoolean("is_installed", false);
+    
                 String installCommand = RuyiFileUtils.getInstallPath() + "/ruyi install '" + name + "(" + semver + ")'";
                 TreeNode versionNode = new TreeNode(semver + remark, null, installCommand);
                 versionNode.setLeaf(true);
@@ -97,21 +73,18 @@ public class JsonParser {
 
 
     private static TreeNode findOrCreateCategoryNode(TreeNode root, String category) {
-        // 遍历根节点的子节点，查找是否已存在该类别节点
+        // Traverse the root node's children to find if the category node already exists
         for (TreeNode child : root.getChildren()) {
             if (child.getName().equals(category)) {
-                return child; // 如果找到，直接返回
+                return child; 
             }
         }
 
-        // 如果未找到，创建新的类别节点并添加到根节点
         TreeNode categoryNode = new TreeNode(category, null);
         root.addChild(categoryNode);
         return categoryNode;
     }
 
-
-    
 
     public static List<String> parseAllEntityIdsInOneLine(String jsonLine) {
         List<String> entityIds = new ArrayList<>();
@@ -127,7 +100,7 @@ public class JsonParser {
             } else if (c == '}') {
                 bracketCount--;
                 if (bracketCount == 0 && start != -1) {
-                    // 取得完整 JSON 对象子串
+                    // get fully json 
                     String singleObject = jsonLine.substring(start, i + 1);
                     parseSingleObject(singleObject, entityIds);
                     start = -1;
@@ -140,7 +113,7 @@ public class JsonParser {
     private static void parseSingleObject(String jsonStr, List<String> entityIds) {
         try (JsonReader reader = Json.createReader(new StringReader(jsonStr))) {
             JsonValue value = reader.read();
-            collectEntityIds(value, entityIds); // 共用已有的递归收集逻辑
+            collectEntityIds(value, entityIds); 
         } catch (Exception e) {
             System.err.println("无法解析的 JSON 对象: " + jsonStr);
         }
@@ -151,11 +124,11 @@ public class JsonParser {
         switch (value.getValueType()) {
             case OBJECT:
                 JsonObject obj = value.asJsonObject();
-                // 如果当前对象包含 entity_id
+                // if the current object contains entity_id
                 if (obj.containsKey("entity_id")) {
                     entityIds.add(obj.getString("entity_id"));
                 }
-                // 继续递归检查子字段
+                // continue to recursively check child fields
                 for (String key : obj.keySet()) {
                     collectEntityIds(obj.get(key), entityIds);
                 }
@@ -167,7 +140,6 @@ public class JsonParser {
                 }
                 break;
             default:
-                // 其它类型无需处理
                 break;
         }
     }
