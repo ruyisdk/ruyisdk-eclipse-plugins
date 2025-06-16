@@ -133,7 +133,7 @@ public class CustomIntroPart implements IIntroPart {
                             } 
                         }
                     } catch (Exception e) {
-
+                        
                     }
                     event.doit = false;
                 } else if (url.startsWith("http:") || url.startsWith("https:")) {
@@ -142,8 +142,11 @@ public class CustomIntroPart implements IIntroPart {
                     } catch (PartInitException | MalformedURLException e) {
                     }
                     event.doit = false;
+                } 
+                else if (url.startsWith("file:")) { 
+                    event.doit = true;
                 } else {
-                    event.doit = false; 
+                    event.doit = false;
                 }
             }
 
