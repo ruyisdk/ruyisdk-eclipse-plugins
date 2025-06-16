@@ -63,7 +63,7 @@ public class CustomIntroPart implements IIntroPart {
                 "icons/icon_matrix.png",
                 "icons/icon_docs.png",
                 "icons/icon_discussions.png"
-                // 后续添加的资源文件在这里列出
+                //resource files added later are listed here
             );
 
             URL resolvedWelcomePageURL = null;
