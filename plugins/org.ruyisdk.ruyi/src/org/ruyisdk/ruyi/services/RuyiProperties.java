@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Properties;
+import java.util.Locale;
 
 import org.ruyisdk.core.basedir.XDGDirs;
 import org.ruyisdk.core.config.Constants;
@@ -147,7 +148,7 @@ public class RuyiProperties {
     }
 
     public static void setTelemetryStatus(TelemetryStatus status) throws IOException {
-        props.setProperty("ruyi.telemetry.status", status.name().toLowerCase());
+        props.setProperty("ruyi.telemetry.status", status.name().toLowerCase(Locale.ROOT));
         saveConfig();
     }
     public static void setTelemetryStatus(boolean status) throws IOException {

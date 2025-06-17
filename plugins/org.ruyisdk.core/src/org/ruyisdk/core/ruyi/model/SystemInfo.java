@@ -1,5 +1,5 @@
 package org.ruyisdk.core.ruyi.model;
-
+import java.util.Locale;
 /**
  * 系统信息模型
  */
@@ -22,8 +22,8 @@ public class SystemInfo {
     }
 
     public static Architecture detectArchitecture() {
-        String arch = System.getProperty("os.arch").toLowerCase();
-        
+        String arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT);
+
         if (arch.contains("x86_64") || arch.contains("amd64")) {
             return Architecture.X86_64;
         } else if (arch.contains("aarch64") || arch.contains("arm64")) {
@@ -36,7 +36,7 @@ public class SystemInfo {
     }
     
     public static String getPlatformKey() {
-        String arch = System.getProperty("os.arch").toLowerCase();
+        String arch = System.getProperty("os.arch").toLowerCase(Locale.ROOT);
         
         if (arch.contains("x86_64") || arch.contains("amd64")) {
             return "linux/x86_64";

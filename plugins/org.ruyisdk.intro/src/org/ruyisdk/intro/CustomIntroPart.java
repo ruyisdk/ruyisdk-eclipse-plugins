@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationEvent;
@@ -34,6 +33,16 @@ public class CustomIntroPart implements IIntroPart {
     private List<IPropertyListener> propertyListeners = new ArrayList<>();
     private String title = "Welcome";
 
+    private String escapeHtml(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.replace("&", "&amp;")
+                   .replace("<", "&lt;")
+                   .replace(">", "&gt;")
+                   .replace("\"", "&quot;")
+                   .replace("'", "&#39;");
+    }
 
     @Override
     public void init(IIntroSite site, IMemento memento) throws PartInitException {
@@ -44,6 +53,7 @@ public class CustomIntroPart implements IIntroPart {
     public void createPartControl(Composite parent) {
         parent.setLayout(new FillLayout());
         browser = new Browser(parent, SWT.NONE);
+
         try {
             Bundle bundle = Activator.getDefault() != null ? Activator.getDefault().getBundle() : FrameworkUtil.getBundle(getClass());
             if (bundle == null) {
@@ -61,7 +71,7 @@ public class CustomIntroPart implements IIntroPart {
                 "icons/icon_matrix.png",
                 "icons/icon_docs.png",
                 "icons/icon_discussions.png"
-                //resource files added later are listed here
+                // Add all other images referenced in welcome.html here
             );
 
             URL resolvedWelcomePageURL = null;
@@ -76,15 +86,19 @@ public class CustomIntroPart implements IIntroPart {
                         }
                     } catch (IOException e_resolve) {
                         if (resourcePath.equals("html/welcome.html")) {
-                             browser.setText("<html><body><h1>Error: Could not resolve welcome.html to a file URL.</h1><p>" + e_resolve.getMessage() + "</p></body></html>");
+                             String errorMessage = e_resolve.getMessage();
+                             String safeErrorMessage = (errorMessage == null) ? "An unknown error occurred." : escapeHtml(errorMessage);
+                             browser.setText("<html><body><h1>Error: Could not resolve welcome.html to a file URL.</h1><p>" + safeErrorMessage + "</p></body></html>");
                              return;
                         }
+                        // For other resources, we might log this error but not necessarily stop loading the intro
                     }
                 } else {
                      if (resourcePath.equals("html/welcome.html")) {
                          browser.setText("<html><body><h1>Error: welcome.html not found in bundle.</h1></body></html>");
                          return;
                      }
+                     // For other resources, we might log this error
                 }
             }
 
@@ -95,15 +109,16 @@ public class CustomIntroPart implements IIntroPart {
             }
 
         } catch (Exception e) { 
-
-            browser.setText("<html><body><h1>Error loading welcome page.</h1><p>" + e.getMessage() + "</p></body></html>");
+            String errorMessage = e.getMessage();
+            String safeErrorMessage = (errorMessage == null) ? "An unknown error occurred." : escapeHtml(errorMessage);
+            browser.setText("<html><body><h1>Error loading welcome page.</h1><p>" + safeErrorMessage + "</p></body></html>");
+            // Consider proper logging for 'e' here using Activator or ILog
         }
 
         browser.addLocationListener(new LocationListener() {
             @Override
             public void changing(LocationEvent event) {
                 String url = event.location;
-
 
                 if (url == null) {
                     event.doit = false; 
@@ -114,6 +129,7 @@ public class CustomIntroPart implements IIntroPart {
                      event.doit = true;
                      return;
                 }
+                
                 if ("about:blank".equalsIgnoreCase(url)) {
                     event.doit = true;
                     return;
@@ -133,32 +149,33 @@ public class CustomIntroPart implements IIntroPart {
                             } 
                         }
                     } catch (Exception e) {
-                        
+                        // Consider proper logging for 'e' here
                     }
                     event.doit = false;
                 } else if (url.startsWith("http:") || url.startsWith("https:")) {
                     try {
                         PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
                     } catch (PartInitException | MalformedURLException e) {
+                        // Consider proper logging for 'e' here
                     }
                     event.doit = false;
-                } 
-                else if (url.startsWith("file:")) { 
-                    event.doit = true;
+                } else if (url.startsWith("file:")) { 
+                    event.doit = true; 
                 } else {
-                    event.doit = false;
+                    event.doit = false; 
                 }
             }
 
             @Override
             public void changed(LocationEvent event) {
+                // Nothing to do here for now
             }
         });
     }
 
     @Override
     public void standbyStateChanged(boolean standby) {
-
+        // Handle standby state if needed
     }
 
     @Override
@@ -196,6 +213,7 @@ public class CustomIntroPart implements IIntroPart {
 
     @Override
     public void saveState(IMemento memento) {
+        // No specific state to save for this simple intro
     }
 
     @Override
@@ -205,7 +223,7 @@ public class CustomIntroPart implements IIntroPart {
 
     @Override
     public Image getTitleImage() {
-        return null; 
+        return null; // No title image by default
     }
 
     @SuppressWarnings("unchecked")
