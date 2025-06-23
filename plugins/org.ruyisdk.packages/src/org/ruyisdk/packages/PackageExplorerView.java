@@ -532,10 +532,85 @@ class OutputDialog extends Dialog {
         return entityIds.toArray(new String[0]);
     }
 
-    private String showHardwareTypeSelectionDialog(Shell shell) {
-        String[] hardwareTypes = fetchHardwareEntities();
-        ListDialog dialog = new ListDialog(shell, hardwareTypes);
-        return dialog.open();
+
+        private String showHardwareTypeSelectionDialog(Shell shell) {
+            String[] hardwareTypes = fetchHardwareEntities();
+            //add no res found check
+            if (hardwareTypes == null || hardwareTypes.length == 0) {
+                MessageDialog.openWarning(shell, "No Hardware Found", "Could not find any supported development board entities. Please check your Ruyi installation.");
+                return null;
+            }
+    
+            HardwareSelectionDialog dialog = new HardwareSelectionDialog(shell, hardwareTypes);
+            if (dialog.open() == Dialog.OK) {
+                return dialog.getSelectedHardwareType();
+            }
+            return null; // User cancelled
+        }
+
+
+    class HardwareSelectionDialog extends Dialog {
+        private org.eclipse.swt.widgets.List listWidget;
+        private String[] hardwareTypes;
+        private String selectedHardwareType;
+        private String title;
+    
+        public HardwareSelectionDialog(Shell parentShell, String[] hardwareTypes) {
+            super(parentShell);
+            this.hardwareTypes = hardwareTypes;
+            this.title = "Select Development Board";
+            
+        }
+    
+        @Override
+        protected void configureShell(Shell newShell) {
+            super.configureShell(newShell);
+            newShell.setText(title);
+        }
+    
+        @Override
+        protected Control createDialogArea(Composite parent) {
+            Composite container = (Composite) super.createDialogArea(parent);
+            container.setLayout(new GridLayout(1, false));
+            
+            // Create the List widget
+            listWidget = new org.eclipse.swt.widgets.List(container, SWT.BORDER | SWT.V_SCROLL | SWT.SINGLE);
+            GridData gd = new GridData(GridData.FILL_BOTH);
+            listWidget.setLayoutData(gd);
+            
+            // Populate the list
+            if (hardwareTypes != null) {
+                listWidget.setItems(hardwareTypes);
+            }
+    
+            // Add a listener for double-click to select and close
+            listWidget.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+                @Override
+                public void widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent e) {
+                    okPressed();
+                }
+            });
+    
+            return container;
+        }
+    
+        @Override
+        protected void okPressed() {
+            String[] selection = listWidget.getSelection();
+            if (selection.length > 0) {
+                selectedHardwareType = selection[0];
+            }
+            super.okPressed();
+        }
+    
+        public String getSelectedHardwareType() {
+            return selectedHardwareType;
+        }
+    
+        @Override
+        protected org.eclipse.swt.graphics.Point getInitialSize() {
+            return new org.eclipse.swt.graphics.Point(450, 300);
+        }
     }
     
 }

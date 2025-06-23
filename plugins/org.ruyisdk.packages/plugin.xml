@@ -3,11 +3,13 @@
 <plugin>
     <extension
         point="org.eclipse.ui.views">
+        <category
+            id="org.ruyisdk.packages.category"
+            name="RuyiSDK"/>
         <view
             id="org.ruyisdk.packages.view"
             name="Ruyi Package Explorer"
             class="org.ruyisdk.packages.PackageExplorerView"
-            category="org.ruyisdk.packages">
-        </view>
+            category="org.ruyisdk.packages.category"/>
     </extension>
 </plugin>
