@@ -9,8 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.io.IOException;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
@@ -19,6 +24,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.part.ViewPart;
@@ -32,9 +38,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Control;
 import org.ruyisdk.packages.JsonParser;
-
-
-
 
 public class PackageExplorerView extends ViewPart {
     private CheckboxTreeViewer viewer;
@@ -53,7 +56,8 @@ public class PackageExplorerView extends ViewPart {
         }
         // build button docker
         Composite buttonComposite = new Composite(parent, SWT.NONE);
-        buttonComposite.setLayout(new GridLayout(6, false));
+        // Removed one button, so grid layout is now 5 columns
+        buttonComposite.setLayout(new GridLayout(5, false));
         buttonComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         // add refresh button
@@ -81,33 +85,6 @@ public class PackageExplorerView extends ViewPart {
             }
         });
 
-        // add open BinaryDirectory button
-        Button openBinariesButton = new Button(buttonComposite, SWT.PUSH);
-        openBinariesButton.setText("Open Binaries Dir");
-        openBinariesButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        openBinariesButton.addListener(SWT.Selection, event -> {
-            try {
-                String dataHome = System.getenv("XDG_DATA_HOME");
-                String arch = System.getProperty("os.arch");
-                    if ("amd64".equals(arch)) {
-                        arch = "x86_64";
-                    }
-                    if ("i386".equals(arch)) {
-                        arch = "x86_64";
-                    }
-                String binariesDir;
-                if (dataHome != null && !dataHome.isEmpty()) {
-                    binariesDir = dataHome + "/ruyi/binaries/" + arch;
-                } else {
-                    binariesDir = System.getProperty("user.home") + "/.local/share/ruyi/binaries/" + arch;
-                    System.err.println(arch);
-                }
-                Runtime.getRuntime().exec(new String[] { "xdg-open", binariesDir });
-            } catch (IOException e) {
-                MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Cannot open binary files download directory: " + e.getMessage());
-            }
-        });
-
         // add open imageDirectory button
         Button openBlobsButton = new Button(buttonComposite, SWT.PUSH);
         openBlobsButton.setText("Open Images Dir");
@@ -126,8 +103,6 @@ public class PackageExplorerView extends ViewPart {
                 MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Cannot open image files download directory: " + e.getMessage());
             }
         });
-
-        
 
         // add download button
         Button downloadButton = new Button(buttonComposite, SWT.PUSH);
@@ -155,6 +130,7 @@ public class PackageExplorerView extends ViewPart {
                 }
             }
         });
+
         //add switch board button
         Button switchBoardButton = new Button(buttonComposite, SWT.PUSH);
         switchBoardButton.setText("Select Development Board");
@@ -197,6 +173,9 @@ public class PackageExplorerView extends ViewPart {
             }
         });
 
+        // Create and register the context menu
+        createContextMenu();
+
         // Start a persistent Bash session and enable experimental mode
         startBashSession();
 
@@ -210,7 +189,51 @@ public class PackageExplorerView extends ViewPart {
     });
     }
 
+    private void createContextMenu() {
+        MenuManager menuMgr = new MenuManager("#PopupMenu");
+        menuMgr.setRemoveAllWhenShown(true);
+        menuMgr.addMenuListener(new IMenuListener() {
+            @Override
+            public void menuAboutToShow(IMenuManager manager) {
+                fillContextMenu(manager);
+            }
+        });
+        Menu menu = menuMgr.createContextMenu(viewer.getControl());
+        viewer.getControl().setMenu(menu);
+        getSite().registerContextMenu(menuMgr, viewer);
+    }
 
+    private void fillContextMenu(IMenuManager manager) {
+        IStructuredSelection selection = viewer.getStructuredSelection();
+        Object firstElement = selection.getFirstElement();
+
+        if (firstElement instanceof TreeNode) {
+            TreeNode node = (TreeNode) firstElement;
+            // Only show the uninstall option for downloaded leaf nodes
+            if (node.isLeaf() && node.isDownloaded()) {
+                Action uninstallAction = new Action("Uninstall") {
+                    @Override
+                    public void run() {
+                        boolean confirmed = MessageDialog.openConfirm(
+                            Display.getDefault().getActiveShell(), 
+                            "Confirm Uninstall", 
+                            "Are you sure you want to uninstall the selected package '" + node.getName() + "'?");
+                        
+                        if (confirmed) {
+                            String ruyiPath = RuyiFileUtils.getInstallPath() + "/ruyi";
+                            String installCommand = node.getInstallCommand();
+                            // Extract package name from a command like ".../ruyi provision -v -f <package-name>"
+                            String packageName = installCommand.substring(installCommand.lastIndexOf(" ") + 1);
+                            String uninstallCommand = ruyiPath + " uninstall " + packageName + " -y";
+                            System.err.println("Executing uninstall command: " + uninstallCommand);
+                            executeInstallCommand(uninstallCommand);
+                        }
+                    }
+                };
+                manager.add(uninstallAction);
+            }
+        }
+    }
 
     private java.util.Set<String> getDownloadedFiles() {
         java.util.Set<String> files = new java.util.HashSet<>();
@@ -221,16 +244,8 @@ public class PackageExplorerView extends ViewPart {
                 ? cacheHome + "/ruyi/distfiles"
                 : System.getProperty("user.home") + "/.cache/ruyi/distfiles";
         addFilesFromDir(files, distfilesDir);
-
-        // binaries
-        String dataHome = System.getenv("XDG_DATA_HOME");
-        String arch = System.getProperty("os.arch");
-        String binariesDir = (dataHome != null && !dataHome.isEmpty())
-                ? dataHome + "/ruyi/binaries/" + arch
-                : System.getProperty("user.home") + "/.local/share/ruyi/binaries/" + arch;
-        addFilesFromDir(files, binariesDir);
-
         // blobs
+        String dataHome = System.getenv("XDG_DATA_HOME");
         String blobsDir = (dataHome != null && !dataHome.isEmpty())
                 ? dataHome + "/ruyi/blobs"
                 : System.getProperty("user.home") + "/.local/share/ruyi/blobs";
@@ -378,9 +393,6 @@ public class PackageExplorerView extends ViewPart {
         }
     }
 
-
-
-
     private void executeInstallCommand(String installCommand) {
         Display.getDefault().asyncExec(() -> {
             OutputLiveDialog dialog = new OutputLiveDialog(Display.getDefault().getActiveShell(), installCommand);
@@ -402,15 +414,13 @@ public class PackageExplorerView extends ViewPart {
         protected Control createDialogArea(Composite parent) {
             Composite container = (Composite) super.createDialogArea(parent);
             container.setLayout(new GridLayout(1, false));
-            text = new Text(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
+            text = new Text(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY | SWT.WRAP);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
             text.setText("Executing command:\n" + installCommand + "\n\nOutput:\n");
             startCommand();
             return container;
         }
     
-
-
         private void startCommand() {
             new Thread(() -> {
                 try {
@@ -467,33 +477,33 @@ public class PackageExplorerView extends ViewPart {
             createButton(parent, OK, "OK", true); // Only create "OK" button
         }
     }
-// Custom dialog
-class OutputDialog extends Dialog {
-    private String content;
-    public OutputDialog(Shell parentShell, String content) {
-        super(parentShell);
-        this.content = content;
+    
+    // Custom dialog
+    class OutputDialog extends Dialog {
+        private String content;
+        public OutputDialog(Shell parentShell, String content) {
+            super(parentShell);
+            this.content = content;
+        }
+        @Override
+        protected Control createDialogArea(Composite parent) {
+            Composite container = (Composite) super.createDialogArea(parent);
+            container.setLayout(new GridLayout(1, false));
+            Text text = new Text(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
+            text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+            text.setText(content);
+            return container;
+        }
+        @Override
+        protected org.eclipse.swt.graphics.Point getInitialSize() {
+            // Set the initial size of the dialog
+            return new org.eclipse.swt.graphics.Point(600, 400);
+        }
+        @Override
+        protected void createButtonsForButtonBar(Composite parent) {
+            createButton(parent, OK, "OK", true); // Only create "OK" button
+        }
     }
-    @Override
-    protected Control createDialogArea(Composite parent) {
-        Composite container = (Composite) super.createDialogArea(parent);
-        container.setLayout(new GridLayout(1, false));
-        Text text = new Text(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
-        text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        text.setText(content);
-        return container;
-    }
-    @Override
-    protected org.eclipse.swt.graphics.Point getInitialSize() {
-        // Set the initial size of the dialog
-        return new org.eclipse.swt.graphics.Point(600, 400);
-    }
-    @Override
-    protected void createButtonsForButtonBar(Composite parent) {
-        createButton(parent, OK, "OK", true); // Only create "OK" button
-    }
-}
-
 
     private void refreshList() {
         if (chosenType == null || chosenType.isEmpty()) {
@@ -503,8 +513,6 @@ class OutputDialog extends Dialog {
         String command = ruyiPath + " --porcelain list --related-to-entity device:" + chosenType + " ; echo RUYI_DONE";
         executeCommandInBackground(command);
     }
-
-
 
     private String[] fetchHardwareEntities() {
             List<String> entityIds = new ArrayList<>();
@@ -532,23 +540,22 @@ class OutputDialog extends Dialog {
         return entityIds.toArray(new String[0]);
     }
 
-
-        private String showHardwareTypeSelectionDialog(Shell shell) {
-            String[] hardwareTypes = fetchHardwareEntities();
-            //add no res found check
-            if (hardwareTypes == null || hardwareTypes.length == 0) {
-                MessageDialog.openWarning(shell, "No Hardware Found", "Could not find any supported development board entities. Please check your Ruyi installation.");
-                return null;
-            }
-    
-            HardwareSelectionDialog dialog = new HardwareSelectionDialog(shell, hardwareTypes);
-            if (dialog.open() == Dialog.OK) {
-                return dialog.getSelectedHardwareType();
-            }
-            return null; // User cancelled
+    private String showHardwareTypeSelectionDialog(Shell shell) {
+        String[] hardwareTypes = fetchHardwareEntities();
+        //add no res found check
+        if (hardwareTypes == null || hardwareTypes.length == 0) {
+            MessageDialog.openWarning(shell, "No Hardware Found", "Could not find any supported development board entities. Please check your Ruyi installation.");
+            return null;
         }
 
+        HardwareSelectionDialog dialog = new HardwareSelectionDialog(shell, hardwareTypes);
+        if (dialog.open() == Dialog.OK) {
+            return dialog.getSelectedHardwareType();
+        }
+        return null; // User cancelled
+    }
 
+    // Custom Dialog for selecting hardware type
     class HardwareSelectionDialog extends Dialog {
         private org.eclipse.swt.widgets.List listWidget;
         private String[] hardwareTypes;
@@ -559,7 +566,6 @@ class OutputDialog extends Dialog {
             super(parentShell);
             this.hardwareTypes = hardwareTypes;
             this.title = "Select Development Board";
-            
         }
     
         @Override
@@ -611,6 +617,13 @@ class OutputDialog extends Dialog {
         protected org.eclipse.swt.graphics.Point getInitialSize() {
             return new org.eclipse.swt.graphics.Point(450, 300);
         }
+
+        @Override
+        protected void createButtonsForButtonBar(Composite parent) {
+            // Create a "Select" button that triggers okPressed()
+            createButton(parent, OK, "Select", true);
+            // Create a standard "Cancel" button
+            createButton(parent, CANCEL, "Cancel", false);
+        }
     }
-    
 }
