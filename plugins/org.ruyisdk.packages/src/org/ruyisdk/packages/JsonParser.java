@@ -13,6 +13,8 @@ import javax.json.*;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 import java.io.StringReader;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 public class JsonParser {
 
@@ -118,8 +120,6 @@ public class JsonParser {
             System.err.println("无法解析的 JSON 对象: " + jsonStr);
         }
     }
-    
-    // ...existing code...
     private static void collectEntityIds(JsonValue value, List<String> entityIds) {
         switch (value.getValueType()) {
             case OBJECT:
@@ -143,9 +143,78 @@ public class JsonParser {
                 break;
         }
     }
+    public static String findInstalledToolchainForBoard(String boardName) {
+        if (boardName == null || boardName.trim().isEmpty()) {
+            return null;
+        }
 
+        String ruyiPath = RuyiFileUtils.getInstallPath() + "/ruyi";
+        String entity = boardName.startsWith("device:") ? boardName : "device:" + boardName;
+        String command = ruyiPath + " --porcelain list --related-to-entity " + entity;
 
+        try {
+            ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
+            pb.environment().put("RUYI_EXPERIMENTAL", "true");
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
 
+            // Read the command's output stream
+            StringBuilder jsonStream = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    jsonStream.append(line);
+                }
+            }
+            process.waitFor();
 
-    
+            String rawJson = jsonStream.toString();
+            if (rawJson.trim().isEmpty()) {
+                return null; // No output from ruyi
+            }
+            // The output is a stream of JSON objects, wrap it to be a valid JSON array.
+            String jsonData = "[" + rawJson.replace("}{", "},{") + "]";
+
+            // Parse the JSON to find the toolchain
+            try (JsonReader reader = Json.createReader(new StringReader(jsonData))) {
+                JsonArray jsonArray = reader.readArray();
+                for (JsonValue value : jsonArray) {
+                    if (value.getValueType() != JsonValue.ValueType.OBJECT) continue;
+
+                    JsonObject pkgObject = (JsonObject) value;
+                    String category = pkgObject.getString("category", "");
+
+                    if ("toolchain".equals(category)) {
+                        JsonArray versions = pkgObject.getJsonArray("vers");
+                        if (versions == null) continue;
+
+                        for (JsonValue verValue : versions) {
+                            JsonObject verObject = (JsonObject) verValue;
+                            if (verObject.getBoolean("is_installed", false)) {
+                                // Extract the full package name from the install command
+                                // to match the expected format.
+                                if (verObject.containsKey("install_command")) {
+                                    String installCommand = verObject.getString("install_command");
+                                    int lastSpace = installCommand.lastIndexOf(' ');
+                                    if (lastSpace != -1) {
+                                        return installCommand.substring(lastSpace + 1);
+                                    }
+                                }
+                                // Fallback if install_command is missing
+                                String pkgName = pkgObject.getString("name");
+                                String pkgVersion = verObject.getString("semver");
+                                return pkgName + "-" + pkgVersion;
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return null; // No installed toolchain found
+    }   
 }

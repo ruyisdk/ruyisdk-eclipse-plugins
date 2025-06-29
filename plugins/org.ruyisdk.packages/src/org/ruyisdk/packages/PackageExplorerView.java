@@ -47,8 +47,7 @@ public class PackageExplorerView extends ViewPart {
     private String chosenType;
 
     @Override
-    public void createPartControl(Composite parent) {
-        
+    public void createPartControl(Composite parent) {   
         parent.setLayout(new GridLayout(1, false));
         chosenType = showHardwareTypeSelectionDialog(parent.getShell());
         if (chosenType != null) {

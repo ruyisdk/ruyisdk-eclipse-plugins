@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension point="org.eclipse.ui.newWizards">
+      <category
+            id="org.ruyisdk.projectcreator.category"
+            name="RuyiSDK">
+      </category>
+      <wizard
+            id="org.ruyisdk.projectcreator.wizards.NewProjectWizard"
+            name="New RuyiSDK Project"
+            class="org.ruyisdk.projectcreator.wizards.NewProjectWizard"
+            category="org.ruyisdk.projectcreator.category"
+            project="true"
+            icon="icons/sample.gif">
+         <description>
+            Create a new project based on the selected board model and example.
+         </description>
+      </wizard>
+   </extension>
+
+   <extension
+         id="makefileBuilder"
+         name="RuyiSDK Makefile Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true">
+         <run
+            class="org.ruyisdk.projectcreator.builder.MakefileBuilder">
+         </run>
+      </builder>
+   </extension>
+
+
+   <extension
+         id="projectNature"
+         name="RuyiSDK Project Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+            class="org.ruyisdk.projectcreator.natures.MyProjectNature">
+         </run>
+      </runtime>
+
+      <builder
+            id="org.ruyisdk.projectcreator.makefileBuilder">
+      </builder>
+   </extension>
+
+
+   <extension point="org.eclipse.ui.propertyPages">
+      <page
+            class="org.ruyisdk.projectcreator.properties.BuildPropertyPage"
+            id="org.ruyisdk.projectcreator.properties.BuildPropertyPage"
+            name="Build Settings">
+         <enabledWhen>
+            <adapt type="org.eclipse.core.resources.IProject">
+               <test
+                     property="org.eclipse.core.resources.projectNature"
+                     value="org.ruyisdk.projectcreator.projectNature">
+               </test>
+            </adapt>
+         </enabledWhen>
+      </page>
+   </extension>
+
+   <extension point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="org.ruyisdk.projectcreator.launch.BuildLaunchShortcut"
+            id="org.ruyisdk.projectcreator.launch.shortcut"
+            label="Build Project"
+            modes="run">
+         <contextualLaunch>
+            <enablement>
+               <with variable="selection">
+                  <count value="1"/>
+                  <iterate>
+                     <adapt type="org.eclipse.core.resources.IProject">
+                        <test
+                              property="org.eclipse.core.resources.projectNature"
+                              value="org.ruyisdk.projectcreator.projectNature">
+                        </test>
+                     </adapt>
+                  </iterate>
+               </with>
+            </enablement>
+         </contextualLaunch>
+      </shortcut>
+   </extension>
+</plugin>

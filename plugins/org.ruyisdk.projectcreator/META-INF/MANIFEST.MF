@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RuyiSDK Project Creator
+Bundle-SymbolicName: org.ruyisdk.projectcreator;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.ruyisdk.projectcreator.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.ui.ide,
+ org.eclipse.jface,
+ org.eclipse.debug.ui,
+ org.ruyisdk.packages
+Export-Package: org.ruyisdk.projectcreator.builder
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-21
