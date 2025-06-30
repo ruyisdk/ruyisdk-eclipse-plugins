@@ -213,22 +213,20 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
 			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Board model not set for project."));
 		}
 
-		// 使用 JsonParser 查找适合这个开发板的已安装工具链
 		String toolchain = org.ruyisdk.packages.JsonParser.findInstalledToolchainForBoard(boardModel);
 
-		// 如果没有找到特定工具链，则使用默认值
 		if (toolchain == null || toolchain.trim().isEmpty()) {
-			// 根据开发板模型选择默认工具链
+
 			if ("milkv-duo".equals(boardModel)) {
-				toolchain = "gnu-milkv-milkv-duo-elf-bin"; // Milk-V Duo 裸机工具链
+				toolchain = "gnu-milkv-milkv-duo-elf-bin";
 			} else if ("sipeed-lpi4a".equals(boardModel)) {
-				toolchain = "gnu-plct-xthead"; // 适用于 Sipeed LPi4A 的工具链
+				toolchain = "gnu-plct-xthead";
 			} else {
-				toolchain = "gnu-plct"; // 通用默认工具链
+				toolchain = "gnu-plct";
 			}
 			logToFile(project, "No installed toolchain found for " + boardModel + ", using default: " + toolchain);
 		} else {
-			// 从完整名称中提取工具链基本名称（去掉版本号）
+
 			int versionIndex = toolchain.indexOf("-0.");
 			if (versionIndex > 0) {
 				toolchain = toolchain.substring(0, versionIndex);
