@@ -2,126 +2,297 @@ package org.ruyisdk.projectcreator.builder;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.Status;
 import org.ruyisdk.projectcreator.Activator;
 
 public class MakefileBuilder extends IncrementalProjectBuilder {
 
-    public static final String BUILDER_ID = "org.ruyisdk.projectcreator.makefileBuilder";
-    private static final String BUILD_CMD_PROPERTY = "buildCmd";
-    private static final String LOG_FILE_NAME = "build_output.log";
+	public static final String BUILDER_ID = "org.ruyisdk.projectcreator.makefileBuilder";
+	private static final String BUILD_CMD_PROPERTY = "buildCmd";
+	private static final String BOARD_MODEL_PROPERTY = "boardModel";
+	private static final String OBJ_DIR_NAME = "obj";
+	private static final String LOG_FILE_NAME = "build_output.log";
+	private static final String RUYI_VENV_DIR = "ruyiVenv";
 
-    @Override
-    protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor) throws CoreException {
-        IProject project = getProject();
+	@Override
+	protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor) throws CoreException {
+		IProject project = getProject();
+		File projectLocation = project.getLocation().toFile();
 
-        String buildCommand = project.getPersistentProperty(
-            new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY)
-        );
+		// Create obj directory if it doesn't exist
+		IFolder objFolder = project.getFolder(OBJ_DIR_NAME);
+		if (!objFolder.exists()) {
+			objFolder.create(true, true, monitor);
+		}
 
-        if (buildCommand == null || buildCommand.trim().isEmpty()) {
-            buildCommand = "make";
-        }
-        
-        System.out.println(">>> MakefileBuilder: Using build command: " + buildCommand);
+		clearLogFile(project);
+		logToFile(project, "=== Build started at " + new Date() + " ===");
 
-        clearLogFile(project);
-        logToFile(project, "=== Build started at " + new Date() + " ===");
+		// 1. Ensure Ruyi virtual environment exists
+		try {
+			ensureRuyiVenv(project, monitor);
+		} catch (IOException | InterruptedException e) {
+			String errorMsg = "Failed to create Ruyi virtual environment: " + e.getMessage();
+			logToFile(project, errorMsg);
+			e.printStackTrace();
+			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, errorMsg, e));
+		}
 
-        logToFile(project, "Build command: " + buildCommand);
-        logToFile(project, "Project: " + project.getName());
-        logToFile(project, "Location: " + project.getLocation());
+		// 2. Get the build command (e.g., "make")
+		String buildCommand = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY));
+		if (buildCommand == null || buildCommand.trim().isEmpty()) {
+			buildCommand = "make";
+		}
 
-        try {
+		logToFile(project, "Project: " + project.getName());
 
-            ProcessBuilder processBuilder = new ProcessBuilder(buildCommand.split("\\s+"));
-            processBuilder.directory(project.getLocation().toFile());
-            processBuilder.redirectErrorStream(true);
-            logToFile(project, "Working directory: " + processBuilder.directory().getAbsolutePath());
+		// 3. Find the RISC-V GCC in the virtual environment
+		File venvBinDir = new File(projectLocation, RUYI_VENV_DIR + "/bin");
+		String gccPath = findRiscvGcc(venvBinDir);
+		if (gccPath == null) {
+			String errorMsg = "Could not find RISC-V GCC in Ruyi virtual environment at: "
+					+ venvBinDir.getAbsolutePath();
+			logToFile(project, errorMsg);
+			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, errorMsg));
+		}
 
-            Process process = processBuilder.start();
+		logToFile(project, "Found RISC-V GCC at: " + gccPath);
 
-            // 实时读取并记录输出
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(">>> MakefileBuilder: [BUILD] " + line);
-                    logToFile(project, line);
-                }
-            }
+		// Extract the prefix from the GCC path
+		String gccName = new File(gccPath).getName();
+		String prefix = gccName.replace("-gcc", "");
+		logToFile(project, "Using toolchain prefix: " + prefix);
 
-            // 等待进程完成并记录结果
-            int exitCode = process.waitFor();
-            String resultMessage = "Build finished with exit code: " + exitCode + " at " + new Date();
-            logToFile(project, resultMessage);
+		// Determine the correct CFLAGS based on the toolchain
+		String cflags = determineCorrectCFLAGS(gccPath, project);
+		logToFile(project, "Using CFLAGS: " + cflags);
 
-        } catch (Exception e) {
-            String errorMessage = "Build failed with exception: " + e.getMessage();
-            System.err.println(">>> MakefileBuilder: " + errorMessage);
-            e.printStackTrace();
-            logToFile(project, errorMessage);
-        } finally {
-            monitor.done();
-        }
+		// 4. Execute make with explicit CC and OBJCOPY variables
+		try {
+			// Build the make command with explicit compiler paths and CFLAGS
+			List<String> commands = new ArrayList<>();
+			commands.add("bash");
+			commands.add("-c");
 
-        // refresh the project to ensure all changes are visible
-        project.refreshLocal(IProject.DEPTH_INFINITE, monitor);
-        return null;
-    }
+			String makeCmd = String.format("cd %s && %s CC=%s/%s-gcc OBJCOPY=%s/%s-objcopy 'CFLAGS=%s'",
+					projectLocation.getAbsolutePath(), buildCommand, venvBinDir.getAbsolutePath(), prefix,
+					venvBinDir.getAbsolutePath(), prefix, cflags);
 
-    private String getBuildKindString(int kind) {
-        switch (kind) {
-            case AUTO_BUILD: return "AUTO_BUILD";
-            case FULL_BUILD: return "FULL_BUILD";
-            case INCREMENTAL_BUILD: return "INCREMENTAL_BUILD";
-            case CLEAN_BUILD: return "CLEAN_BUILD";
-            default: return "UNKNOWN (" + kind + ")";
-        }
-    }
-        private void clearLogFile(IProject project) {
-        IFile logFile = project.getFile(LOG_FILE_NAME);
-        try {
-            if (logFile.exists()) {
-                logFile.delete(true, null);
-            }
-        } catch (CoreException e) {
-            System.err.println(">>> MakefileBuilder: Failed to clear log file: " + e.getMessage());
-        }
-    }
-   
-    // writes a message to the project's log file.
-    private void logToFile(IProject project, String message) {
-        IFile logFile = project.getFile(LOG_FILE_NAME);
-        try {
-            // If the file does not exist, create it
-            if (!logFile.exists()) {
-                try (InputStream stream = new ByteArrayInputStream(new byte[0])) {
-                    logFile.create(stream, true, null);
-                }
-            }
-            
-            // add the message to the log file
-            try (FileWriter writer = new FileWriter(logFile.getLocation().toFile(), true);
-                 PrintWriter printWriter = new PrintWriter(writer)) {
-                printWriter.println(message);
-            }
-        } catch (IOException | CoreException e) {
-            System.err.println(">>> MakefileBuilder: Failed to write to log file: " + e.getMessage());
-        }
-    }
+			commands.add(makeCmd);
 
+			logToFile(project, "Build command: " + makeCmd);
 
+			ProcessBuilder processBuilder = new ProcessBuilder(commands);
+			processBuilder.redirectErrorStream(true);
+
+			Process process = processBuilder.start();
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					System.out.println(">>> MakefileBuilder: " + line);
+					logToFile(project, line);
+				}
+			}
+			int exitCode = process.waitFor();
+			String resultMessage = "Build finished with exit code: " + exitCode;
+			logToFile(project, resultMessage);
+
+		} catch (Exception e) {
+			String errorMessage = "Build failed with exception: " + e.getMessage();
+			System.err.println(">>> MakefileBuilder: " + errorMessage);
+			e.printStackTrace();
+			logToFile(project, errorMessage);
+		} finally {
+			logToFile(project, "=== Build finished at " + new Date() + " ===");
+			project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+			monitor.done();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Determines the correct CFLAGS based on the toolchain type.
+	 * 
+	 * @param gccPath The path to the gcc compiler
+	 * @param project The project
+	 * @return The appropriate CFLAGS for the toolchain
+	 * @throws CoreException if board model is not set
+	 */
+	private String determineCorrectCFLAGS(String gccPath, IProject project) throws CoreException {
+		// Base CFLAGS that are always included
+		String cflags = "-Wall -O2";
+
+		// Get the board model to provide more specific flags
+		String boardModel = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
+		if (boardModel == null || boardModel.trim().isEmpty()) {
+			return cflags; // Return default flags if board model is not available
+		}
+
+		// Analyze the GCC path to determine the type of toolchain
+		if (gccPath.contains("unknown-linux-musl")) {
+			// For Milk-V Duo with musl libc
+			return cflags + " -march=rv64gc -mabi=lp64d";
+		} else if (gccPath.contains("unknown-linux-gnu")) {
+			// For GNU/Linux toolchains
+			return cflags + " -march=rv64gc -mabi=lp64d";
+		} else if (gccPath.contains("milkv-duo-elf")) {
+			// Specific for Milk-V Duo bare metal
+			return cflags + " -march=rv64gc -mabi=lp64d";
+		} else if (gccPath.contains("unknown-elf") || gccPath.contains("plct-elf")) {
+			// Generic bare metal toolchain
+			if ("milkv-duo".equals(boardModel)) {
+				return cflags + " -march=rv64gc -mabi=lp64d";
+			} else {
+				return cflags + " -march=rv64imac -mabi=lp64";
+			}
+		}
+
+		// Default flags when we can't determine the specific toolchain type
+		return cflags + " -march=rv64gc -mabi=lp64d";
+	}
+
+	/**
+	 * Searches for a RISC-V GCC compiler in the given directory.
+	 * 
+	 * @param directory The directory to search in
+	 * @return The path to the RISC-V GCC, or null if not found
+	 */
+	private String findRiscvGcc(File directory) {
+		if (!directory.exists() || !directory.isDirectory()) {
+			return null;
+		}
+
+		// Look for files matching patterns like riscv64-*-gcc or riscv32-*-gcc
+		File[] files = directory.listFiles(file -> {
+			String name = file.getName();
+			return (name.startsWith("riscv") || name.contains("-riscv")) && name.endsWith("-gcc");
+		});
+
+		if (files != null && files.length > 0) {
+			return files[0].getAbsolutePath();
+		}
+
+		return null;
+	}
+
+	private void ensureRuyiVenv(IProject project, IProgressMonitor monitor)
+			throws IOException, InterruptedException, CoreException {
+		File projectLocation = project.getLocation().toFile();
+		File venvDir = new File(projectLocation, RUYI_VENV_DIR);
+
+		if (venvDir.exists() && venvDir.isDirectory()) {
+			logToFile(project, "Ruyi virtual environment found at: " + venvDir.getAbsolutePath());
+			return; // Venv already exists, do nothing.
+		}
+
+		logToFile(project, "Ruyi virtual environment not found. Creating...");
+
+		String boardModel = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
+		if (boardModel == null || boardModel.trim().isEmpty()) {
+			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Board model not set for project."));
+		}
+
+		// 使用 JsonParser 查找适合这个开发板的已安装工具链
+		String toolchain = org.ruyisdk.packages.JsonParser.findInstalledToolchainForBoard(boardModel);
+
+		// 如果没有找到特定工具链，则使用默认值
+		if (toolchain == null || toolchain.trim().isEmpty()) {
+			// 根据开发板模型选择默认工具链
+			if ("milkv-duo".equals(boardModel)) {
+				toolchain = "gnu-milkv-milkv-duo-elf-bin"; // Milk-V Duo 裸机工具链
+			} else if ("sipeed-lpi4a".equals(boardModel)) {
+				toolchain = "gnu-plct-xthead"; // 适用于 Sipeed LPi4A 的工具链
+			} else {
+				toolchain = "gnu-plct"; // 通用默认工具链
+			}
+			logToFile(project, "No installed toolchain found for " + boardModel + ", using default: " + toolchain);
+		} else {
+			// 从完整名称中提取工具链基本名称（去掉版本号）
+			int versionIndex = toolchain.indexOf("-0.");
+			if (versionIndex > 0) {
+				toolchain = toolchain.substring(0, versionIndex);
+			}
+			logToFile(project, "Found installed toolchain for " + boardModel + ": " + toolchain);
+		}
+
+		ProcessBuilder pb = new ProcessBuilder("ruyi", "venv", "-t", toolchain, boardModel, "./" + RUYI_VENV_DIR);
+		pb.directory(projectLocation);
+		pb.redirectErrorStream(true);
+
+		logToFile(project, "Executing: " + String.join(" ", pb.command()));
+		Process process = pb.start();
+
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				logToFile(project, "[ruyi venv] " + line);
+			}
+		}
+
+		int exitCode = process.waitFor();
+		if (exitCode != 0) {
+			throw new IOException("ruyi venv command failed with exit code " + exitCode);
+		}
+
+		logToFile(project, "Ruyi virtual environment created successfully.");
+		project.refreshLocal(IResource.DEPTH_INFINITE, monitor); // Refresh to show the new venv folder
+	}
+
+	private void clearLogFile(IProject project) {
+		IFolder objFolder = project.getFolder(OBJ_DIR_NAME);
+		IFile logFile = objFolder.getFile(LOG_FILE_NAME);
+		try {
+			// Ensure obj folder exists
+			if (!objFolder.exists()) {
+				objFolder.create(IResource.FORCE, true, null);
+			}
+			if (logFile.exists()) {
+				logFile.delete(true, null);
+			}
+		} catch (CoreException e) {
+			System.err.println(">>> MakefileBuilder: Failed to clear log file: " + e.getMessage());
+		}
+	}
+
+	private void logToFile(IProject project, String message) {
+		IFolder objFolder = project.getFolder(OBJ_DIR_NAME);
+		IFile logFile = objFolder.getFile(LOG_FILE_NAME);
+		try {
+			if (!objFolder.exists()) {
+				objFolder.create(IResource.FORCE, true, null);
+			}
+			if (!logFile.exists()) {
+				try (InputStream stream = new ByteArrayInputStream(new byte[0])) {
+					logFile.create(stream, true, null);
+				}
+			}
+			try (FileWriter writer = new FileWriter(logFile.getLocation().toFile(), true);
+					PrintWriter printWriter = new PrintWriter(writer)) {
+				printWriter.println(message);
+			}
+		} catch (IOException | CoreException e) {
+			System.err.println(">>> MakefileBuilder: Failed to write to log file: " + e.getMessage());
+		}
+	}
 }

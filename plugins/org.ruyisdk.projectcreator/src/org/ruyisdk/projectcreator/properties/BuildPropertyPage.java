@@ -15,44 +15,44 @@ import org.eclipse.ui.dialogs.PropertyPage;
 import org.ruyisdk.projectcreator.Activator;
 
 public class BuildPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
+	private Text buildCommandText;
+	private static final String BUILD_CMD_PROPERTY = "buildCmd";
 
-    private Text buildCommandText;
-    private static final String BUILD_CMD_PROPERTY = "buildCmd";
+	@Override
+	protected Control createContents(Composite parent) {
+		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setLayout(new GridLayout(2, false));
 
-    @Override
-    protected Control createContents(Composite parent) {
-        Composite composite = new Composite(parent, SWT.NONE);
-        composite.setLayout(new GridLayout(2, false));
+		new Label(composite, SWT.NONE).setText("Compile Commands:");
+		buildCommandText = new Text(composite, SWT.BORDER | SWT.SINGLE);
+		buildCommandText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-        new Label(composite, SWT.NONE).setText("Compile Commands:");
-        buildCommandText = new Text(composite, SWT.BORDER | SWT.SINGLE);
-        buildCommandText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		loadProperties();
 
-        loadProperties();
+		return composite;
+	}
 
-        return composite;
-    }
+	private void loadProperties() {
+		try {
+			IProject project = getElement().getAdapter(IProject.class);
+			String buildCmd = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY));
+			if (buildCmd != null) {
+				buildCommandText.setText(buildCmd);
+			}
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+	}
 
-    private void loadProperties() {
-        try {
-            IProject project = getElement().getAdapter(IProject.class);
-            String buildCmd = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY));
-            if (buildCmd != null) {
-                buildCommandText.setText(buildCmd);
-            }
-        } catch (CoreException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public boolean performOk() {
-        try {
-            IProject project = getElement().getAdapter(IProject.class);
-            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY), buildCommandText.getText());
-        } catch (CoreException e) {
-            return false;
-        }
-        return super.performOk();
-    }
+	@Override
+	public boolean performOk() {
+		try {
+			IProject project = getElement().getAdapter(IProject.class);
+			project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY),
+					buildCommandText.getText());
+		} catch (CoreException e) {
+			return false;
+		}
+		return super.performOk();
+	}
 }
