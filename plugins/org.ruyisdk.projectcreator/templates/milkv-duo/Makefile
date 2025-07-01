@@ -1,6 +1,4 @@
 # This Makefile is designed to be run inside an activated Ruyi virtual environment.
-# It relies on environment variables like 'CC' being set by the activation script.
-CROSS_PREFIX ?= riscv64-plct-elf
 CC ?= $(CROSS_PREFIX)-gcc
 OBJCOPY ?= $(CROSS_PREFIX)-objcopy
 # User-specific flags from the wizard are still used.

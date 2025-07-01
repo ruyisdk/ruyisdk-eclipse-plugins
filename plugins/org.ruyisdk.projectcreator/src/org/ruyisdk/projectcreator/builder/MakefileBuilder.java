@@ -33,6 +33,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
 	private static final String OBJ_DIR_NAME = "obj";
 	private static final String LOG_FILE_NAME = "build_output.log";
 	private static final String RUYI_VENV_DIR = "ruyiVenv";
+	public static final String RUYI_VENV_CMD_PROPERTY = "ruyiVenvCmd";
 
 	@Override
 	protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor) throws CoreException {
@@ -196,6 +197,17 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
 		return null;
 	}
 
+	private String getRuyiInstallPath() {
+		try {
+			Class<?> clazz = Class.forName("org.ruyisdk.ruyi.util.RuyiFileUtils");
+			java.lang.reflect.Method method = clazz.getMethod("getInstallPath");
+			return (String) method.invoke(null);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return System.getProperty("user.home") + "/.ruyi";
+		}
+	}
+
 	private void ensureRuyiVenv(IProject project, IProgressMonitor monitor)
 			throws IOException, InterruptedException, CoreException {
 		File projectLocation = project.getLocation().toFile();
@@ -208,37 +220,46 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
 
 		logToFile(project, "Ruyi virtual environment not found. Creating...");
 
-		String boardModel = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
-		if (boardModel == null || boardModel.trim().isEmpty()) {
-			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Board model not set for project."));
-		}
+		String venvCommand = project
+				.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, RUYI_VENV_CMD_PROPERTY));
 
-		String toolchain = org.ruyisdk.packages.JsonParser.findInstalledToolchainForBoard(boardModel);
+		if (venvCommand == null || venvCommand.trim().isEmpty()) {
 
-		if (toolchain == null || toolchain.trim().isEmpty()) {
-
-			if ("milkv-duo".equals(boardModel)) {
-				toolchain = "gnu-milkv-milkv-duo-elf-bin";
-			} else if ("sipeed-lpi4a".equals(boardModel)) {
-				toolchain = "gnu-plct-xthead";
+			logToFile(project, "No custom venv command found, generating default command...");
+			String boardModel = project
+					.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
+			if (boardModel == null) {
+				throw new CoreException(
+						new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Board model not set for project."));
+			}
+			String toolchain = org.ruyisdk.packages.JsonParser.findInstalledToolchainForBoard(boardModel);
+			if (toolchain == null || toolchain.trim().isEmpty()) {
+				if ("milkv-duo".equals(boardModel)) {
+					toolchain = "gnu-milkv-milkv-duo-elf-bin";
+				} else if ("sipeed-lpi4a".equals(boardModel)) {
+					toolchain = "gnu-plct-xthead";
+				} else {
+					toolchain = "gnu-plct";
+				}
 			} else {
-				toolchain = "gnu-plct";
+				int versionIndex = toolchain.indexOf("-0.");
+				if (versionIndex > 0) {
+					toolchain = toolchain.substring(0, versionIndex);
+				}
 			}
-			logToFile(project, "No installed toolchain found for " + boardModel + ", using default: " + toolchain);
-		} else {
+			String ruyiPath = getRuyiInstallPath() + "/ruyi";
 
-			int versionIndex = toolchain.indexOf("-0.");
-			if (versionIndex > 0) {
-				toolchain = toolchain.substring(0, versionIndex);
-			}
-			logToFile(project, "Found installed toolchain for " + boardModel + ": " + toolchain);
+			venvCommand = String.format("%s venv -t %s %s ./%s", ruyiPath, toolchain, boardModel, RUYI_VENV_DIR);
+		} else {
+			logToFile(project, "Using custom ruyi venv command from project properties.");
 		}
 
-		ProcessBuilder pb = new ProcessBuilder("ruyi", "venv", "-t", toolchain, boardModel, "./" + RUYI_VENV_DIR);
+		ProcessBuilder pb = new ProcessBuilder("bash", "-c", venvCommand);
+		System.err.println("Executing: " + venvCommand);
 		pb.directory(projectLocation);
 		pb.redirectErrorStream(true);
 
-		logToFile(project, "Executing: " + String.join(" ", pb.command()));
+		logToFile(project, "Executing: " + venvCommand);
 		Process process = pb.start();
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
@@ -250,11 +271,9 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
 
 		int exitCode = process.waitFor();
 		if (exitCode != 0) {
-			throw new IOException("ruyi venv command failed with exit code " + exitCode);
+			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+					"Failed to create Ruyi virtual environment. Exit code: " + exitCode));
 		}
-
-		logToFile(project, "Ruyi virtual environment created successfully.");
-		project.refreshLocal(IResource.DEPTH_INFINITE, monitor); // Refresh to show the new venv folder
 	}
 
 	private void clearLogFile(IProject project) {

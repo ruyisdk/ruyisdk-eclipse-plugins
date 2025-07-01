@@ -10,7 +10,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.jface,
  org.eclipse.debug.ui,
- org.ruyisdk.packages
+ org.ruyisdk.packages,
+ org.ruyisdk.ruyi,
+ org.ruyisdk.core
 Export-Package: org.ruyisdk.projectcreator.builder
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-21
+Import-Package: org.ruyisdk.ruyi.util
