@@ -1,10 +1,6 @@
 package org.ruyisdk.ruyi.preferences;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -12,7 +8,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.*;
-import org.ruyisdk.core.ruyi.model.RepoConfig;
 import org.ruyisdk.ruyi.services.RuyiProperties;
 import org.ruyisdk.ruyi.services.RuyiProperties.TelemetryStatus;
 

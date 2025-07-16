@@ -1,8 +1,9 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: org.ruyisdk.projectcreator
 Bundle-ManifestVersion: 2
 Bundle-Name: RuyiSDK Project Creator
 Bundle-SymbolicName: org.ruyisdk.projectcreator;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.1.0
 Bundle-Activator: org.ruyisdk.projectcreator.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

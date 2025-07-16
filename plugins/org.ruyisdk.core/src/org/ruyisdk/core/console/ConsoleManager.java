@@ -5,28 +5,28 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 
 /**
- * 控制台生命周期管理
+ * 控制台生命周期管理.
  */
 public class ConsoleManager {
-    
-    public static void showConsole() {
-        IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
-        RuyiSDKConsole console = RuyiSDKConsole.getInstance();
-        
-        // 避免重复添加
-        IConsole[] existing = consoleManager.getConsoles();
-        for (IConsole c : existing) {
-            if (c == console.getConsole()) {
-                return;
-            }
-        }
-        
-        consoleManager.addConsoles(new IConsole[]{ console.getConsole() });
-        consoleManager.showConsoleView(console.getConsole());
+
+  public static void showConsole() {
+    IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
+    RuyisdkConsole console = RuyisdkConsole.getInstance();
+
+    // 避免重复添加
+    IConsole[] existing = consoleManager.getConsoles();
+    for (IConsole c : existing) {
+      if (c == console.getConsole()) {
+        return;
+      }
     }
 
-    public static void dispose() {
-        ConsolePlugin.getDefault().getConsoleManager()
-            .removeConsoles(new IConsole[]{ RuyiSDKConsole.getInstance().getConsole() });
-    }
+    consoleManager.addConsoles(new IConsole[] {console.getConsole()});
+    consoleManager.showConsoleView(console.getConsole());
+  }
+
+  public static void dispose() {
+    ConsolePlugin.getDefault().getConsoleManager()
+        .removeConsoles(new IConsole[] {RuyisdkConsole.getInstance().getConsole()});
+  }
 }

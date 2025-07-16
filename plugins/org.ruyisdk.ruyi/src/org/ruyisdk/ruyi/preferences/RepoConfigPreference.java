@@ -12,7 +12,6 @@ import org.eclipse.swt.widgets.*;
 import org.ruyisdk.core.config.Constants;
 import org.ruyisdk.core.ruyi.model.RepoConfig;
 import org.ruyisdk.ruyi.services.RuyiProperties;
-import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 public class RepoConfigPreference {
 	private final Composite parent;

@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
 
 public class RuyiNetworkUtils {
     private static final int CONNECT_TIMEOUT = 15000;

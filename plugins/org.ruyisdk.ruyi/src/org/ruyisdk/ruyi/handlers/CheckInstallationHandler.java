@@ -5,7 +5,6 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.core.RuyiCore;
-import org.ruyisdk.ruyi.jobs.CheckRuyiJob;
 import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**

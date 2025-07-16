@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.io.IOException;
 
 import org.eclipse.jface.action.Action;
@@ -16,8 +15,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -28,7 +25,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.part.ViewPart;
-import org.ruyisdk.packages.PackageExplorerView.OutputLiveDialog;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
 import org.eclipse.jface.viewers.ICheckStateProvider;
 import org.eclipse.ui.IWorkbenchPage;
@@ -37,7 +33,6 @@ import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Control;
-import org.ruyisdk.packages.JsonParser;
 
 public class PackageExplorerView extends ViewPart {
     private CheckboxTreeViewer viewer;

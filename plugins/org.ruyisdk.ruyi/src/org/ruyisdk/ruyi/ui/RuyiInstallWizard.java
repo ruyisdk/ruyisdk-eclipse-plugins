@@ -2,16 +2,12 @@ package org.ruyisdk.ruyi.ui;
 
 import java.io.IOException;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.*;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
@@ -21,14 +17,12 @@ import org.eclipse.swt.widgets.*;
 import org.ruyisdk.core.ruyi.model.RepoConfig;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
 import org.ruyisdk.ruyi.Activator;
-import org.ruyisdk.ruyi.preferences.AutomaticCheckPreference;
 import org.ruyisdk.ruyi.preferences.RepoConfigPreference;
 import org.ruyisdk.ruyi.preferences.RuyiInstallPathPreference;
 import org.ruyisdk.ruyi.preferences.TelemetryPreference;
 import org.ruyisdk.ruyi.services.RuyiInstallManager;
 import org.ruyisdk.ruyi.services.RuyiProperties;
 import org.ruyisdk.ruyi.services.RuyiProperties.TelemetryStatus;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 import org.ruyisdk.ruyi.util.StatusUtil;
 
 // Ruyi安装/升级向导

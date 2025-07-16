@@ -37,7 +37,10 @@
 		</intro>
 		<introProductBinding
 			introId="org.ruyisdk.intro.main"
-			productId="org.eclipse.epp.package.rcp.product"> <!-- The productId here must be consistent with the productId of the loaded IDE: in the instance test environment: org.eclipse.epp.package.rcp.product, in ruyiide: org.eclipse.epp.package.embedcpp.product -->
+			productId="org.eclipse.epp.package.rcp.product"> <!-- The productId
+			here must be consistent with the productId of the loaded IDE: in the
+			instance test environment: org.eclipse.epp.package.rcp.product, in
+			ruyiide: org.eclipse.epp.package.embedcpp.product -->
 		</introProductBinding>
 	</extension>
 
