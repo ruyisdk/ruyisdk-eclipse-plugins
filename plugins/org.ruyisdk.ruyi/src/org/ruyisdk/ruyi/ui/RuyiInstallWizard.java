@@ -324,14 +324,12 @@ public class RuyiInstallWizard extends Wizard {
                         progressComp.appendLog("Operation completed successfully!");
                         setPageComplete(true);
 
-
-                         MessageDialog.openInformation(
+                        MessageDialog.openInformation(
                                 getShell(),
                                 "Ruyi Installation",
-                                "Download and installation completed successfully!"
-                            );
+                                "Download and installation completed successfully!");
                     });
-                    
+
                     return Status.OK_STATUS;
                 } catch (Exception e) {
                     Display.getDefault().asyncExec(() -> {
@@ -361,54 +359,54 @@ public class RuyiInstallWizard extends Wizard {
         }
     }
 
-    private class CompletionPage extends WizardPa final Mode mode;
-                     
+    private class CompletionPage extends WizardPage {
+        private final Mode mode;
+
         public CompletionPage(Mode mode) {
             super("completionPage");
             this.mode = mode;
             setTitle("Operation Complete");
-            setDescription(mode == Mode.INSTALL ?
-                "Ruyi has been successfully installed" :
+            setDescription(mode == Mode.INSTALL ? "Ruyi has been successfully installed"
+                    : "Ruyi has been upgraded successfully");
+        }
 
-            
+        @Override
+        public void createControl(Composite parent) {
+            Composite container = new Composite(parent, SWT.NONE);
+            container.setLayout(new GridLayout(1, false));
 
+            Label label = new Label(container, SWT.WRAP);
+            label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-            ic void createControl(Composite pare osite container = new Composite(parent, SWT.N
-                    ainer.setLayout(n
-                    
-                    l label = new Label(container, SWT.WRA
-                    l.setLayoutData(new GridData(SWT.FILL
-                      
-                            ng text = mode ==
-                            "Ruyi has been successfully 
-                            "Next steps:\n" +
-                            "• Restart you
+            String text = mode == Mode.INSTALL ? "Ruyi has been successfully installed!\n\n" +
+                    "Next steps:\n" +
+                    "• Restart your IDE to apply changes\n" +
+                    "• Configure project SDK settings\n" +
+                    "• Visit documentation for tutorials"
+                    : "Ruyi has been upgraded to the latest version.\n\n" +
+                            "What's new:\n" +
+                            "• Improved performance\n" +
+                            "• New API features\n" +
+                            "• Bug fixes";
 
-                "• Visit documentation for tutorials" :
-                "Ruyi has been upgraded to the latest version.\n\n" +
-                "What's new:\n" +
-                "• Improved performance\n" +
-                "• New API features\n" +
-                "• Bug fixes";
-            
-         
+            label.setText(text);
+            setControl(container);
+        }
 
-           }
-        
-              @Override
-           public boolean isPageComplete() {
+        @Override
+        public boolean isPageComplete() {
             return true; // 完成页始终可进入
         }
-        
-    	@Override
 
-        lic IWizardPage getPreviousPage() {
-    		return null;
-    	}
+        @Override
+        public IWizardPage getPreviousPage() {
+            return null;
+        }
     }
 
     public interface InstallationListener {
         void progressChanged(int percent, String message);
+
         void logMessage(String message);
     }
 }
