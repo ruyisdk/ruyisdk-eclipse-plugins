@@ -13,21 +13,18 @@ public class RuyiVersion implements Comparable<RuyiVersion> {
         this.minor = minor;
         this.patch = patch;
     }
+
     public static RuyiVersion parse(String versionStr) {
         try {
             String[] parts = versionStr.split("\\.");
             if (parts.length != 3) {
-            	 System.out.print("Invalid version format: " + versionStr);
-            	 return null;
+                System.out.print("Invalid version format: " + versionStr);
+                return null;
             }
-            return new RuyiVersion(
-                Integer.parseInt(parts[0]),
-                Integer.parseInt(parts[1]),
-                Integer.parseInt(parts[2])
-            );
+            return new RuyiVersion(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
         } catch (NumberFormatException e) {
-        	System.out.print("Invalid version number: " + versionStr);
-        	return null;
+            System.out.print("Invalid version number: " + versionStr);
+            return null;
         }
     }
 
@@ -48,7 +45,15 @@ public class RuyiVersion implements Comparable<RuyiVersion> {
     }
 
     // Getters
-    public int getMajor() { return major; }
-    public int getMinor() { return minor; }
-    public int getPatch() { return patch; }
+    public int getMajor() {
+        return major;
+    }
+
+    public int getMinor() {
+        return minor;
+    }
+
+    public int getPatch() {
+        return patch;
+    }
 }

@@ -19,16 +19,29 @@ public class RuyiReleaseInfo {
     }
 
     // Getter 方法
-    public RuyiVersion getVersion() { return version; }
-    public String getChannel() { return channel; }
-    public String getFilename() { return filename; }
-    public String getGithubUrl() { return githubUrl; }
-    public String getMirrorUrl() { return mirrorUrl; }
+    public RuyiVersion getVersion() {
+        return version;
+    }
+
+    public String getChannel() {
+        return channel;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public String getGithubUrl() {
+        return githubUrl;
+    }
+
+    public String getMirrorUrl() {
+        return mirrorUrl;
+    }
 
     @Override
     public String toString() {
-        return String.format(
-            "VersionInfo[version=%s, channel=%s, filename=%s, githubUrl=%s, mirrorUrl=%s]",
-            version.toString(), channel, filename, githubUrl, mirrorUrl);
+        return String.format("VersionInfo[version=%s, channel=%s, filename=%s, githubUrl=%s, mirrorUrl=%s]",
+                        version.toString(), channel, filename, githubUrl, mirrorUrl);
     }
-	}
+}
