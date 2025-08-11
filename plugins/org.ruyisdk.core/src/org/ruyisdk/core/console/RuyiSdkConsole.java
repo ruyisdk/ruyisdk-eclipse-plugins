@@ -9,7 +9,7 @@ import org.eclipse.ui.console.MessageConsoleStream;
 /**
  * RuyiSDK 专属控制台（单例模式）
  */
-public class RuyiSDKConsole {
+public class RuyiSdkConsole {
     private static final String CONSOLE_NAME = "RuyiSDK";
     private static final String CONSOLE_TYPE = "org.ruyisdk.console";
 
@@ -18,7 +18,7 @@ public class RuyiSDKConsole {
 
     // 静态内部类实现懒加载单例
     private static class Holder {
-        static final RuyiSDKConsole INSTANCE = new RuyiSDKConsole();
+        static final RuyiSdkConsole INSTANCE = new RuyiSdkConsole();
     }
 
     private final MessageConsole console;
@@ -28,7 +28,7 @@ public class RuyiSDKConsole {
     private MessageConsoleStream commandStream;
 
     // 私有构造函数
-    private RuyiSDKConsole() {
+    private RuyiSdkConsole() {
         this.console = new MessageConsole(CONSOLE_NAME, CONSOLE_TYPE, ImageDescriptor.getMissingImageDescriptor(),
                         true);
 
@@ -39,7 +39,7 @@ public class RuyiSDKConsole {
     /**
      * 获取单例实例（线程安全）
      */
-    public static RuyiSDKConsole getInstance() {
+    public static RuyiSdkConsole getInstance() {
         return Holder.INSTANCE;
     }
 

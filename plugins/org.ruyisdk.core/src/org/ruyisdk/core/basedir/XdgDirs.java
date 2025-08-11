@@ -3,7 +3,7 @@ package org.ruyisdk.core.basedir;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class XDGDirs {
+public class XdgDirs {
 
     /**
      * 获取 XDG 配置目录（$XDG_CONFIG_HOME/<app-name> 或 ~/.config/<app-name>）

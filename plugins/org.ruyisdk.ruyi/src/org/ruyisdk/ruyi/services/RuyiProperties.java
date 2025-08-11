@@ -10,16 +10,16 @@ import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 import java.util.Locale;
 
-import org.ruyisdk.core.basedir.XDGDirs;
+import org.ruyisdk.core.basedir.XdgDirs;
 import org.ruyisdk.core.config.Constants;
 import org.ruyisdk.core.config.Constants.AppInfo;
 import org.ruyisdk.core.config.Constants.ConfigFile;
 import org.ruyisdk.core.config.Constants.Ruyi;
-import org.ruyisdk.core.console.RuyiSDKConsole;
+import org.ruyisdk.core.console.RuyiSdkConsole;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 public class RuyiProperties {
-	private static final Path CONFIG_DIR = XDGDirs.getConfigDir(Constants.AppInfo.AppDir);
+	private static final Path CONFIG_DIR = XdgDirs.getConfigDir(Constants.AppInfo.AppDir);
     private static final Path FILE_PATH = CONFIG_DIR.resolve(Constants.ConfigFile.RuyiProperties);
     private static final Properties props = loadConfig();
     
@@ -167,7 +167,7 @@ public class RuyiProperties {
 
     // 错误处理
     private static void handleConfigError(String message, Exception e) {
-        RuyiSDKConsole.getInstance().logError(message + ": " + e.getMessage());
+        RuyiSdkConsole.getInstance().logError(message + ": " + e.getMessage());
 //        if (Constants.DEBUG_MODE) {
 //            e.printStackTrace();
 //        }

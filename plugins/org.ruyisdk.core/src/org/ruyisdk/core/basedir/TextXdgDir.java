@@ -4,16 +4,16 @@ import java.nio.file.Path;
 
 import org.ruyisdk.core.config.Constants;
 
-public class TextXDGDir {
+public class TextXdgDir {
 
     public static void main(String[] args) {
         String appName = Constants.AppInfo.AppDir;
 
         // 获取 XDG 目录
-        Path configDir = XDGDirs.getConfigDir(appName);
-        Path cacheDir = XDGDirs.getCacheDir(appName);
-        Path dataDir = XDGDirs.getDataDir(appName);
-        Path stateDir = XDGDirs.getStateDir(appName);
+        Path configDir = XdgDirs.getConfigDir(appName);
+        Path cacheDir = XdgDirs.getCacheDir(appName);
+        Path dataDir = XdgDirs.getDataDir(appName);
+        Path stateDir = XdgDirs.getStateDir(appName);
 
         System.out.println("Config Dir: " + configDir);
         System.out.println("Cache Dir: " + cacheDir);

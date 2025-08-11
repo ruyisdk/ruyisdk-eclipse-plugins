@@ -18,15 +18,15 @@ public class ConsoleExtensions {
             try {
                 Object ext = config.createExecutableExtension("class");
                 if (ext instanceof ConsoleExtension) {
-                    ((ConsoleExtension) ext).init(RuyiSDKConsole.getInstance());
+                    ((ConsoleExtension) ext).init(RuyiSdkConsole.getInstance());
                 }
             } catch (CoreException e) {
-                RuyiSDKConsole.getInstance().logError("Failed to load console extension: " + e.getMessage());
+                RuyiSdkConsole.getInstance().logError("Failed to load console extension: " + e.getMessage());
             }
         }
     }
 
     public interface ConsoleExtension {
-        void init(RuyiSDKConsole console);
+        void init(RuyiSdkConsole console);
     }
 }

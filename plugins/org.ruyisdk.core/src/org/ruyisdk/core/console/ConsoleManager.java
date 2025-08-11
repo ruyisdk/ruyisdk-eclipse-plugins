@@ -11,7 +11,7 @@ public class ConsoleManager {
     
     public static void showConsole() {
         IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
-        RuyiSDKConsole console = RuyiSDKConsole.getInstance();
+        RuyiSdkConsole console = RuyiSdkConsole.getInstance();
         
         // 避免重复添加
         IConsole[] existing = consoleManager.getConsoles();
@@ -27,6 +27,6 @@ public class ConsoleManager {
 
     public static void dispose() {
         ConsolePlugin.getDefault().getConsoleManager()
-            .removeConsoles(new IConsole[]{ RuyiSDKConsole.getInstance().getConsole() });
+            .removeConsoles(new IConsole[]{ RuyiSdkConsole.getInstance().getConsole() });
     }
 }

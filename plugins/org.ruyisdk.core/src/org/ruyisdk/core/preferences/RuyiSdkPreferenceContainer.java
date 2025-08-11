@@ -14,7 +14,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 /**
  * RuyiSDK 首选项根容器页（不包含具体配置项，仅作为分类入口）
  */
-public class RuyiSDKPreferenceContainer extends PreferencePage implements IWorkbenchPreferencePage {
+public class RuyiSdkPreferenceContainer extends PreferencePage implements IWorkbenchPreferencePage {
 
     @Override
     public void init(IWorkbench workbench) {
