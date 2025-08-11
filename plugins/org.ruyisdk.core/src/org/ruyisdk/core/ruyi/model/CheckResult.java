@@ -5,9 +5,9 @@ package org.ruyisdk.core.ruyi.model;
  */
 public class CheckResult {
     public enum ActionType {
-        INSTALL,   // 需要安装
-        UPGRADE,   // 需要升级
-        NOTHING    // 无需操作
+        INSTALL, // 需要安装
+        UPGRADE, // 需要升级
+        NOTHING // 无需操作
     }
 
     private final ActionType action;
@@ -15,8 +15,7 @@ public class CheckResult {
     private final RuyiVersion currentVersion;
     private final RuyiVersion latestVersion;
 
-    private CheckResult(ActionType action, String message, 
-                       RuyiVersion current, RuyiVersion latest) {
+    private CheckResult(ActionType action, String message, RuyiVersion current, RuyiVersion latest) {
         this.action = action;
         this.message = message;
         this.currentVersion = current;
@@ -27,8 +26,7 @@ public class CheckResult {
         return new CheckResult(ActionType.INSTALL, msg, null, null);
     }
 
-    public static CheckResult needUpgrade(RuyiVersion current, 
-                                         RuyiVersion latest, String msg) {
+    public static CheckResult needUpgrade(RuyiVersion current, RuyiVersion latest, String msg) {
         return new CheckResult(ActionType.UPGRADE, msg, current, latest);
     }
 
@@ -37,9 +35,23 @@ public class CheckResult {
     }
 
     // Getters
-    public ActionType getAction() { return action; }
-    public String getMessage() { return message; }
-    public RuyiVersion getCurrentVersion() { return currentVersion; }
-    public RuyiVersion getLatestVersion() { return latestVersion; }
-    public boolean needAction() { return action != ActionType.NOTHING; }
+    public ActionType getAction() {
+        return action;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public RuyiVersion getCurrentVersion() {
+        return currentVersion;
+    }
+
+    public RuyiVersion getLatestVersion() {
+        return latestVersion;
+    }
+
+    public boolean needAction() {
+        return action != ActionType.NOTHING;
+    }
 }
