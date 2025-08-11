@@ -7,20 +7,19 @@ import org.ruyisdk.core.console.ConsoleExtensions;
 import org.ruyisdk.core.console.ConsoleManager;
 
 /**
- * RuyiSDK Core 插件入口
+ * The activator class controls the plug-in life cycle.
  */
 public class Activator extends AbstractUIPlugin {
-    // 插件ID（需与MANIFEST.MF一致）
-    public static final String PLUGIN_ID = "org.ruyisdk.core";
+    public static final String PLUGIN_ID = "org.ruyisdk.core"; // The plug-in ID
+    private static Activator plugin; // The shared instance
 
-    // 单例实例
-    private static Activator plugin;
 
     /**
-     * 构造函数（必须公开无参）
+     * Constructs a new Activator.
+     *
      */
     public Activator() {
-        // 父类AbstractUIPlugin会自动初始化
+        // Parent class AbstractUIPlugin handles initialization automatically
     }
 
     @Override
@@ -28,7 +27,7 @@ public class Activator extends AbstractUIPlugin {
         super.start(context);
         plugin = this;
 
-        // 初始化控制台扩展
+        // Initialize console extensions
         ConsoleExtensions.loadExtensions();
     }
 
@@ -41,14 +40,19 @@ public class Activator extends AbstractUIPlugin {
     }
 
     /**
-     * 获取共享实例
+     * Returns the shared instance.
+     *
+     * @return the shared plugin instance
      */
     public static Activator getDefault() {
         return plugin;
     }
 
     /**
-     * 获取图像描述符（安全方式）
+     * Returns an image descriptor for the image file at the given path.
+     *
+     * @param path the image path (relative to the plugin installation)
+     * @return the image descriptor, or null if the image could not be found
      */
     public static ImageDescriptor getImageDescriptor(String path) {
         return imageDescriptorFromPlugin(PLUGIN_ID, path);

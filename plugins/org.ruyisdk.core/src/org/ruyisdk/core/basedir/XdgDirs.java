@@ -3,51 +3,75 @@ package org.ruyisdk.core.basedir;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Utility class for resolving XDG Base Directory Specification compliant paths. Provides methods to
+ * locate configuration, cache, data and state directories according to the XDG standard.
+ */
 public class XdgDirs {
 
     /**
-     * 获取 XDG 配置目录（$XDG_CONFIG_HOME/<app-name> 或 ~/.config/<app-name>）
+     * Gets the XDG config directory path. Resolution order: 1. {@code $XDG_CONFIG_HOME/<app-name>} if
+     * environment variable is set 2. {@code ~/.config/<app-name>} as fallback
+     *
+     * @param appName the application name used for subdirectory
+     * @return resolved config directory path
      */
     public static Path getConfigDir(String appName) {
         return getXdgDir("XDG_CONFIG_HOME", ".config", appName);
     }
 
     /**
-     * 获取 XDG 缓存目录（$XDG_CACHE_HOME/<app-name> 或 ~/.cache/<app-name>）
+     * Gets the XDG cache directory path. Resolution order: 1. {@code $XDG_CACHE_HOME/<app-name>} if
+     * environment variable is set 2. {@code ~/.cache/<app-name>} as fallback
+     *
+     * @param appName the application name used for subdirectory
+     * @return resolved cache directory path
      */
     public static Path getCacheDir(String appName) {
         return getXdgDir("XDG_CACHE_HOME", ".cache", appName);
     }
 
     /**
-     * 获取 XDG 数据目录（$XDG_DATA_HOME/<app-name> 或 ~/.local/share/<app-name>）
+     * Gets the XDG data directory path. Resolution order: 1. {@code $XDG_DATA_HOME/<app-name>} if
+     * environment variable is set 2. {@code ~/.local/share/<app-name>} as fallback
+     *
+     * @param appName the application name used for subdirectory
+     * @return resolved data directory path
      */
     public static Path getDataDir(String appName) {
         return getXdgDir("XDG_DATA_HOME", ".local/share", appName);
     }
-    
+
     /**
-     * 获取 XDG 状态目录（$XDG_STATE_HOME/<app-name> 或 ~/.local/state/<app-name>）
+     * Gets the XDG state directory path. Resolution order: 1. {@code $XDG_STATE_HOME/<app-name>} if
+     * environment variable is set 2. {@code ~/.local/state/<app-name>} as fallback
+     *
+     * @param appName the application name used for subdirectory
+     * @return resolved state directory path
      */
     public static Path getStateDir(String appName) {
         return getXdgDir("XDG_STATE_HOME", ".local/state", appName);
     }
 
     /**
-     * 通用方法：获取 XDG 目录
-     * @param xdgEnvVar 环境变量名（如 "XDG_CONFIG_HOME"）
-     * @param defaultRelativePath 默认相对路径（如 ".config"）
-     * @param appName 应用名称（如 "your-ide-name"）
-     * @return 完整路径（如 /home/user/.config/your-ide-name）
+     * Internal method for resolving XDG directory paths. Follows XDG Base Directory Specification
+     * resolution rules: 1. Checks specified environment variable first 2. Falls back to default path
+     * under user home if not set
+     *
+     * @param xdgEnvVar the XDG environment variable name (e.g. "XDG_CONFIG_HOME")
+     * @param defaultRelativePath the default path relative to user home (e.g. ".config")
+     * @param appName the application name for final subdirectory
+     * @return fully resolved directory path
+     * @throws NullPointerException if appName is null
      */
     private static Path getXdgDir(String xdgEnvVar, String defaultRelativePath, String appName) {
-        // 1. 检查环境变量（如 $XDG_CONFIG_HOME）
+        // 1. Check environment variable (e.g. $XDG_CONFIG_HOME)
         String xdgHome = System.getenv(xdgEnvVar);
         if (xdgHome != null && !xdgHome.trim().isEmpty()) {
             return Paths.get(xdgHome, appName);
         }
 
-        // 2. 默认路径（如 ~/.config/）
+        // 2. Default path (e.g. ~/.config/)
         String userHome = System.getProperty("user.home");
         return Paths.get(userHome, defaultRelativePath, appName);
     }

@@ -12,33 +12,35 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 /**
- * RuyiSDK 首选项根容器页（不包含具体配置项，仅作为分类入口）
+ * Root container preference page for RuyiSDK configuration.
+ *
+ * <p>This serves as a category entry point in the preferences dialog tree,
+ * containing no actual configuration items itself. Specific preferences
+ * should be implemented in sub-pages.
  */
 public class RuyiSdkPreferenceContainer extends PreferencePage implements IWorkbenchPreferencePage {
 
     @Override
     public void init(IWorkbench workbench) {
-        // 无初始化操作
+        // No initialization required
     }
 
     @Override
     protected Control createContents(Composite parent) {
-        // 创建容器
+        // Create main container
         Composite container = new Composite(parent, SWT.NONE);
         container.setLayout(new GridLayout(1, false));
 
-        // 添加提示文本
+        // Add informational label
         Label infoLabel = new Label(container, SWT.WRAP);
         infoLabel.setText("Expand the tree to edit preferences for a specific feature.");
 
-        // 添加间距
-        new Label(container, SWT.NONE); // 空标签作为间距
+        // Add spacing
+        new Label(container, SWT.NONE); // Empty label for spacing
 
-        // 可选：添加更多指引
-        // Label hintLabel = new Label(container, SWT.WRAP);
-        // hintLabel.setText("Note: Configuration changes may require restart to take effect.");
+        // Optional: Add documentation link
         Link helpLink = new Link(container, SWT.NONE);
-        helpLink.setText("RuyiSDK 文档: <a>Click here for online documentation</a>");
+        helpLink.setText("RuyiSDK Documentation: <a>Click here for online documentation</a>");
         helpLink.addListener(SWT.Selection, e -> {
             Program.launch("https://ruyisdk.org/docs/intro");
         });
@@ -48,12 +50,12 @@ public class RuyiSdkPreferenceContainer extends PreferencePage implements IWorkb
 
     @Override
     public boolean performOk() {
-        // 无需保存操作
+        // No save operation required
         return true;
     }
 
     @Override
     protected void performDefaults() {
-        // 无默认值操作
+        // No default values to restore
     }
 }

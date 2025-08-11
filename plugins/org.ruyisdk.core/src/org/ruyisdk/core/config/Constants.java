@@ -1,48 +1,79 @@
 package org.ruyisdk.core.config;
 
 /**
- * Constants 程序设计设定，用户不需要修改，由开发者在产品迭代优化中按需修改
+ * Centralized configuration constants for RuyiSDK.
+ *
+ * <p>These are design-time constants that should only be modified by developers during product
+ * iteration. End users should not modify these values.
  */
 public final class Constants {
 
+    /**
+     * Application information constants.
+     */
     public static final class AppInfo {
-        public static final String AppDir = "ruyisdkide"; // XDG-Dir
+        /**
+         * XDG base directory name following XDG Base Directory Specification.
+         * Example: "~/.config/ruyisdkide"
+         */
+        public static final String AppDir = "ruyisdkide";
     }
 
+    /**
+     * Configuration file names and paths.
+     */
     public static final class ConfigFile {
+        /** Device-specific properties file name. */
         public static final String DeviceProperties = "devices.properties";
+
+        /** Main RuyiSDK properties file name. */
         public static final String RuyiProperties = "ruyi.properties";
     }
 
-    // 网络端点（基础设施URL）
+    /**
+     * Network endpoints and infrastructure URLs.
+     */
     public static final class NetAddress {
-        // 官网
-        public static final String WEBSIT = "https://ruyisdk.org";
+        /** Official website URL. */
+        public static final String WEBSITE = "https://ruyisdk.org";
 
-        // Base域名
+        // Base domains
         private static final String MIRROR_BASE = "https://mirror.iscas.ac.cn";
         private static final String GITHUB_BASE = "https://github.com/ruyisdk";
 
-        // 下载RUYI
+        /** Mirror server URL for RuyiSDK releases. */
         public static final String MIRROR_RUYI_RELEASES = MIRROR_BASE + "/ruyisdk/ruyi/releases";
+
+        /** GitHub URL for RuyiSDK releases. */
         public static final String GITHUB_RUYI_RELEASES = GITHUB_BASE + "/ruyi/releases";
 
-        // 下载IDE
+        /** Mirror server URL for IDE releases. */
         public static final String MIRROR_IDE_RELEASES = MIRROR_BASE + "/ruyisdk/ide";
+
+        /** GitHub URL for IDE packages releases. */
         public static final String GITHUB_IDE_RELEASES = GITHUB_BASE + "/ruyisdk-eclipse-packages/releases";
+
+        /** GitHub URL for IDE plugins releases. */
         public static final String GITHUB_IDEPLUGINS_RELEASES = GITHUB_BASE + "/ruyisdk-eclipse-plugins/releases";
 
-        // 存储库 packages-index
-        public static final String MAIN_REPO_URL = GITHUB_BASE + "/packages-index.git"; // "https://github.com/ruyisdk/packages-index.git"
-        public static final String BACKUP_REPO_URL = MIRROR_BASE + "/git/ruyisdk/packages-index.git"; // https://mirror.iscas.ac.cn/git/ruyisdk/packages-index.git
+        /** Main repository URL for packages index. */
+        public static final String MAIN_REPO_URL = GITHUB_BASE + "/packages-index.git";
+
+        /** Backup repository URL for packages index. */
+        public static final String BACKUP_REPO_URL = MIRROR_BASE + "/git/ruyisdk/packages-index.git";
     }
 
-    // 安装配置
-    // 安装配置（设计期确定）
+    /**
+     * Installation configuration constants.
+     */
     public static final class Ruyi {
-        public static String INSTALL_PATH = "~/.local/bin"; // ruyi install path;"/usr/local/bin/"
+        /**
+         * Default installation path for RuyiSDK.
+         * Default value: "~/.local/bin" (user-local binaries)
+         */
+        public static String INSTALL_PATH = "~/.local/bin";
+
+        /** Prefix for backup files created by RuyiSDK. */
         public static final String BACKUP_PREFIX = "ruyi.backup.";
     }
-
-
 }
