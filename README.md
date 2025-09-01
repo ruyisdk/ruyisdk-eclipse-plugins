@@ -5,13 +5,13 @@
 ```
 ├── features
 ├── plugins
-│   ├── org.ruyisdk.core
-│   ├── org.ruyisdk.devices
-│   ├── org.ruyisdk.news
-│   ├── org.ruyisdk.packages
-│   ├── org.ruyisdk.intro
-│   ├── org.ruyisdk.ruyi
-│   └── org.ruyisdk.ui
+│   ├── org.ruyisdk.core
+│   ├── org.ruyisdk.devices
+│   ├── org.ruyisdk.news
+│   ├── org.ruyisdk.packages
+│   ├── org.ruyisdk.intro
+│   ├── org.ruyisdk.ruyi
+│   └── org.ruyisdk.ui
 └── README.md
 
 ```

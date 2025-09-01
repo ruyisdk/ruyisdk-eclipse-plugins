@@ -9,24 +9,24 @@ import org.eclipse.core.runtime.Platform;
  */
 public class ConsoleExtensions {
     private static final String EXTENSION_POINT_ID = "org.ruyisdk.core.consoleExtensions";
-    
+
     public static void loadExtensions() {
-        IConfigurationElement[] configs = Platform.getExtensionRegistry()
-            .getConfigurationElementsFor(EXTENSION_POINT_ID);
-        
+        IConfigurationElement[] configs =
+                        Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_POINT_ID);
+
         for (IConfigurationElement config : configs) {
             try {
                 Object ext = config.createExecutableExtension("class");
                 if (ext instanceof ConsoleExtension) {
-                    ((ConsoleExtension) ext).init(RuyiSDKConsole.getInstance());
+                    ((ConsoleExtension) ext).init(RuyiSdkConsole.getInstance());
                 }
             } catch (CoreException e) {
-            	RuyiSDKConsole.getInstance().logError("Failed to load console extension: " + e.getMessage());
+                RuyiSdkConsole.getInstance().logError("Failed to load console extension: " + e.getMessage());
             }
         }
     }
-    
+
     public interface ConsoleExtension {
-        void init(RuyiSDKConsole console);
+        void init(RuyiSdkConsole console);
     }
 }

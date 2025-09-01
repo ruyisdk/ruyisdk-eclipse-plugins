@@ -10,13 +10,13 @@ import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.ruyisdk.core.basedir.XDGDirs;
+import org.ruyisdk.core.basedir.XdgDirs;
 import org.ruyisdk.devices.model.Device;
-import org.ruyisdk.core.console.RuyiSDKConsole;
+import org.ruyisdk.core.console.RuyiSdkConsole;
 import org.ruyisdk.core.config.Constants;
 
 public class PropertiesService {
-	private static final Path FILE_PATH = Paths.get(XDGDirs.getConfigDir(Constants.AppInfo.AppDir).toString(), Constants.ConfigFile.DeviceProperties);  //devices.properties
+	private static final Path FILE_PATH = Paths.get(XdgDirs.getConfigDir(Constants.AppInfo.AppDir).toString(), Constants.ConfigFile.DeviceProperties);  //devices.properties
 	private static final String DEFAULT_DEVICE_KEY = "default_device";
 	 
 	public List<Device> loadDevices() {
@@ -86,12 +86,12 @@ public class PropertiesService {
 		try (OutputStream output = new FileOutputStream(FILE_PATH.toString())) {
 			properties.store(output, "RuyiSDK Devices Configuration");
 			
-			RuyiSDKConsole.getInstance().logInfo("Devices is successfully stored to file :"+FILE_PATH.toString());
+			RuyiSdkConsole.getInstance().logInfo("Devices is successfully stored to file :"+FILE_PATH.toString());
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 			
-			RuyiSDKConsole.getInstance().logError("Devices storage failure!");
+			RuyiSdkConsole.getInstance().logError("Devices storage failure!");
 		} 
 	}
 }

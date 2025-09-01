@@ -5,7 +5,7 @@
 	<extension point="org.eclipse.ui.preferencePages">
 		<page id="org.ruyisdk.preferences.root"
 			name="RuyiSDK"
-			class="org.ruyisdk.core.preferences.RuyiSDKPreferenceContainer"
+			class="org.ruyisdk.core.preferences.RuyiSdkPreferenceContainer"
 			icon="icons/ruyisdk-icon16.png">
 		</page>
 	</extension>
