@@ -6,48 +6,47 @@ import org.ruyisdk.core.console.ConsoleManager;
 import org.ruyisdk.core.console.RuyiSdkConsole;
 
 /**
- * The activator class controls the plug-in life cycle
+ * The activator class controls the plug-in life cycle.
  */
 public class Activator extends AbstractUIPlugin {
 
-	// The plug-in ID
-	public static final String PLUGIN_ID = "org.ruyisdk.devices"; 
+    // The plug-in ID
+    public static final String PLUGIN_ID = "org.ruyisdk.devices";
 
-	// The shared instance
-	private static Activator plugin;
-	
-	/**
-	 * The constructor
-	 */
-	public Activator() {
-	}
+    // The shared instance
+    private static Activator plugin;
 
-	@Override
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		plugin = this;
-		
-//		// (可选)启动时自动打开控制台
-//        ConsoleManager.showConsole();
-        
-        RuyiSdkConsole.getInstance().logInfo("Devices Plugin " + getBundle().getVersion()+" Activated !");
-	}
+    /**
+     * The constructor.
+     */
+    public Activator() {}
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		plugin = null;
-		super.stop(context);
-		
-		 ConsoleManager.dispose();
-	}
+    @Override
+    public void start(BundleContext context) throws Exception {
+        super.start(context);
+        plugin = this;
 
-	/**
-	 * Returns the shared instance
-	 *
-	 * @return the shared instance
-	 */
-	public static Activator getDefault() {
-		return plugin;
-	}
+        // (Optional) Automatically open the console at startup.
+        // ConsoleManager.showConsole();
+
+        RuyiSdkConsole.getInstance().logInfo("Devices Plugin " + getBundle().getVersion() + " Activated !");
+    }
+
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        plugin = null;
+        super.stop(context);
+
+        ConsoleManager.dispose();
+    }
+
+    /**
+     * Returns the shared instance.
+     *
+     * @return the shared instance
+     */
+    public static Activator getDefault() {
+        return plugin;
+    }
 
 }
