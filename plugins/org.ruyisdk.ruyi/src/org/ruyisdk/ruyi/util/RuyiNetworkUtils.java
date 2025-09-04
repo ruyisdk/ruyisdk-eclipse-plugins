@@ -17,54 +17,54 @@ public class RuyiNetworkUtils {
     /**
      * 下载文件到本地路径
      */
-    public static void downloadFile(String fileUrl, String destinationPath, 
-            IProgressMonitor monitor, BiConsumer<Long, Long> progressCallback) throws IOException {
+    public static void downloadFile(String fileUrl, String destinationPath, IProgressMonitor monitor,
+                    BiConsumer<Long, Long> progressCallback) throws IOException {
         HttpURLConnection connection = null;
         InputStream input = null;
         OutputStream output = null;
-        
+
         try {
             URL url = new URL(fileUrl);
-            
-            System.out.println("fileUrl==="+fileUrl);
-            
+
+            System.out.println("fileUrl===" + fileUrl);
+
             connection = (HttpURLConnection) url.openConnection();
             configureConnection(connection);
-            
+
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
                 throw new IOException("Server returned HTTP " + responseCode + ": " + connection.getResponseMessage());
             }
 
             long fileSize = connection.getContentLengthLong();
-//            SubMonitor subMonitor = SubMonitor.convert(monitor, "Downloading " + url.getFile(), 100);
+            // SubMonitor subMonitor = SubMonitor.convert(monitor, "Downloading " + url.getFile(), 100);
 
             input = connection.getInputStream();
             output = new BufferedOutputStream(new FileOutputStream(destinationPath));
-            
+
             byte[] buffer = new byte[BUFFER_SIZE];
             long totalRead = 0;
             int bytesRead;
-            
-//            while ((bytesRead = input.read(buffer)) != -1 && !subMonitor.isCanceled()) {
+
+            // while ((bytesRead = input.read(buffer)) != -1 && !subMonitor.isCanceled()) {
             while ((bytesRead = input.read(buffer)) != -1 && !monitor.isCanceled()) {
                 output.write(buffer, 0, bytesRead);
                 totalRead += bytesRead;
-                
+
                 if (fileSize > 0) {
-//                    int percentDone = (int)(totalRead * 100 / fileSize);
-//                    subMonitor.setWorkRemaining(100 - percentDone);
-//                    subMonitor.worked(1);
-//                    
+                    // int percentDone = (int)(totalRead * 100 / fileSize);
+                    // subMonitor.setWorkRemaining(100 - percentDone);
+                    // subMonitor.worked(1);
+                    //
                     if (progressCallback != null) {
                         progressCallback.accept(totalRead, fileSize);
                     }
-//                } else {
-//                    subMonitor.worked(1);
+                    // } else {
+                    // subMonitor.worked(1);
                 }
             }
 
-//            if (subMonitor.isCanceled()) {
+            // if (subMonitor.isCanceled()) {
             if (monitor.isCanceled()) {
                 throw new InterruptedIOException("Download cancelled by user");
             }
@@ -74,24 +74,24 @@ public class RuyiNetworkUtils {
             if (connection != null) {
                 connection.disconnect();
             }
-//            if (monitor != null) {
-//                monitor.done();
-//            }
+            // if (monitor != null) {
+            // monitor.done();
+            // }
         }
     }
-    
+
     /**
      * 发送HTTP GET请求获取字符串内容
      */
     public static String fetchStringContent(String urlString, IProgressMonitor monitor) throws IOException {
         HttpURLConnection connection = null;
         InputStream input = null;
-        
+
         try {
             URL url = new URL(urlString);
             connection = (HttpURLConnection) url.openConnection();
             configureConnection(connection);
-            
+
             if (monitor != null) {
                 monitor.subTask("Connecting to " + url.getHost());
             }
@@ -104,12 +104,11 @@ public class RuyiNetworkUtils {
             input = connection.getInputStream();
             StringBuilder content = new StringBuilder();
             BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
-            
+
             String line;
-            while ((line = reader.readLine()) != null && 
-                  (monitor == null || !monitor.isCanceled())) {
+            while ((line = reader.readLine()) != null && (monitor == null || !monitor.isCanceled())) {
                 content.append(line).append("\n");
-                
+
                 if (monitor != null) {
                     monitor.worked(1);
                 }
@@ -131,12 +130,12 @@ public class RuyiNetworkUtils {
     /**
      * 发送JSON格式的POST请求
      */
-    public static String postJson(String urlString, Map<String, Object> data, 
-            IProgressMonitor monitor) throws IOException {
+    public static String postJson(String urlString, Map<String, Object> data, IProgressMonitor monitor)
+                    throws IOException {
         HttpURLConnection connection = null;
         OutputStream output = null;
         InputStream input = null;
-        
+
         try {
             URL url = new URL(urlString);
             connection = (HttpURLConnection) url.openConnection();
@@ -152,7 +151,7 @@ public class RuyiNetworkUtils {
 
             String jsonInput = JsonUtils.toJson(data);
             byte[] inputBytes = jsonInput.getBytes(StandardCharsets.UTF_8);
-            
+
             connection.setFixedLengthStreamingMode(inputBytes.length);
             output = connection.getOutputStream();
             output.write(inputBytes);
@@ -170,14 +169,12 @@ public class RuyiNetworkUtils {
 
             input = connection.getInputStream();
             StringBuilder response = new StringBuilder();
-            BufferedReader reader = new BufferedReader(
-                new InputStreamReader(input, StandardCharsets.UTF_8));
-            
+            BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+
             String line;
-            while ((line = reader.readLine()) != null && 
-                  (monitor == null || !monitor.isCanceled())) {
+            while ((line = reader.readLine()) != null && (monitor == null || !monitor.isCanceled())) {
                 response.append(line);
-                
+
                 if (monitor != null) {
                     monitor.worked(1);
                 }
@@ -241,37 +238,32 @@ public class RuyiNetworkUtils {
         static String toJson(Map<String, Object> data) {
             StringBuilder json = new StringBuilder("{");
             boolean first = true;
-            
+
             for (Map.Entry<String, Object> entry : data.entrySet()) {
                 if (!first) {
                     json.append(",");
                 }
                 first = false;
-                
+
                 json.append("\"").append(escapeJson(entry.getKey())).append("\":");
                 Object value = entry.getValue();
-                
+
                 if (value instanceof String) {
-                    json.append("\"").append(escapeJson((String)value)).append("\"");
+                    json.append("\"").append(escapeJson((String) value)).append("\"");
                 } else if (value instanceof Number || value instanceof Boolean) {
                     json.append(value);
                 } else {
                     json.append("\"").append(escapeJson(value.toString())).append("\"");
                 }
             }
-            
+
             json.append("}");
             return json.toString();
         }
 
         private static String escapeJson(String str) {
-            return str.replace("\\", "\\\\")
-                    .replace("\"", "\\\"")
-                    .replace("\b", "\\b")
-                    .replace("\f", "\\f")
-                    .replace("\n", "\\n")
-                    .replace("\r", "\\r")
-                    .replace("\t", "\\t");
+            return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\b", "\\b").replace("\f", "\\f")
+                            .replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
         }
     }
 }

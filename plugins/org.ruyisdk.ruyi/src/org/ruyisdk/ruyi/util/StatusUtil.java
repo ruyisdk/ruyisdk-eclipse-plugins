@@ -12,40 +12,21 @@ import org.ruyisdk.ruyi.Activator;
 public class StatusUtil {
 
     public static void showInfo(String message) {
-        Display.getDefault().asyncExec(() -> 
-            MessageDialog.openInformation(
-                Display.getDefault().getActiveShell(),
-                "Information",
-                message
-            )
-        );
+        Display.getDefault().asyncExec(() -> MessageDialog.openInformation(Display.getDefault().getActiveShell(),
+                        "Information", message));
     }
 
     public static void showError(String message) {
-        Display.getDefault().asyncExec(() -> 
-            MessageDialog.openError(
-                Display.getDefault().getActiveShell(),
-                "Error",
-                message
-            )
-        );
+        Display.getDefault().asyncExec(
+                        () -> MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message));
     }
 
     public static IStatus createErrorStatus(String message, Throwable ex) {
-        return new Status(
-            IStatus.ERROR, 
-            Activator.PLUGIN_ID, 
-            message, 
-            ex
-        );
+        return new Status(IStatus.ERROR, Activator.PLUGIN_ID, message, ex);
     }
 
     public static IStatus createInfoStatus(String message) {
-        return new Status(
-            IStatus.INFO,
-            Activator.PLUGIN_ID,
-            message
-        );
+        return new Status(IStatus.INFO, Activator.PLUGIN_ID, message);
     }
 
     public static void logAndShow(String message, Throwable ex) {

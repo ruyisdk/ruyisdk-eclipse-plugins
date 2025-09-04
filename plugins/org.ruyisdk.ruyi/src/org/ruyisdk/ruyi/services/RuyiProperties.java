@@ -19,11 +19,11 @@ import org.ruyisdk.core.console.RuyiSdkConsole;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 public class RuyiProperties {
-	private static final Path CONFIG_DIR = XdgDirs.getConfigDir(Constants.AppInfo.AppDir);
+    private static final Path CONFIG_DIR = XdgDirs.getConfigDir(Constants.AppInfo.AppDir);
     private static final Path FILE_PATH = CONFIG_DIR.resolve(Constants.ConfigFile.RuyiProperties);
     private static final Properties props = loadConfig();
-    
- // 初始化配置目录
+
+    // 初始化配置目录
     static {
         try {
             Files.createDirectories(CONFIG_DIR);
@@ -55,30 +55,29 @@ public class RuyiProperties {
         defaults.setProperty("ruyi.telemetry.status", "on");
         defaults.setProperty("ruyi.install.path", RuyiFileUtils.getDefaultInstallPath().toString());
         defaults.setProperty("ruyi.mirror.custom", "");
-        
+
         // 为package-index设置默认的选中状态
         defaults.setProperty("ruyi.mirror.iscas.checked", "1");
         defaults.setProperty("ruyi.mirror.github.checked", "1");
         defaults.setProperty("ruyi.mirror.custom.checked", "0");
-        
+
         saveConfig(defaults);
         props.putAll(defaults); // 同时更新内存中的配置
     }
 
- // 修改saveConfig方法使其能接受Properties参数
+    // 修改saveConfig方法使其能接受Properties参数
     private static synchronized void saveConfig(Properties propsToSave) throws IOException {
-        try (OutputStream os = Files.newOutputStream(FILE_PATH, 
-             StandardOpenOption.CREATE, 
-             StandardOpenOption.TRUNCATE_EXISTING)) {
+        try (OutputStream os = Files.newOutputStream(FILE_PATH, StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING)) {
             propsToSave.store(os, "Ruyi Configuration");
         }
     }
-    
+
     private static synchronized void saveConfig() throws IOException {
         saveConfig(props); // 重用上面的方法
     }
 
-    //=== 公开API ===//
+    // === 公开API ===//
 
     // 自动检测配置
     public static boolean isAutomaticDetectionEnabled() {
@@ -109,7 +108,7 @@ public class RuyiProperties {
         props.setProperty("ruyi.mirror.custom", url != null ? url : "");
         saveConfig();
     }
-    
+
     public static boolean isIscasMirrorChecked() {
         return "1".equals(props.getProperty("ruyi.mirror.iscas.checked"));
     }
@@ -140,8 +139,7 @@ public class RuyiProperties {
     // 遥测配置
     public static TelemetryStatus getTelemetryStatus() {
         try {
-            return TelemetryStatus.valueOf(
-                props.getProperty("ruyi.telemetry.status").toUpperCase());
+            return TelemetryStatus.valueOf(props.getProperty("ruyi.telemetry.status").toUpperCase());
         } catch (IllegalArgumentException e) {
             return TelemetryStatus.ON;
         }
@@ -151,25 +149,26 @@ public class RuyiProperties {
         props.setProperty("ruyi.telemetry.status", status.name().toLowerCase(Locale.ROOT));
         saveConfig();
     }
+
     public static void setTelemetryStatus(boolean status) throws IOException {
-    	props.setProperty("ruyi.telemetry.status", status ? "on": "off");
+        props.setProperty("ruyi.telemetry.status", status ? "on" : "off");
         saveConfig();
     }
-    
-    
+
+
 
     // 遥测状态枚举
     public enum TelemetryStatus {
-        ON,       // 完全启用
-        LOCAL,    // 仅本地分析
-        OFF       // 完全禁用
+        ON, // 完全启用
+        LOCAL, // 仅本地分析
+        OFF // 完全禁用
     }
 
     // 错误处理
     private static void handleConfigError(String message, Exception e) {
         RuyiSdkConsole.getInstance().logError(message + ": " + e.getMessage());
-//        if (Constants.DEBUG_MODE) {
-//            e.printStackTrace();
-//        }
+        // if (Constants.DEBUG_MODE) {
+        // e.printStackTrace();
+        // }
     }
 }

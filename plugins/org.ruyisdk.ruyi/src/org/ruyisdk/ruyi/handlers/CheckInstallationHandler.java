@@ -13,8 +13,8 @@ import org.ruyisdk.ruyi.util.RuyiLogger;
  */
 public class CheckInstallationHandler extends AbstractHandler {
     private static final RuyiLogger logger = Activator.getDefault().getLogger();
-    private RuyiCore ruyiCore;  // 核心服务
-    
+    private RuyiCore ruyiCore; // 核心服务
+
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
         try {

@@ -19,32 +19,28 @@ public class CheckRuyiJob {
     public CheckResult runCheck(IProgressMonitor monitor) {
         try {
             monitor.beginTask("Checking Ruyi environment", 3);
-            
+
             // 步骤1: 检查是否安装
             monitor.subTask("Checking installation");
             if (!isInstalled()) {
                 return CheckResult.needInstall("Ruyi is not installed");
             }
             monitor.worked(1);
-            
+
             // 步骤2: 获取当前版本
             monitor.subTask("Detecting current version");
             RuyiVersion current = getInstalledVersion();
             monitor.worked(1);
-            
+
             // 步骤3: 检查新版本
             monitor.subTask("Checking latest version");
             RuyiVersion latest = getLatestRelease();
-            
-            if (latest !=null && current.compareTo(latest) < 0) {
-                return CheckResult.needUpgrade(
-                    current,
-                    latest,
-                    String.format("New version available: %s (current: %s)", 
-                                latest.toString(), current.toString())
-                );
+
+            if (latest != null && current.compareTo(latest) < 0) {
+                return CheckResult.needUpgrade(current, latest, String.format("New version available: %s (current: %s)",
+                                latest.toString(), current.toString()));
             }
-            
+
             return CheckResult.ok();
         } catch (OperationCanceledException e) {
             logger.logInfo("Version check cancelled");
@@ -58,17 +54,17 @@ public class CheckRuyiJob {
     }
 
     private boolean isInstalled() {
-    	System.out.println("Ruyi is installed ? "+RuyiManager.isRuyiInstalled());
+        System.out.println("Ruyi is installed ? " + RuyiManager.isRuyiInstalled());
         return RuyiManager.isRuyiInstalled();
     }
 
     private RuyiVersion getInstalledVersion() {
-    	System.out.println("Ruyi is installed ? "+RuyiManager.isRuyiInstalled());
+        System.out.println("Ruyi is installed ? " + RuyiManager.isRuyiInstalled());
         return RuyiManager.getInstalledVersion();
     }
 
     private RuyiVersion getLatestRelease() {
-    	System.out.println("Ruyi has new version: "+RuyiManager.getLatestVersion());
+        System.out.println("Ruyi has new version: " + RuyiManager.getLatestVersion());
         return RuyiManager.getLatestVersion();
     }
 }

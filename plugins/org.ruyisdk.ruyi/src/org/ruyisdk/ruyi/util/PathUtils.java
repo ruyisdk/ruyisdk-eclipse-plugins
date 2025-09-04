@@ -7,25 +7,25 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class PathUtils {
-    
+
     /**
      * 检查PATH是否已包含指定路径
+     * 
      * @param path 要检查的路径（自动标准化处理）
      * @return 是否已配置
      */
     public static boolean isPathConfigured(String path) {
         String normalizedPath = normalizePath(path);
         String currentPath = System.getenv("PATH");
-        
+
         if (currentPath == null || currentPath.isEmpty()) {
             return false;
         }
-        
-        return Arrays.stream(currentPath.split(":"))
-            .map(PathUtils::normalizePath)
-            .anyMatch(p -> p.equals(normalizedPath));
+
+        return Arrays.stream(currentPath.split(":")).map(PathUtils::normalizePath)
+                        .anyMatch(p -> p.equals(normalizedPath));
     }
-    
+
     /**
      * 标准化路径格式（统一处理末尾斜杠和符号链接）
      */
@@ -40,14 +40,14 @@ public class PathUtils {
             return rawPath.replaceAll("/+$", "");
         }
     }
-    
+
     /**
      * 获取用户shell配置文件路径
      */
     public static Path detectShellConfigFile() throws IOException {
         String userHome = System.getProperty("user.home");
         String[] candidates = {".bashrc", ".zshrc", ".bash_profile", ".profile"};
-        
+
         for (String filename : candidates) {
             Path configFile = Paths.get(userHome, filename);
             if (Files.isRegularFile(configFile)) {
