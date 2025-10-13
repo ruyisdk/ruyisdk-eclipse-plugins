@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RuyiSDK Project Creator
+Bundle-SymbolicName: org.ruyisdk.projectcreator;singleton:=true
+Bundle-Version: 0.0.4.20250708-0616
+Bundle-Activator: org.ruyisdk.projectcreator.Activator
+Bundle-ClassPath: .,lib/javax.json-1.1.4.jar
+Require-Bundle: org.eclipse.ui,org.eclipse.core.runtime,org.eclipse.core
+ .resources,org.eclipse.ui.ide,org.eclipse.jface,org.eclipse.debug.ui,or
+ g.ruyisdk.packages,org.ruyisdk.ruyi,org.ruyisdk.core
+Export-Package: org.ruyisdk.projectcreator.builder
+Bundle-ActivationPolicy: lazy
+Import-Package: org.ruyisdk.ruyi.util
+Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=21))"
+

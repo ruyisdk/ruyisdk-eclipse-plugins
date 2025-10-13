@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<artifacts size='1'>
+  <artifact classifier='org.eclipse.update.feature' id='org.ruyisdk.feature' version='0.0.4.20251012-0755'>
+    <properties size='10'>
+      <property name='artifact.size' value='6676'/>
+      <property name='download.size' value='6676'/>
+      <property name='download.checksum.sha-512' value='9854a1b0dc7aa3bee862f007c737f0d12a76de9b935562a0e851b774504af5ffc4cb6ad3a8b1b368cfc2eddaa40eed7bd848520e9fc427406865c71c2b459c1c'/>
+      <property name='download.checksum.sha-1' value='537372482ee649fdfce5420f48810cf3162b2eaa'/>
+      <property name='download.checksum.sha-256' value='a34cf034477c4f953ffc5e2cbaa448364328513d5a017c075f8a99eb299c03da'/>
+      <property name='maven-groupId' value='org.ruyisdk'/>
+      <property name='maven-artifactId' value='org.ruyisdk.feature'/>
+      <property name='maven-version' value='0.0.4-SNAPSHOT'/>
+      <property name='maven-type' value='eclipse-feature'/>
+      <property name='download.contentType' value='application/zip'/>
+    </properties>
+  </artifact>
+</artifacts>

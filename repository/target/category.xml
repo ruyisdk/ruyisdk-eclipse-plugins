@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="RuyiSDK IDE Update Site" url="https://github.com/ruyisdk/ruyisdk-eclipse-plugins">
+      Update site for RuyiSDK Eclipse IDE plugins
+   </description>
+   
+   <feature url="features/org.ruyisdk.feature_0.0.4.qualifier.jar" 
+            id="org.ruyisdk.feature" 
+            version="0.0.4.qualifier">
+      <category name="ruyisdk"/>
+   </feature>
+   
+   <category-def name="ruyisdk" label="RuyiSDK IDE">
+      <description>
+         RuyiSDK Eclipse IDE plugins for RISC-V development.
+         Includes device management, project creation, and Ruyi package manager integration.
+      </description>
+   </category-def>
+</site>
+

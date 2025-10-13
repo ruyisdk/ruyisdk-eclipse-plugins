@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<artifacts size='2'>
+  <artifact classifier='osgi.bundle' id='org.ruyisdk.intro' version='0.0.4.20250617-0859'>
+    <properties size='9'>
+      <property name='artifact.size' value='143857'/>
+      <property name='download.size' value='143857'/>
+      <property name='download.checksum.sha-512' value='cf4e10043d62da11e3d0030e70a979506b216ae717634f3704491cf2ba8419bd22e30f67649e3c1d66edfc928f5778de3fcda026828f9c6f0464b9025105692f'/>
+      <property name='download.checksum.sha-1' value='6ee764fee9636e7a41e3e5156021ed3381e8d820'/>
+      <property name='download.checksum.sha-256' value='22fdf05a121fc47f938f124db21fae5498263210d104a39c4455f2052a420dd1'/>
+      <property name='maven-groupId' value='org.ruyisdk'/>
+      <property name='maven-artifactId' value='org.ruyisdk.intro'/>
+      <property name='maven-version' value='0.0.4-SNAPSHOT'/>
+      <property name='maven-type' value='eclipse-plugin'/>
+    </properties>
+  </artifact>
+  <artifact classifier='osgi.bundle' id='org.ruyisdk.intro.source' version='0.0.4.20250617-0859'>
+    <properties size='10'>
+      <property name='artifact.size' value='5510'/>
+      <property name='download.size' value='5510'/>
+      <property name='download.checksum.sha-512' value='68e0999ae69ed3000a78eee24c58fbe83b203963d28f870f7c0836a652384005fa6f550f9f4527fdc11394fac63cb975961b5d56e980bc66b74e9ee237a4b38a'/>
+      <property name='download.checksum.sha-1' value='63766c337f1216411afc45a25e9b597cd59bb885'/>
+      <property name='download.checksum.sha-256' value='46d8cf524b3bbe4e8bfb9c9b04b39b4dcfc6d4aae7c2c5168371b7f9fb4ae5d4'/>
+      <property name='maven-groupId' value='org.ruyisdk'/>
+      <property name='maven-artifactId' value='org.ruyisdk.intro'/>
+      <property name='maven-version' value='0.0.4-SNAPSHOT'/>
+      <property name='maven-classifier' value='sources'/>
+      <property name='maven-type' value='java-source'/>
+    </properties>
+  </artifact>
+</artifacts>

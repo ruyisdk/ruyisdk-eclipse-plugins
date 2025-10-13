@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2024 RuyiSDK and others.
+  All rights reserved. This program and the accompanying materials
+  are made available under the terms of the Eclipse Public License v2.0
+  which accompanies this distribution, and is available at
+  https://www.eclipse.org/legal/epl-2.0/
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.ruyisdk</groupId>
+  <artifactId>ruyisdk-eclipse-plugins-parent</artifactId>
+  <version>0.0.4-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>RuyiSDK Eclipse Plugins</name>
+  <description>Custom Eclipse plugins for RuyiSDK IDE</description>
+
+  <properties>
+    <maven.version>3.9.0</maven.version>
+    <tycho.version>4.0.10</tycho.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
+    
+    <!-- Eclipse 2024-12 (4.34) release -->
+    <eclipse.release>2024-12</eclipse.release>
+    <eclipse.version>4.34.0</eclipse.version>
+    <simrel.repo>https://download.eclipse.org/releases/2024-12/</simrel.repo>
+  </properties>
+
+  <prerequisites>
+    <maven>${maven.version}</maven>
+  </prerequisites>
+
+  <modules>
+    <module>plugins/org.ruyisdk.core</module>
+    <module>plugins/org.ruyisdk.devices</module>
+    <module>plugins/org.ruyisdk.intro</module>
+    <module>plugins/org.ruyisdk.news</module>
+    <module>plugins/org.ruyisdk.packages</module>
+    <module>plugins/org.ruyisdk.projectcreator</module>
+    <module>plugins/org.ruyisdk.ruyi</module>
+    <module>plugins/org.ruyisdk.ui</module>
+    <module>features/org.ruyisdk.feature</module>
+    <module>repository</module>
+  </modules>
+
+  <repositories>
+    <repository>
+      <id>eclipse-release</id>
+      <layout>p2</layout>
+      <url>${simrel.repo}</url>
+    </repository>
+  </repositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <extensions>true</extensions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+          <resolver>p2</resolver>
+          <environments>
+            <environment>
+              <os>linux</os>
+              <ws>gtk</ws>
+              <arch>x86_64</arch>
+            </environment>
+            <environment>
+              <os>linux</os>
+              <ws>gtk</ws>
+              <arch>aarch64</arch>
+            </environment>
+            <environment>
+              <os>linux</os>
+              <ws>gtk</ws>
+              <arch>riscv64</arch>
+            </environment>
+            <environment>
+              <os>win32</os>
+              <ws>win32</ws>
+              <arch>x86_64</arch>
+            </environment>
+            <environment>
+              <os>win32</os>
+              <ws>win32</ws>
+              <arch>aarch64</arch>
+            </environment>
+            <environment>
+              <os>macosx</os>
+              <ws>cocoa</ws>
+              <arch>x86_64</arch>
+            </environment>
+            <environment>
+              <os>macosx</os>
+              <ws>cocoa</ws>
+              <arch>aarch64</arch>
+            </environment>
+          </environments>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-packaging-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-buildtimestamp-jgit</artifactId>
+            <version>${tycho.version}</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <timestampProvider>jgit</timestampProvider>
+          <jgit.dirtyWorkingTree>ignore</jgit.dirtyWorkingTree>
+          <format>yyyyMMdd-HHmm</format>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-source-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <executions>
+          <execution>
+            <id>plugin-source</id>
+            <goals>
+              <goal>plugin-source</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+

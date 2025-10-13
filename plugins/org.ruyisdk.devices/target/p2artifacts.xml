@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<artifacts size='2'>
+  <artifact classifier='osgi.bundle' id='org.ruyisdk.devices' version='0.0.4.20250903-1218'>
+    <properties size='9'>
+      <property name='artifact.size' value='15852'/>
+      <property name='download.size' value='15852'/>
+      <property name='download.checksum.sha-512' value='a26f3be0edc698ad3f2a99df7b5250a403be61a0156c3fbfba9ef643e233fff54ea898c05b96f1cc0081592e4d2897a9e5e53e4efc029ca59c9ee1a149f55e00'/>
+      <property name='download.checksum.sha-1' value='75d9f26ad42be2b5c2ffd0249210afadc2524222'/>
+      <property name='download.checksum.sha-256' value='e21d0d751e071b9da1391a95bba2ef46ad62d05c12696446205f0e3a0eb1c0ed'/>
+      <property name='maven-groupId' value='org.ruyisdk'/>
+      <property name='maven-artifactId' value='org.ruyisdk.devices'/>
+      <property name='maven-version' value='0.0.4-SNAPSHOT'/>
+      <property name='maven-type' value='eclipse-plugin'/>
+    </properties>
+  </artifact>
+  <artifact classifier='osgi.bundle' id='org.ruyisdk.devices.source' version='0.0.4.20250903-1218'>
+    <properties size='10'>
+      <property name='artifact.size' value='8585'/>
+      <property name='download.size' value='8585'/>
+      <property name='download.checksum.sha-512' value='027881e26fe81f9aec753255d7b1312e6d5f723837bb6f72ca0cf4036339dffe6565f98cb2d4bc6e0e114a2ad8146049ac7c76e22aea9cc8eef52a24433cbf8c'/>
+      <property name='download.checksum.sha-1' value='c5fca55828689f417293f0c1b6d2b2e12ffc9dd7'/>
+      <property name='download.checksum.sha-256' value='f7af72e09cd0298abc39f5d09647d1f638b53214281ce57d3b9df94786b21d4d'/>
+      <property name='maven-groupId' value='org.ruyisdk'/>
+      <property name='maven-artifactId' value='org.ruyisdk.devices'/>
+      <property name='maven-version' value='0.0.4-SNAPSHOT'/>
+      <property name='maven-classifier' value='sources'/>
+      <property name='maven-type' value='java-source'/>
+    </properties>
+  </artifact>
+</artifacts>

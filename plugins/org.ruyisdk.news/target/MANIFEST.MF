@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: News
+Bundle-SymbolicName: org.ruyisdk.news
+Bundle-Version: 0.0.4.20250509-1122
+Automatic-Module-Name: org.ruyisdk.news
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+

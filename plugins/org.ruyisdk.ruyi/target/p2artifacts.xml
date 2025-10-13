@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<artifacts size='2'>
+  <artifact classifier='osgi.bundle' id='org.ruyisdk.ruyi' version='0.0.4.20250811-1049'>
+    <properties size='9'>
+      <property name='artifact.size' value='406479'/>
+      <property name='download.size' value='406479'/>
+      <property name='download.checksum.sha-512' value='e1bb3ab194b870f22fce484dbb4d99621c3bd849f0de7ee0f7190d9b2860c8f1753dc20ecf5b670d70ee8f8089804bb1546dc9902deefe44d5bcd7951fdfe506'/>
+      <property name='download.checksum.sha-1' value='dedfe1588b809385ce0f0a3e30fe33d99203ad7d'/>
+      <property name='download.checksum.sha-256' value='88a5bbce39d1af2293eedf2bca4217fad6994a28a350923b93485661ab9079cc'/>
+      <property name='maven-groupId' value='org.ruyisdk'/>
+      <property name='maven-artifactId' value='org.ruyisdk.ruyi'/>
+      <property name='maven-version' value='0.0.4-SNAPSHOT'/>
+      <property name='maven-type' value='eclipse-plugin'/>
+    </properties>
+  </artifact>
+  <artifact classifier='osgi.bundle' id='org.ruyisdk.ruyi.source' version='0.0.4.20250811-1049'>
+    <properties size='10'>
+      <property name='artifact.size' value='39298'/>
+      <property name='download.size' value='39298'/>
+      <property name='download.checksum.sha-512' value='b71bf3fe572cd1e01ddb916170bbdb3df0d242300dde152ef28f688e97cd70f4b3ee0adecff86b86165d1e9a13c2dcd521e51c1bb97190ec572c87b9344dd6dd'/>
+      <property name='download.checksum.sha-1' value='c5f7df58739637f6259e5cb7b81a6385efd74163'/>
+      <property name='download.checksum.sha-256' value='a232c17188a39f871d17676c5d08d185a72dbe82c45b45fd3f59983152e7e521'/>
+      <property name='maven-groupId' value='org.ruyisdk'/>
+      <property name='maven-artifactId' value='org.ruyisdk.ruyi'/>
+      <property name='maven-version' value='0.0.4-SNAPSHOT'/>
+      <property name='maven-classifier' value='sources'/>
+      <property name='maven-type' value='java-source'/>
+    </properties>
+  </artifact>
+</artifacts>
