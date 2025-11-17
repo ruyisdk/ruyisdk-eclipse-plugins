@@ -14,6 +14,6 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="3.31.100",
  org.eclipse.jface;bundle-version="3.35.0",
  org.eclipse.equinox.app;bundle-version="1.7.200"
 Automatic-Module-Name: org.ruyisdk.ruyi
-Bundle-RequiredExecutionEnvironment: JavaSE-21
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Export-Package: org.ruyisdk.ruyi.util

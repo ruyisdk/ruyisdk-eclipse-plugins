@@ -1,0 +1,226 @@
+name: CI
+
+on: [push, pull_request, workflow_dispatch]
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  output_file_name: "ruyisdk-eclipse-plugins.site.zip"
+
+jobs:
+  dco:
+    name: DCO Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run christophebedard/dco-check
+        if: ${{ github.ref_type != 'tag' }}  # tagging does not produce any commits
+        uses: christophebedard/dco-check@7b0205d25ead0f898e0b706b58227dd5fa7e3f55  # 0.5.0
+        with:
+          args: "--verbose"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  config:
+    name: Configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    outputs:
+      datetime: ${{ steps.the_work.outputs.datetime }}
+      # if main branch updates, publish continuous releases
+      make_continuous_release: ${{ steps.the_work.outputs.continuous }}
+      # if tag added, publish versioning releases
+      make_versioning_release: ${{ steps.the_work.outputs.versioning }}
+    steps:
+      - name: The Work
+        id: the_work
+        run: |
+          set -ex
+
+          echo "datetime=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S %z')" >> "$GITHUB_OUTPUT"
+
+          echo 'continuous=${{ github.ref_type == 'tag' || (github.ref_type == 'branch' && github.ref_name == 'main') }}' >> "$GITHUB_OUTPUT"
+          echo 'versioning=${{ github.ref_type == 'tag' }}' >> "$GITHUB_OUTPUT"
+
+  build_and_upload:
+    name: Build and Upload
+    if: ${{ needs.dco.result == 'success' }}
+    needs: dco
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: true
+      matrix:
+        java_version: [17, 21, 25]
+    env:
+      # https://github.com/eclipse-packaging/packages/blob/2024-12_R/packages/org.eclipse.epp.package.embedcpp/META-INF/MANIFEST.MF#L7
+      java_version_for_release: 21
+    outputs:
+      output_file_list: ${{ steps.packaging.outputs.output_file_list }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK ${{ matrix.java_version }}
+        uses: actions/setup-java@v5.0.0
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java_version }}
+          cache: 'maven'
+
+      - name: Build
+        run: |
+          set -ex
+
+          mvn clean verify
+
+      - name: Package for Release
+        if: ${{ env.java_version_for_release == matrix.java_version }}
+        id: packaging
+        run: |
+          set -ex
+
+          input_dir_path="$PWD/sites/repository/target/repository/"
+          output_file_path="$(mktemp -d)/${{ env.output_file_name }}"
+          pushd "$input_dir_path"
+            echo 'output_file_list<<EOF' >> $GITHUB_OUTPUT
+              find . -type f >> $GITHUB_OUTPUT
+            echo 'EOF' >> $GITHUB_OUTPUT
+            find . -type f -print0 | xargs -0 zip -9 "$output_file_path"
+          popd
+          echo "output_file_path=$output_file_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Artifact for Release
+        if: ${{ steps.packaging.outcome == 'success' }}
+        uses: actions/upload-artifact@v5.0.0
+        with:
+          name: ${{ env.output_file_name }}
+          path: ${{ steps.packaging.outputs.output_file_path }}
+          compression-level: 0
+          if-no-files-found: error
+
+  publish_releases:
+    name: Publish Releases
+    if: ${{ needs.config.outputs.make_continuous_release == 'true' }}
+    needs:
+      - config
+      - build_and_upload
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      output_file_list: ${{ needs.build_and_upload.outputs.output_file_list }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+
+      - name: Download the Artifact
+        uses: actions/download-artifact@v6.0.0
+        with:
+          name: ${{ env.output_file_name }}
+
+      - name: Delete Old Continuous Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -ex
+
+          # https://cli.github.com/manual/gh_release
+          if gh release view 'continuous'; then
+            gh release delete 'continuous' --cleanup-tag --yes
+
+            while gh release view 'continuous'; do
+              echo 'the release is still there'
+              sleep 5
+            done
+          fi
+
+      - name: Prepare Release Notes
+        run: |
+          set -ex
+
+          for f in $(find '${{ github.workspace }}/.github/resources/release/' -name '*.md'); do
+            # https://stackoverflow.com/questions/10107459/replace-a-word-with-multiple-lines-using-sed/10108037#10108037
+            perl -i.bak -pe 's/%FILE_LIST%/$ENV{"output_file_list"}/g' "$f" && rm "$f.bak"
+          done
+
+      - name: Publish a Continuous Release
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090  # v2.4.1
+        with:
+          name: Continuous
+          tag_name: continuous
+          make_latest: false
+          prerelease: true
+          generate_release_notes: false
+          body_path: ${{ github.workspace }}/.github/resources/release/release_note_continuous.md
+          files: |
+            ${{ env.output_file_name }}
+
+      - name: Publish a Versioning Release
+        if: ${{ needs.config.outputs.make_versioning_release == 'true' }}
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090  # v2.4.1
+        with:
+          make_latest: true
+          prerelease: false
+          generate_release_notes: true
+          body_path: ${{ github.workspace }}/.github/resources/release/release_note_versioning.md
+          files: |
+            ${{ env.output_file_name }}
+
+  publish_github_pages:
+    name: Publish GitHub Pages
+    if: ${{ needs.config.outputs.make_versioning_release == 'true' }}
+    needs:
+      - config
+      - build_and_upload
+      - publish_releases
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      output_file_list: ${{ needs.build_and_upload.outputs.output_file_list }}
+      datetime: ${{ needs.config.outputs.datetime }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5.0.0
+
+      - name: Download the Artifact
+        id: download
+        uses: actions/download-artifact@v6.0.0
+        with:
+          name: ${{ env.output_file_name }}
+
+      - name: Extract Artifact Content and Prepare Index Page
+        id: extraction
+        run: |
+          set -ex
+
+          output_dir_path='${{ github.workspace }}/.github/resources/website/'
+          pushd "$output_dir_path"
+            unzip '${{ steps.download.outputs.download-path }}/${{ env.output_file_name }}'
+            for f in 'index.html' 'index.zh_Hans.html'; do
+              # update datetime
+              sed -i "s!%PUBLISH_DATE%!$datetime!g" "$f"
+              # https://stackoverflow.com/questions/10107459/replace-a-word-with-multiple-lines-using-sed/10108037#10108037
+              perl -i.bak -pe 's/%FILE_LIST%/$ENV{"output_file_list"}/g' "$f" && rm "$f.bak"
+            done
+          popd
+          echo "output_dir_path=$output_dir_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload static files as artifact
+        uses: actions/upload-pages-artifact@v4.0.0
+        with:
+          path: ${{ steps.extraction.outputs.output_dir_path }}
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4.0.5

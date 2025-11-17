@@ -121,13 +121,13 @@ public class TelemetryPreference {
 	        RuyiProperties.setTelemetryStatus(getTelemetryStatus());
 	    }
 	    
-	    public int initTelemetryStatus(){
-	        switch (RuyiProperties.getTelemetryStatus()) {
-	            case TelemetryStatus.ON: return 0;
-	            case TelemetryStatus.LOCAL: return 1;
-	            case TelemetryStatus.OFF: return 2;
-	            default: return 0;
-	        }
-	    }
+    public int initTelemetryStatus(){
+        switch (RuyiProperties.getTelemetryStatus()) {
+            case ON: return 0;
+            case LOCAL: return 1;
+            case OFF: return 2;
+            default: return 0;
+        }
+    }
 	    
 }

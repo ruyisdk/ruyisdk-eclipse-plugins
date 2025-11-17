@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<head>
+    <title>RuyiSDK Eclipse 插件更新站点</title>
+    <link rel="icon" href="./favicon.ico" />
+    <!-- https://stackoverflow.com/questions/14669352/is-the-charset-attribute-required-with-html5 -->
+    <meta charset="utf-8" />
+    <!-- https://stackoverflow.com/questions/72922557/light-dark-mode-in-html-without-css-only-html -->
+    <meta name="color-scheme" content="light dark" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta/name/viewport#using_a_media_query_with_a_viewport_meta -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="prefetch" href="./index.html" as="document" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        span#title {
+            color: #2c3e50;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            span#title {
+                color: #aaaaaa;
+            }
+        }
+
+        time {
+            color: #27ae60;
+        }
+
+        /* don't be too compact */
+        td {
+            padding-right: 1em;
+        }
+
+        li,
+        ul {
+            margin-top: 0.5em
+        }
+
+        /* link colorization */
+        a:link {
+            color: inherit;
+        }
+
+        a:visited {
+            color: inherit;
+        }
+
+        a:hover {
+            color: #27ae60;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Structuring_documents -->
+    <header>
+        <h1>
+            <img alt="RuyiSDK Logo" src="./ruyi-logo-720.svg" style="width: 5%; display: inline;" />
+            <span id="title">RuyiSDK Eclipse 插件更新站点</span>
+        </h1>
+        <!-- https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/time -->
+        <p><time datetime="%PUBLISH_DATE%">%PUBLISH_DATE%</time></p>
+        <p><a href="./index.html">English</a></p>
+    </header>
+
+    <main>
+        <article>
+            <section>
+                <h2>环境要求</h2>
+                <ol>
+                    <li>Eclipse IDE: 2024-12 (4.34) 及更新版本</li>
+                    <li>操作系统: Linux</li>
+                    <li>处理器架构: riscv64、aarch64、x86_64</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>添加本站点</h2>
+                <ol>
+                    <li>启动 IDE，打开顶部菜单栏的 "Help" ，单击 "Install New Software..."</li>
+                    <li>在打开的窗口中单击 "Add..." 按钮打开 "Add Repository" 对话框</li>
+                    <li>
+                        填入下列信息并单击 "Add" 按钮
+                        <table>
+                            <tr>
+                                <td>Name:</td>
+                                <td>RuyiSDK Updates (GitHub)</td>
+                            </tr>
+                            <tr>
+                                <td>Location:</td>
+                                <td>https://ruyisdk.github.io/ruyisdk-eclipse-plugins/</td>
+                            </tr>
+                        </table>
+                    </li>
+                    <li>回到 "Install" 窗口，在 "Work with" 下拉框中选择刚添加的站点</li>
+                    <li>待信息载入完毕后，展开 "RuyiSDK IDE" 并勾选 "RuyiSDK IDE Feature" 后单击 "Next >" 按钮开始安装</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>检查更新</h2>
+                <ol>
+                    <li>启动 IDE，打开顶部菜单栏的 "Help" ，单击 "Check for Updates"</li>
+                    <li>待窗口 "Available Updates" 打开后，若表格中出现 "RuyiSDK IDE Feature"，说明新版本的插件发布了，单击 "Next >" 按钮开始更新</li>
+                </ol>
+            </section>
+
+            <section>
+                <h2>需要帮助？</h2>
+                <ul>
+                    <li>请您在 RISC-V 开发者社区发帖:
+                        <a href="https://ruyisdk.cn/">https://ruyisdk.cn/</a>
+                    </li>
+                    <li>您也可以在本插件的 GitHub 仓库提问:
+                        <a href="https://github.com/ruyisdk/ruyisdk-eclipse-plugins/issues">
+                            https://github.com/ruyisdk/ruyisdk-eclipse-plugins/issues
+                        </a>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>文件列表</h2>
+                <pre><code>
+%FILE_LIST%
+                </code></pre>
+            </section>
+        </article>
+
+        <aside>
+            <h2>另请参阅</h2>
+            <ul>
+                <li>包含最新插件的 RuyiSDK Eclipse IDE:
+                    <a href="https://github.com/ruyisdk/ruyisdk-eclipse-plugins">GitHub</a>
+                </li>
+                <!-- TODO: https://marketplace.visualstudio.com/items?itemName= -->
+                <li>RuyiSDK VSCode 插件: <a href="https://github.com/ruyisdk/ruyisdk-vscode-extension">
+                        GitHub</a>、Visual Studio 市场</li>
+                <li>RuyiSDK 官方网站: <a href="https://ruyisdk.org/">https://ruyisdk.org/</a></li>
+                <li>Eclipse 帮助文档
+                    <ul>
+                        <li>
+                            <a href="https://help.eclipse.org/topic/org.eclipse.platform.doc.user/tasks/tasks-127.htm">
+                                Adding a New Software Site
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://help.eclipse.org/topic/org.eclipse.platform.doc.user/tasks/tasks-120.htm">
+                                Updating the Installation
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+    </main>
+
+    <footer>
+        <hr />
+        <p>版权所有 © 中国科学院软件研究所（ISCAS）。保留所有权利。</p>
+        <p>在本网站托管的文件采用 <a href="https://www.eclipse.org/legal/epl-2.0/">EPL-2.0 许可证</a>授权。</p>
+    </footer>
+</body>
+
+</html>

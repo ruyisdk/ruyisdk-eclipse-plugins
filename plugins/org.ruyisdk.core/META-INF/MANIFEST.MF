@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core
 Bundle-SymbolicName: org.ruyisdk.core;singleton:=true
-Bundle-Version: 0.0.4.qualifier
+Bundle-Version: 0.0.5.qualifier
 Automatic-Module-Name: org.ruyisdk.core
 Bundle-Activator: org.ruyisdk.core.Activator
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-21
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.ruyisdk.core.basedir,
  org.ruyisdk.core.config,
  org.ruyisdk.core.console,

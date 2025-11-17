@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ruyi SDK Packages
 Bundle-SymbolicName: org.ruyisdk.packages;singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 0.0.5.qualifier
 Require-Bundle: 
  org.eclipse.ui,
  org.eclipse.ui.workbench,
@@ -11,10 +11,9 @@ Require-Bundle:
  org.eclipse.core.runtime,
  org.eclipse.ui.console,
  org.ruyisdk.core,
- org.ruyisdk.ruyi,
- org.glassfish.javax.json;bundle-version="1.1.4"
+ org.ruyisdk.ruyi
 Bundle-ClassPath: ., lib/javax.json-1.1.4.jar
-Bundle-RequiredExecutionEnvironment: JavaSE-21
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: org.ruyisdk.packages
 
 
