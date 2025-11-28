@@ -96,7 +96,7 @@ public class RuyiCore {
                     break;
 
                 default:
-                    logger.logError("Unknown check result action");
+                    logger.logError("Unknown check result action", null);
                     break;
             }
         });

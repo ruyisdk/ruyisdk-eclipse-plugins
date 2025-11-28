@@ -78,7 +78,7 @@ public class RuyiManager {
         String archSuffix = SystemInfo.detectArchitecture().getSuffix();
         RuyiVersion version = null;
         try {
-            RuyiReleaseInfo info = RuyiAPI.getLatestRelease(archSuffix);
+            RuyiReleaseInfo info = RuyiApi.getLatestRelease(archSuffix);
             version = info.getVersion();
         } catch (Exception e) {
             // TODO Auto-generated catch block
