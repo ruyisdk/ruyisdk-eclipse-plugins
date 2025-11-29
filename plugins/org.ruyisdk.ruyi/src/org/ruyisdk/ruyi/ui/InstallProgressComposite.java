@@ -3,39 +3,57 @@ package org.ruyisdk.ruyi.ui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.Text;
 
+/**
+ * Composite for displaying installation progress.
+ */
 public class InstallProgressComposite extends Composite {
     private ProgressBar progressBar;
     private Label statusLabel;
     private Text logText;
-    
+
+    /**
+     * Constructs install progress composite.
+     *
+     * @param parent parent composite
+     */
     public InstallProgressComposite(Composite parent) {
         super(parent, SWT.NONE);
         setLayout(new GridLayout(1, false));
         setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         // 进度条
         progressBar = new ProgressBar(this, SWT.SMOOTH);
         progressBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-        
+
         // 状态标签
         statusLabel = new Label(this, SWT.NONE);
         statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
         statusLabel.setText("Preparing installation...");
-        
+
         // 日志区域
         Group logGroup = new Group(this, SWT.NONE);
         logGroup.setText("Installation Log");
         logGroup.setLayout(new GridLayout());
         logGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        
+
         logText = new Text(logGroup, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
         GridData logData = new GridData(SWT.FILL, SWT.FILL, true, true);
         logData.heightHint = 150;
         logText.setLayoutData(logData);
     }
-    
+
+    /**
+     * Updates progress bar and status message.
+     *
+     * @param value progress value
+     * @param message status message
+     */
     public void updateProgress(int value, String message) {
         if (!isDisposed()) {
             getDisplay().asyncExec(() -> {
@@ -48,7 +66,12 @@ public class InstallProgressComposite extends Composite {
             });
         }
     }
-    
+
+    /**
+     * Appends text to installation log.
+     *
+     * @param text log text
+     */
     public void appendLog(String text) {
         if (!isDisposed()) {
             getDisplay().asyncExec(() -> {
@@ -59,7 +82,12 @@ public class InstallProgressComposite extends Composite {
             });
         }
     }
-    
+
+    /**
+     * Sets progress bar to indeterminate mode.
+     *
+     * @param indeterminate true for indeterminate mode
+     */
     public void setIndeterminate(boolean indeterminate) {
         if (!isDisposed()) {
             getDisplay().asyncExec(() -> {

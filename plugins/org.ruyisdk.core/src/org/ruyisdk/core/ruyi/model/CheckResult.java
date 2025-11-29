@@ -3,8 +3,9 @@ package org.ruyisdk.core.ruyi.model;
 /**
  * Encapsulates the result of a Ruyi environment check operation.
  *
- * <p>This class represents the outcome of checking the Ruyi installation status,
- * including whether installation/upgrade is needed and version information.
+ * <p>
+ * This class represents the outcome of checking the Ruyi installation status, including whether
+ * installation/upgrade is needed and version information.
  */
 public class CheckResult {
     /**
@@ -13,10 +14,10 @@ public class CheckResult {
     public enum ActionType {
         /** Ruyi needs to be installed (not currently installed). */
         INSTALL,
-        
+
         /** Ruyi needs to be upgraded (newer version available). */
         UPGRADE,
-        
+
         /** No action needed (Ruyi is up-to-date). */
         NOTHING
     }

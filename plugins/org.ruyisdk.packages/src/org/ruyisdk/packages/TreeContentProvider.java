@@ -2,6 +2,9 @@ package org.ruyisdk.packages;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
+/**
+ * Content provider for package tree structure.
+ */
 public class TreeContentProvider implements ITreeContentProvider {
     @Override
     public Object[] getElements(Object inputElement) {

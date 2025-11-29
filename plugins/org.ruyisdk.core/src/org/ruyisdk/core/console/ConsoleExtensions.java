@@ -5,11 +5,14 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 
 /**
- * 控制台扩展点支持
+ * 控制台扩展点支持.
  */
 public class ConsoleExtensions {
     private static final String EXTENSION_POINT_ID = "org.ruyisdk.core.consoleExtensions";
 
+    /**
+     * Loads and initializes all registered console extensions.
+     */
     public static void loadExtensions() {
         IConfigurationElement[] configs =
                         Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_POINT_ID);
@@ -26,7 +29,15 @@ public class ConsoleExtensions {
         }
     }
 
+    /**
+     * Interface for console extension implementations.
+     */
     public interface ConsoleExtension {
+        /**
+         * Initializes the extension with the console instance.
+         *
+         * @param console the console instance
+         */
         void init(RuyiSdkConsole console);
     }
 }

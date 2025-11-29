@@ -1,10 +1,20 @@
 package org.ruyisdk.devices.views;
 
-import org.eclipse.jface.preference.*;
-import org.eclipse.jface.viewers.*;
+import java.util.List;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.ruyisdk.devices.Activator;
@@ -12,17 +22,23 @@ import org.ruyisdk.devices.model.Device;
 import org.ruyisdk.devices.providers.DeviceLabelProvider;
 import org.ruyisdk.devices.services.DeviceService;
 
-import java.util.List;
-import org.eclipse.jface.window.Window;
-
+/**
+ * Preference page for managing RISC-V development devices.
+ */
 public class DevicePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
     private TableViewer tableViewer;
-    private Button addButton, editButton, removeButton, setDefaultButton;
+    private Button addButton;
+    private Button editButton;
+    private Button removeButton;
+    private Button setDefaultButton;
 
     private Label infoLabel;
     private DeviceService deviceService = new DeviceService();
     private List<Device> devices;
 
+    /**
+     * Constructs the device preference page.
+     */
     public DevicePreferencePage() {
         if (Activator.getDefault() == null) {
             throw new IllegalStateException("Plugin not activated!");
@@ -105,7 +121,7 @@ public class DevicePreferencePage extends PreferencePage implements IWorkbenchPr
         tableViewer.setInput(devices);
 
         boolean hasBoards = !devices.isEmpty();
-        boolean hasDefault = devices.stream().anyMatch(Device::isDefault);
+        final boolean hasDefault = devices.stream().anyMatch(Device::isDefault);
 
         editButton.setEnabled(hasBoards);
         removeButton.setEnabled(hasBoards);
@@ -121,7 +137,7 @@ public class DevicePreferencePage extends PreferencePage implements IWorkbenchPr
     }
 
     /**
-     * 刷新表格数据
+     * 刷新表格数据.
      */
     private void refreshTable() {
         tableViewer.setInput(deviceService.getDevices());
@@ -131,7 +147,7 @@ public class DevicePreferencePage extends PreferencePage implements IWorkbenchPr
     }
 
     /**
-     * 绑定按钮事件
+     * 绑定按钮事件.
      */
     private void bindButtonEvents() {
         addButton.addListener(SWT.Selection, e -> handleAddDevice());
@@ -178,7 +194,7 @@ public class DevicePreferencePage extends PreferencePage implements IWorkbenchPr
     }
 
     /**
-     * 获取选中的开发板
+     * 获取选中的开发板.
      */
     private Device getSelectedDevice() {
         IStructuredSelection selection = (IStructuredSelection) tableViewer.getSelection();

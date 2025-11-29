@@ -6,7 +6,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.SWT;
@@ -27,6 +26,9 @@ import org.eclipse.ui.intro.IIntroSite;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
+/**
+ * Custom intro part for welcome page.
+ */
 public class CustomIntroPart implements IIntroPart {
     private Browser browser;
     private IIntroSite site;
@@ -37,11 +39,8 @@ public class CustomIntroPart implements IIntroPart {
         if (text == null) {
             return "";
         }
-        return text.replace("&", "&amp;")
-                   .replace("<", "&lt;")
-                   .replace(">", "&gt;")
-                   .replace("\"", "&quot;")
-                   .replace("'", "&#39;");
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'",
+                        "&#39;");
     }
 
     @Override
@@ -55,63 +54,64 @@ public class CustomIntroPart implements IIntroPart {
         browser = new Browser(parent, SWT.NONE);
 
         try {
-            Bundle bundle = Activator.getDefault() != null ? Activator.getDefault().getBundle() : FrameworkUtil.getBundle(getClass());
+            Bundle bundle = Activator.getDefault() != null ? Activator.getDefault().getBundle()
+                            : FrameworkUtil.getBundle(getClass());
             if (bundle == null) {
                 browser.setText("<html><body><h1>Error: Plugin bundle could not be determined.</h1></body></html>");
                 return;
             }
 
-            List<String> resourcePaths = Arrays.asList(
-                "html/welcome.html",
-                "html/style.css",
-                "icons/ruyi_logo.png",
-                "icons/icon_new.png",
-                "icons/icon_open.png",
-                "icons/icon_settings.png",
-                "icons/icon_matrix.png",
-                "icons/icon_docs.png",
-                "icons/icon_discussions.png"
-                // Add all other images referenced in welcome.html here
+            List<String> resourcePaths = Arrays.asList("html/welcome.html", "html/style.css", "icons/ruyi_logo.png",
+                            "icons/icon_new.png", "icons/icon_open.png", "icons/icon_settings.png",
+                            "icons/icon_matrix.png", "icons/icon_docs.png", "icons/icon_discussions.png"
+            // Add all other images referenced in welcome.html here
             );
 
-            URL resolvedWelcomePageURL = null;
+            URL resolvedWelcomePageUrl = null;
 
             for (String resourcePath : resourcePaths) {
                 URL bundleUrl = FileLocator.find(bundle, new Path(resourcePath), null);
                 if (bundleUrl != null) {
                     try {
-                        URL fileUrl = FileLocator.toFileURL(bundleUrl); 
+                        URL fileUrl = FileLocator.toFileURL(bundleUrl);
                         if (resourcePath.equals("html/welcome.html")) {
-                            resolvedWelcomePageURL = fileUrl; 
+                            resolvedWelcomePageUrl = fileUrl;
                         }
-                    } catch (IOException e_resolve) {
+                    } catch (IOException ioException) {
                         if (resourcePath.equals("html/welcome.html")) {
-                             String errorMessage = e_resolve.getMessage();
-                             String safeErrorMessage = (errorMessage == null) ? "An unknown error occurred." : escapeHtml(errorMessage);
-                             browser.setText("<html><body><h1>Error: Could not resolve welcome.html to a file URL.</h1><p>" + safeErrorMessage + "</p></body></html>");
-                             return;
+                            String errorMessage = ioException.getMessage();
+                            String safeErrorMessage = (errorMessage == null) ? "An unknown error occurred."
+                                            : escapeHtml(errorMessage);
+                            String errorHtml = "<html><body>"
+                                            + "<h1>Error: Could not resolve welcome.html to a file URL.</h1>" + "<p>"
+                                            + safeErrorMessage + "</p></body></html>";
+                            browser.setText(errorHtml);
+                            return;
                         }
                         // For other resources, we might log this error but not necessarily stop loading the intro
                     }
                 } else {
-                     if (resourcePath.equals("html/welcome.html")) {
-                         browser.setText("<html><body><h1>Error: welcome.html not found in bundle.</h1></body></html>");
-                         return;
-                     }
-                     // For other resources, we might log this error
+                    if (resourcePath.equals("html/welcome.html")) {
+                        browser.setText("<html><body><h1>Error: welcome.html not found in bundle.</h1></body></html>");
+                        return;
+                    }
+                    // For other resources, we might log this error
                 }
             }
 
-            if (resolvedWelcomePageURL != null) {
-                browser.setUrl(resolvedWelcomePageURL.toExternalForm()); 
+            if (resolvedWelcomePageUrl != null) {
+                browser.setUrl(resolvedWelcomePageUrl.toExternalForm());
             } else {
-                browser.setText("<html><body><h1>Error: Welcome page URL could not be determined after resource processing.</h1></body></html>");
+                String errorMsg = "<html><body>" + "<h1>Error: Welcome page URL could not be determined "
+                                + "after resource processing.</h1></body></html>";
+                browser.setText(errorMsg);
             }
 
-        } catch (Exception e) { 
+        } catch (Exception e) {
             String errorMessage = e.getMessage();
             String safeErrorMessage = (errorMessage == null) ? "An unknown error occurred." : escapeHtml(errorMessage);
-            browser.setText("<html><body><h1>Error loading welcome page.</h1><p>" + safeErrorMessage + "</p></body></html>");
+            browser.setText("<html><body><h1>Error loading welcome page.</h1><p>" + safeErrorMessage
+                            + "</p></body></html>");
             // Consider proper logging for 'e' here using Activator or ILog
         }
 
@@ -121,15 +121,15 @@ public class CustomIntroPart implements IIntroPart {
                 String url = event.location;
 
                 if (url == null) {
-                    event.doit = false; 
+                    event.doit = false;
                     return;
                 }
-                
+
                 if (url.startsWith("file:") && url.contains(".cp/")) {
-                     event.doit = true;
-                     return;
+                    event.doit = true;
+                    return;
                 }
-                
+
                 if ("about:blank".equalsIgnoreCase(url)) {
                     event.doit = true;
                     return;
@@ -146,7 +146,7 @@ public class CustomIntroPart implements IIntroPart {
                             IHandlerService handlerService = window.getService(IHandlerService.class);
                             if (handlerService != null) {
                                 handlerService.executeCommand(commandId, null);
-                            } 
+                            }
                         }
                     } catch (Exception e) {
                         // Consider proper logging for 'e' here
@@ -159,10 +159,10 @@ public class CustomIntroPart implements IIntroPart {
                         // Consider proper logging for 'e' here
                     }
                     event.doit = false;
-                } else if (url.startsWith("file:")) { 
-                    event.doit = true; 
+                } else if (url.startsWith("file:")) {
+                    event.doit = true;
                 } else {
-                    event.doit = false; 
+                    event.doit = false;
                 }
             }
 

@@ -3,7 +3,8 @@ package org.ruyisdk.core.config;
 /**
  * Centralized configuration constants for RuyiSDK.
  *
- * <p>These are design-time constants that should only be modified by developers during product
+ * <p>
+ * These are design-time constants that should only be modified by developers during product
  * iteration. End users should not modify these values.
  */
 public final class Constants {
@@ -13,8 +14,8 @@ public final class Constants {
      */
     public static final class AppInfo {
         /**
-         * XDG base directory name following XDG Base Directory Specification.
-         * Example: "~/.config/ruyisdkide"
+         * XDG base directory name following XDG Base Directory Specification. Example:
+         * "~/.config/ruyisdkide"
          */
         public static final String AppDir = "ruyisdkide";
     }
@@ -68,8 +69,7 @@ public final class Constants {
      */
     public static final class Ruyi {
         /**
-         * Default installation path for RuyiSDK.
-         * Default value: "~/.local/bin" (user-local binaries)
+         * Default installation path for RuyiSDK. Default value: "~/.local/bin" (user-local binaries)
          */
         public static String INSTALL_PATH = "~/.local/bin";
 

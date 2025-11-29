@@ -7,7 +7,7 @@ import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 /**
- * RuyiSDK 专属控制台（单例模式）
+ * RuyiSDK 专属控制台（单例模式）.
  */
 public class RuyiSdkConsole {
     private static final String CONSOLE_NAME = "RuyiSDK";
@@ -37,35 +37,62 @@ public class RuyiSdkConsole {
     }
 
     /**
-     * 获取单例实例（线程安全）
+     * 获取单例实例（线程安全）.
+     *
+     * @return console instance
      */
     public static RuyiSdkConsole getInstance() {
         return Holder.INSTANCE;
     }
 
+    /**
+     * Logs an info message.
+     *
+     * @param message the message to log
+     */
     public synchronized void logInfo(String message) {
         infoStream.println("[INFO] " + message);
     }
 
+    /**
+     * Logs a command message.
+     *
+     * @param message the message to log
+     */
     public synchronized void logCommand(String message) {
         infoStream.println("[COMMAND] " + message);
     }
 
+    /**
+     * Logs a warning message.
+     *
+     * @param message the message to log
+     */
     public synchronized void logWarn(String message) {
         infoStream.println("[WARN] " + message);
     }
 
+    /**
+     * Logs an error message.
+     *
+     * @param message the message to log
+     */
     public synchronized void logError(String message) {
         errorStream.println("[ERROR] " + message);
         errorStream.setActivateOnWrite(true); // 错误时自动激活控制台
     }
 
+    /**
+     * Gets the underlying MessageConsole instance.
+     *
+     * @return the MessageConsole instance
+     */
     public MessageConsole getConsole() {
         return console;
     }
 
     /**
-     * 初始化各等级消息流
+     * 初始化各等级消息流.
      */
     private void initStreams() {
         Display display = Display.getDefault();

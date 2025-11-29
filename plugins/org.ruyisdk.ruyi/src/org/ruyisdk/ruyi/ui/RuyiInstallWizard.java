@@ -1,13 +1,15 @@
 package org.ruyisdk.ruyi.ui;
 
 import java.io.IOException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.wizard.*;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -17,7 +19,14 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.ruyisdk.core.ruyi.model.RepoConfig;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
 import org.ruyisdk.ruyi.Activator;
@@ -31,34 +40,49 @@ import org.ruyisdk.ruyi.services.RuyiProperties.TelemetryStatus;
 import org.ruyisdk.ruyi.util.RuyiLogger;
 import org.ruyisdk.ruyi.util.StatusUtil;
 
-// Ruyi安装/升级向导
+/**
+ * Wizard for Ruyi installation and upgrade.
+ */
 public class RuyiInstallWizard extends Wizard {
-    public enum Mode { INSTALL, UPGRADE }  // 向导运行模式:INSTALL全新安装模式,UPGRADE升级现有安装模式
-    
+    /**
+     * Wizard operation mode.
+     */
+    public enum Mode {
+        INSTALL, UPGRADE
+    } // 向导运行模式:INSTALL全新安装模式,UPGRADE升级现有安装模式
+
     private final Mode mode;
     private final RuyiVersion currentVersion;
     private final RuyiVersion newVersion;
-    
+
+    /**
+     * Opens wizard for fresh installation.
+     */
     public static void openForInstall() {
         new RuyiInstallWizard(Mode.INSTALL, null, null).open();
     }
-    
+
+    /**
+     * Opens wizard for upgrade.
+     *
+     * @param current current version
+     * @param latest latest version
+     */
     public static void openForUpgrade(RuyiVersion current, RuyiVersion latest) {
         new RuyiInstallWizard(Mode.UPGRADE, current, latest).open();
     }
-	    
-	 // 私有构造方法
+
+    // 私有构造方法
     private RuyiInstallWizard(Mode mode, RuyiVersion currentVersion, RuyiVersion newVersion) {
         this.mode = mode;
         this.currentVersion = currentVersion;
         this.newVersion = newVersion;
         setNeedsProgressMonitor(true);
-        
+
         // 根据模式设置不同标题
-        setWindowTitle(mode == Mode.INSTALL ? 
-        		"Ruyi Installation Wizard" : "Ruyi Upgrade Wizard");
+        setWindowTitle(mode == Mode.INSTALL ? "Ruyi Installation Wizard" : "Ruyi Upgrade Wizard");
     }
-    
+
     @Override
     public void addPages() {
         addPage(new CheckResultPage(mode));
@@ -70,32 +94,34 @@ public class RuyiInstallWizard extends Wizard {
 
     @Override
     public boolean performFinish() {
-        return ((InstallationPage)getPage("installationPage")).performFinish();
+        return ((InstallationPage) getPage("installationPage")).performFinish();
     }
-    
+
+    /**
+     * Opens the wizard dialog.
+     */
     public void open() {
-        WizardDialog dialog = new WizardDialog(
-            Display.getDefault().getActiveShell(), 
-            this
-        );
+        WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), this);
         dialog.setMinimumPageSize(600, 400);
         dialog.open();
     }
 
-    //========================各向导页面的内部类实现====================//
+    // ========================各向导页面的内部类实现====================//
+    /**
+     * Wizard page showing check results.
+     */
     private class CheckResultPage extends WizardPage {
         private final Mode mode;
         private Button dontCheckAgainCheckbox;
-//        private AutomaticCheckPreference automaticCheckPref;
+        // private AutomaticCheckPreference automaticCheckPref;
 
         public CheckResultPage(Mode mode) {
             super("checkResultPage");
             this.mode = mode;
-            setTitle(mode == Mode.INSTALL ? 
-                "Ruyi Installation Required" : "Ruyi Upgrade Available");
-//            setDescription("Review the detection results before proceeding");
+            setTitle(mode == Mode.INSTALL ? "Ruyi Installation Required" : "Ruyi Upgrade Available");
+            // setDescription("Review the detection results before proceeding");
         }
-        
+
         @Override
         public void createControl(Composite parent) {
             Composite container = new Composite(parent, SWT.NONE);
@@ -104,13 +130,12 @@ public class RuyiInstallWizard extends Wizard {
             // 信息展示区域
             Label infoLabel = new Label(container, SWT.WRAP);
             infoLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-            String showtext = mode == Mode.INSTALL ?
-                    "Ruyi package manager (ruyi command) not detected.  \n" :
-                    String.format("New Ruyi version %s available (current: %s).  \n",
-                        newVersion, currentVersion);
+            String showtext = mode == Mode.INSTALL ? "Ruyi package manager (ruyi command) not detected.  \n"
+                            : String.format("New Ruyi version %s available (current: %s).  \n", newVersion,
+                                            currentVersion);
             infoLabel.setText(showtext);
-            
-         
+
+
             FontData[] fontData = infoLabel.getFont().getFontData(); // 获取当前字体数据
             // 修改字体数据，设置字体名称和大小
             for (FontData fd : fontData) {
@@ -133,80 +158,79 @@ public class RuyiInstallWizard extends Wizard {
             // 提示文本
             Label hintLabel = new Label(container, SWT.WRAP);
             hintLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-            hintLabel.setText(
-            	"Please note:\n" +
-                "• Click [Next] to start installation wizard. \n" +  //[Proceed Now]
-                "• Select [Cancel] to manually trigger from menu: RuyiSDK > Ruyi Installation. \n" +  //[Handle Later] 
-                "• If you already have ruyi, configure path in: Windows > Preferences > RuyiSDK > Ruyi Config > Ruyi Installation Directory. \n\n "
-            );
+            hintLabel.setText("Please note:\n" + "• Click [Next] to start installation wizard.\n"
+                            + "• Select [Cancel] to manually trigger from menu: " + "RuyiSDK > Ruyi Installation.\n"
+                            + "• If you already have ruyi, configure path in: "
+                            + "Windows > Preferences > RuyiSDK > Ruyi Config > " + "Ruyi Installation Directory.\n\n");
             Color tipColor = new Color(hintLabel.getDisplay(), 0, 0, 255);
             hintLabel.setForeground(tipColor); // 设置标签的字体颜色
             // 颜色对象使用后需要释放资源
             hintLabel.addDisposeListener(e -> {
-            	if (!tipColor.isDisposed()) {
-            		tipColor.dispose();
-            	}
+                if (!tipColor.isDisposed()) {
+                    tipColor.dispose();
+                }
             });
 
             // 不再检测选项
-//            automaticCheckPref = new AutomaticCheckPreference(container);
-//            automaticCheckPref.createSection();
+            // automaticCheckPref = new AutomaticCheckPreference(container);
+            // automaticCheckPref.createSection();
             dontCheckAgainCheckbox = new Button(container, SWT.CHECK);
             dontCheckAgainCheckbox.setText("Don't check and prompt again");
             dontCheckAgainCheckbox.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
             dontCheckAgainCheckbox.addListener(SWT.Selection, e -> setAutomaticDetection());
-           
+
             setControl(container);
         }
 
         // 保存"不再提示"设置
         private void setAutomaticDetection() {
-           try {
-				RuyiProperties.setAutomaticDetection(!dontCheckAgainCheckbox.getSelection());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+            try {
+                RuyiProperties.setAutomaticDetection(!dontCheckAgainCheckbox.getSelection());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     }
-    
+
+    /**
+     * Wizard page for preparation.
+     */
     private class PreparePage extends WizardPage {
 
         public PreparePage(Mode mode) {
             super("welcomePage");
-            setTitle(mode == Mode.INSTALL ? 
-                "Welcome to Ruyi Installation" : "Welcome to Ruyi Upgrade");
-            setDescription(mode == Mode.INSTALL ?
-                "This wizard will guide you through the Ruyi installation process" :
-                "This wizard will upgrade your Ruyi installation to the latest version");
+            setTitle(mode == Mode.INSTALL ? "Welcome to Ruyi Installation" : "Welcome to Ruyi Upgrade");
+            setDescription(mode == Mode.INSTALL ? "This wizard will guide you through the Ruyi installation process"
+                            : "This wizard will upgrade your Ruyi installation to the latest version");
         }
 
         @Override
         public void createControl(Composite parent) {
             Composite container = new Composite(parent, SWT.NONE);
             container.setLayout(new GridLayout(1, false));
-            
+
             Label label = new Label(container, SWT.WRAP);
             label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            
-            String text = mode == Mode.INSTALL ?
-                "The Ruyi SDK provides all necessary tools for Ruyi development. \n\n" +
-                "Before proceeding, please ensure: \n" +
-                "• 500MB+ free disk space \n" +
-                "• Active internet connection \n" +
-                "• Administrator privileges if needed" :
-                "Your Ruyi installation will be upgraded to the latest version. \n\n" +
-                "Please note: \n" +
-                "• The old version will be replaced \n" +
-                "• Existing configurations will be preserved \n" +
-                "• Active internet connection \n" +
-                "• Administrator privileges if needed";
-            
+
+            String text = mode == Mode.INSTALL
+                            ? "The Ruyi SDK provides all necessary tools for Ruyi development. \n\n"
+                                            + "Before proceeding, please ensure: \n" + "• 500MB+ free disk space \n"
+                                            + "• Active internet connection \n" + "• Administrator privileges if needed"
+                            : "Your Ruyi installation will be upgraded to the latest version. \n\n" + "Please note: \n"
+                                            + "• The old version will be replaced \n"
+                                            + "• Existing configurations will be preserved \n"
+                                            + "• Active internet connection \n"
+                                            + "• Administrator privileges if needed";
+
             label.setText(text);
             setControl(container);
         }
     }
 
+    /**
+     * Wizard page for configuration.
+     */
     private class ConfigurationPage extends WizardPage {
         private RuyiInstallPathPreference installPref;
         private RepoConfigPreference repoPref;
@@ -249,19 +273,22 @@ public class RuyiInstallWizard extends Wizard {
         public TelemetryStatus getTelemetryStatus() {
             return telemetryPref.getTelemetryStatus();
         }
-        
+
         public void saveConfig() {
-        	try {
-        		installPref.saveInstallPath();
-        		repoPref.saveRepoConfigs();
-        		telemetryPref.saveTelemetryConfigs();
-    		} catch (IOException e) {
-    			// TODO Auto-generated catch block
-    			e.printStackTrace();
-    		}
+            try {
+                installPref.saveInstallPath();
+                repoPref.saveRepoConfigs();
+                telemetryPref.saveTelemetryConfigs();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     }
 
+    /**
+     * Wizard page for installation process.
+     */
     private class InstallationPage extends WizardPage {
         private final Mode mode;
         private InstallProgressComposite progressComp;
@@ -270,13 +297,11 @@ public class RuyiInstallWizard extends Wizard {
         public InstallationPage(Mode mode) {
             super("installationPage");
             this.mode = mode;
-//            this.installManager = Activator.getDefault().getRuyiCore().getInstallManager();
+            // this.installManager = Activator.getDefault().getRuyiCore().getInstallManager();
             this.installManager = new RuyiInstallManager(Activator.getDefault().getLogger());
-            setTitle(mode == Mode.INSTALL ? 
-                "Installing Ruyi" : "Upgrading Ruyi");
-            setDescription(mode == Mode.INSTALL ?
-                "Please wait while Ruyi is being installed" :
-                "Upgrading to the latest version...");
+            setTitle(mode == Mode.INSTALL ? "Installing Ruyi" : "Upgrading Ruyi");
+            setDescription(mode == Mode.INSTALL ? "Please wait while Ruyi is being installed"
+                            : "Upgrading to the latest version...");
         }
 
         @Override
@@ -284,11 +309,11 @@ public class RuyiInstallWizard extends Wizard {
             progressComp = new InstallProgressComposite(parent);
             setControl(progressComp);
         }
-        
-    	@Override
-    	public IWizardPage getPreviousPage() {
-    		return null;
-    	}
+
+        @Override
+        public IWizardPage getPreviousPage() {
+            return null;
+        }
 
         @Override
         public void setVisible(boolean visible) {
@@ -301,17 +326,15 @@ public class RuyiInstallWizard extends Wizard {
         private void startInstallation() {
             ConfigurationPage configPage = (ConfigurationPage) getWizard().getPage("configurationPage");
             configPage.saveConfig();
-            
-//            installManager.setInstalledVersion(currentVersion.toString());
-//            installManager.setLatestVersion(newVersion.toString());
+
+            // installManager.setInstalledVersion(currentVersion.toString());
+            // installManager.setLatestVersion(newVersion.toString());
 
             installManager.setInstallPath(configPage.getInstallPath());
             installManager.setRepoUrls(configPage.getSelectedRepos());
-            installManager.setTelemetryStatus(configPage.getTelemetryStatus());
 
-            progressComp.appendLog("Starting " + 
-                (mode == Mode.INSTALL ? "installation" : "upgrade") + "...");
-            
+            progressComp.appendLog("Starting " + (mode == Mode.INSTALL ? "installation" : "upgrade") + "...");
+
             Job.create("Ruyi " + mode.name(), monitor -> {
                 try {
                     installManager.install(monitor, new InstallationListener() {
@@ -325,12 +348,12 @@ public class RuyiInstallWizard extends Wizard {
                             appendLog(message);
                         }
                     });
-                    
+
                     Display.getDefault().asyncExec(() -> {
                         progressComp.appendLog("Operation completed successfully!");
                         setPageComplete(true);
                     });
-                    
+
                     return Status.OK_STATUS;
                 } catch (Exception e) {
                     Display.getDefault().asyncExec(() -> {
@@ -360,6 +383,9 @@ public class RuyiInstallWizard extends Wizard {
         }
     }
 
+    /**
+     * Wizard page showing completion status.
+     */
     private class CompletionPage extends WizardPage {
         private final Mode mode;
 
@@ -367,31 +393,24 @@ public class RuyiInstallWizard extends Wizard {
             super("completionPage");
             this.mode = mode;
             setTitle("Operation Complete");
-            setDescription(mode == Mode.INSTALL ?
-                "Ruyi has been successfully installed" :
-                "Ruyi has been upgraded successfully");
+            setDescription(mode == Mode.INSTALL ? "Ruyi has been successfully installed"
+                            : "Ruyi has been upgraded successfully");
         }
 
         @Override
         public void createControl(Composite parent) {
             Composite container = new Composite(parent, SWT.NONE);
             container.setLayout(new GridLayout(1, false));
-            
+
             Label label = new Label(container, SWT.WRAP);
             label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            
-            String text = mode == Mode.INSTALL ?
-                "Ruyi has been successfully installed!\n\n" +
-                "Next steps:\n" +
-                "• Restart your IDE to apply changes\n" +
-                "• Configure project SDK settings\n" +
-                "• Visit documentation for tutorials" :
-                "Ruyi has been upgraded to the latest version.\n\n" +
-                "What's new:\n" +
-                "• Improved performance\n" +
-                "• New API features\n" +
-                "• Bug fixes";
-            
+
+            String text = mode == Mode.INSTALL ? "Ruyi has been successfully installed!\n\n" + "Next steps:\n"
+                            + "• Restart your IDE to apply changes\n" + "• Configure project SDK settings\n"
+                            + "• Visit documentation for tutorials"
+                            : "Ruyi has been upgraded to the latest version.\n\n" + "What's new:\n"
+                                            + "• Improved performance\n" + "• New API features\n" + "• Bug fixes";
+
             label.setText(text);
             setControl(container);
         }
@@ -400,15 +419,30 @@ public class RuyiInstallWizard extends Wizard {
         public boolean isPageComplete() {
             return true; // 完成页始终可进入
         }
-        
-    	@Override
-    	public IWizardPage getPreviousPage() {
-    		return null;
-    	}
+
+        @Override
+        public IWizardPage getPreviousPage() {
+            return null;
+        }
     }
 
+    /**
+     * Listener for installation progress.
+     */
     public interface InstallationListener {
+        /**
+         * Called when progress changes.
+         *
+         * @param percent progress percentage
+         * @param message progress message
+         */
         void progressChanged(int percent, String message);
+
+        /**
+         * Logs a message.
+         *
+         * @param message message to log
+         */
         void logMessage(String message);
     }
 }

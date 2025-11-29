@@ -14,9 +14,9 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 /**
  * Root container preference page for RuyiSDK configuration.
  *
- * <p>This serves as a category entry point in the preferences dialog tree,
- * containing no actual configuration items itself. Specific preferences
- * should be implemented in sub-pages.
+ * <p>
+ * This serves as a category entry point in the preferences dialog tree, containing no actual
+ * configuration items itself. Specific preferences should be implemented in sub-pages.
  */
 public class RuyiSdkPreferenceContainer extends PreferencePage implements IWorkbenchPreferencePage {
 

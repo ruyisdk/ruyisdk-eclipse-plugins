@@ -1,10 +1,12 @@
 package org.ruyisdk.packages;
 
+import java.util.Map;
+import javax.json.JsonValue;
 import org.eclipse.jface.viewers.LabelProvider;
 
-import javax.json.JsonValue;
-import java.util.Map;
-
+/**
+ * Label provider for package display.
+ */
 public class PackageLabelProvider extends LabelProvider {
     @Override
     public String getText(Object element) {

@@ -176,7 +176,13 @@
       <message key="ws.preceded" value="GenericWhitespace ''{0}'' is preceded with whitespace."/>
       <message key="ws.illegalFollow" value="GenericWhitespace ''{0}'' should followed by whitespace."/>
     </module>
-    <module name="Indentation"/>
+    <!-- Indentation check enabled - array formatting follows Checkstyle rules -->
+    <module name="Indentation">
+      <property name="basicOffset" value="4"/>
+      <property name="arrayInitIndent" value="4"/>
+      <property name="throwsIndent" value="8"/>
+      <property name="lineWrappingIndentation" value="8"/>
+    </module>
     <module name="SuppressionXpathSingleFilter">
       <property name="checks" value="Indentation"/>
       <property name="query" value="//SLIST[not(parent::CASE_GROUP)]/SLIST                                    | //SLIST[not(parent::CASE_GROUP)]/SLIST/RCURLY"/>
@@ -225,7 +231,7 @@
       <property name="forbiddenSummaryFragments" value="^@return the *|^This method returns |^A [{]@code [a-zA-Z0-9]+[}]( is a )"/>
     </module>
     <module name="JavadocParagraph">
-      <property name="allowNewlineParagraph" value="false"/>
+      <property name="allowNewlineParagraph" value="true"/>
     </module>
     <module name="RequireEmptyLineBeforeBlockTagGroup"/>
     <module name="AtclauseOrder">

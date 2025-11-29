@@ -7,7 +7,7 @@ import org.ruyisdk.core.console.ConsoleExtensions;
 import org.ruyisdk.core.console.ConsoleManager;
 
 /**
- * The activator class controls the plug-in life cycle.
+ * Activator for the RuyiSDK Core plugin.
  */
 public class Activator extends AbstractUIPlugin {
     public static final String PLUGIN_ID = "org.ruyisdk.core"; // The plug-in ID
@@ -15,13 +15,18 @@ public class Activator extends AbstractUIPlugin {
 
 
     /**
-     * Constructs a new Activator.
-     *
+     * Constructs the activator.
      */
     public Activator() {
         // Parent class AbstractUIPlugin handles initialization automatically
     }
 
+    /**
+     * Starts the plugin.
+     *
+     * @param context the bundle context
+     * @throws Exception if start fails
+     */
     @Override
     public void start(BundleContext context) throws Exception {
         super.start(context);
@@ -31,6 +36,12 @@ public class Activator extends AbstractUIPlugin {
         ConsoleExtensions.loadExtensions();
     }
 
+    /**
+     * Stops the plugin.
+     *
+     * @param context the bundle context
+     * @throws Exception if stop fails
+     */
     @Override
     public void stop(BundleContext context) throws Exception {
         ConsoleManager.dispose();
@@ -40,9 +51,9 @@ public class Activator extends AbstractUIPlugin {
     }
 
     /**
-     * Returns the shared instance.
+     * Returns the shared plugin instance.
      *
-     * @return the shared plugin instance
+     * @return the shared instance
      */
     public static Activator getDefault() {
         return plugin;

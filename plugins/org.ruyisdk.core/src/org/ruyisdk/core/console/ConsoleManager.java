@@ -5,14 +5,17 @@ import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
 
 /**
- * 控制台生命周期管理
+ * 控制台生命周期管理.
  */
 public class ConsoleManager {
-    
+
+    /**
+     * Shows the RuyiSDK console in the console view.
+     */
     public static void showConsole() {
         IConsoleManager consoleManager = ConsolePlugin.getDefault().getConsoleManager();
         RuyiSdkConsole console = RuyiSdkConsole.getInstance();
-        
+
         // 避免重复添加
         IConsole[] existing = consoleManager.getConsoles();
         for (IConsole c : existing) {
@@ -20,13 +23,16 @@ public class ConsoleManager {
                 return;
             }
         }
-        
-        consoleManager.addConsoles(new IConsole[]{ console.getConsole() });
+
+        consoleManager.addConsoles(new IConsole[] {console.getConsole()});
         consoleManager.showConsoleView(console.getConsole());
     }
 
+    /**
+     * Disposes the console and removes it from console manager.
+     */
     public static void dispose() {
         ConsolePlugin.getDefault().getConsoleManager()
-            .removeConsoles(new IConsole[]{ RuyiSdkConsole.getInstance().getConsole() });
+                        .removeConsoles(new IConsole[] {RuyiSdkConsole.getInstance().getConsole()});
     }
 }

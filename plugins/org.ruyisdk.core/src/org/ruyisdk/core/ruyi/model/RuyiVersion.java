@@ -3,17 +3,18 @@ package org.ruyisdk.core.ruyi.model;
 /**
  * Represents a semantic version number for Ruyi following MAJOR.MINOR.PATCH format.
  *
- * <p>This immutable class implements semantic versioning comparison logic and provides
- * parsing capabilities from version strings. Used for version checking and upgrade
- * decisions throughout RuyiSDK.
+ * <p>
+ * This immutable class implements semantic versioning comparison logic and provides parsing
+ * capabilities from version strings. Used for version checking and upgrade decisions throughout
+ * RuyiSDK.
  */
 public class RuyiVersion implements Comparable<RuyiVersion> {
     /** Major version number (incremented for incompatible API changes). */
     private final int major;
-    
+
     /** Minor version number (incremented for backward-compatible functionality). */
     private final int minor;
-    
+
     /** Patch version number (incremented for backward-compatible bug fixes). */
     private final int patch;
 
@@ -29,7 +30,7 @@ public class RuyiVersion implements Comparable<RuyiVersion> {
         this.minor = minor;
         this.patch = patch;
     }
-    
+
     /**
      * Parses a version string in "MAJOR.MINOR.PATCH" format.
      *
@@ -72,14 +73,29 @@ public class RuyiVersion implements Comparable<RuyiVersion> {
         return major + "." + minor + "." + patch;
     }
 
+    /**
+     * Gets the major version number.
+     *
+     * @return major version
+     */
     public int getMajor() {
         return major;
     }
 
+    /**
+     * Gets the minor version number.
+     *
+     * @return minor version
+     */
     public int getMinor() {
         return minor;
     }
 
+    /**
+     * Gets the patch version number.
+     *
+     * @return patch version
+     */
     public int getPatch() {
         return patch;
     }

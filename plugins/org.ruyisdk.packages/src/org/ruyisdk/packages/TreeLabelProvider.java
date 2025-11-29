@@ -2,6 +2,9 @@ package org.ruyisdk.packages;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
+/**
+ * Label provider for tree nodes.
+ */
 public class TreeLabelProvider extends LabelProvider {
     @Override
     public String getText(Object element) {

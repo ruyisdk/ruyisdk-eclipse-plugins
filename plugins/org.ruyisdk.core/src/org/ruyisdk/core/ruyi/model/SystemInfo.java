@@ -5,7 +5,8 @@ import java.util.Locale;
 /**
  * Represents system architecture information and provides detection utilities.
  *
- * <p>This class helps identify the current system's CPU architecture and generates platform-specific
+ * <p>
+ * This class helps identify the current system's CPU architecture and generates platform-specific
  * identifiers for RuyiSDK operations.
  */
 public class SystemInfo {
@@ -70,7 +71,8 @@ public class SystemInfo {
     /**
      * Generates a platform key string in "OS/ARCH" format.
      *
-     * <p>The returned string follows RuyiSDK's platform identification convention and can be used for
+     * <p>
+     * The returned string follows RuyiSDK's platform identification convention and can be used for
      * downloading architecture-specific packages.
      *
      * @return platform key string (e.g., "linux/x86_64")

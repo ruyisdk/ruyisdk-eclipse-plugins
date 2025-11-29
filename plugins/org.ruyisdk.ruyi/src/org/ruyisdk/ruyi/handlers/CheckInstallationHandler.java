@@ -9,12 +9,12 @@ import org.ruyisdk.ruyi.jobs.CheckRuyiJob;
 import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
- * 处理"检查安装"命令
+ * Handler for check installation command.
  */
 public class CheckInstallationHandler extends AbstractHandler {
     private static final RuyiLogger logger = Activator.getDefault().getLogger();
-    private RuyiCore ruyiCore;  // 核心服务
-    
+    private RuyiCore ruyiCore; // 核心服务
+
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
         try {

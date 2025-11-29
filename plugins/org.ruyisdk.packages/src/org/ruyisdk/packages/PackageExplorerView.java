@@ -2,19 +2,20 @@ package org.ruyisdk.packages;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.io.IOException;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ICheckStateProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -23,22 +24,23 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.ui.part.ViewPart;
-import org.ruyisdk.packages.PackageExplorerView.OutputLiveDialog;
-import org.ruyisdk.ruyi.util.RuyiFileUtils;
-import org.eclipse.jface.viewers.ICheckStateProvider;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IConsoleConstants;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.part.ViewPart;
 import org.ruyisdk.packages.JsonParser;
+import org.ruyisdk.packages.PackageExplorerView.OutputLiveDialog;
+import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
+/**
+ * View for exploring packages.
+ */
 public class PackageExplorerView extends ViewPart {
     private CheckboxTreeViewer viewer;
     private Process bashProcess;
@@ -112,7 +114,7 @@ public class PackageExplorerView extends ViewPart {
         downloadButton.addListener(SWT.Selection, event -> {
             Object[] checkedElements = viewer.getCheckedElements();
             List<TreeNode> selectedNodes = new ArrayList<>();
-            for (Object obj : checkedElements) {// Download Monitor
+            for (Object obj : checkedElements) { // Download Monitor
                 if (obj instanceof TreeNode) {
                     TreeNode node = (TreeNode) obj;
                     if (node.isLeaf() && !node.isDownloaded()) {
@@ -552,8 +554,9 @@ public class PackageExplorerView extends ViewPart {
         String[] hardwareTypes = fetchHardwareEntities();
         // add no res found check
         if (hardwareTypes == null || hardwareTypes.length == 0) {
-            MessageDialog.openWarning(shell, "No Hardware Found",
-                            "Could not find any supported development board entities. Please check your Ruyi installation.");
+            String msg = "Could not find any supported development board entities. "
+                            + "Please check your Ruyi installation.";
+            MessageDialog.openWarning(shell, "No Hardware Found", msg);
             return null;
         }
 

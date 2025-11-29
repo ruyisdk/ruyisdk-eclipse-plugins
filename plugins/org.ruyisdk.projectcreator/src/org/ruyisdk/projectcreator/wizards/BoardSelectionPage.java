@@ -8,48 +8,56 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+/**
+ * Wizard page for board selection.
+ */
 public class BoardSelectionPage extends WizardPage {
 
-	private Combo boardModelCombo;
+    private Combo boardModelCombo;
 
-	protected BoardSelectionPage(String pageName) {
-		super(pageName);
-		setTitle("choose Board Model");
-		setDescription("Please select your target board model.");
-		setPageComplete(false);
-	}
+    /**
+     * Constructs board selection page.
+     *
+     * @param pageName page name
+     */
+    protected BoardSelectionPage(String pageName) {
+        super(pageName);
+        setTitle("choose Board Model");
+        setDescription("Please select your target board model.");
+        setPageComplete(false);
+    }
 
-	@Override
-	public void createControl(Composite parent) {
-		Composite container = new Composite(parent, SWT.NULL);
-		setControl(container);
-		container.setLayout(new GridLayout(2, false));
+    @Override
+    public void createControl(Composite parent) {
+        Composite container = new Composite(parent, SWT.NULL);
+        setControl(container);
+        container.setLayout(new GridLayout(2, false));
 
-		new Label(container, SWT.NULL).setText("Board Model:");
-		boardModelCombo = new Combo(container, SWT.READ_ONLY);
-		boardModelCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        new Label(container, SWT.NULL).setText("Board Model:");
+        boardModelCombo = new Combo(container, SWT.READ_ONLY);
+        boardModelCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-		String[] boardModels = new String[] { "milkv-duo", "default" };
-		boardModelCombo.setItems(boardModels);
+        String[] boardModels = new String[] {"milkv-duo", "default"};
+        boardModelCombo.setItems(boardModels);
 
-		boardModelCombo.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
-			public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
-				validatePage();
-			}
-		});
-	}
+        boardModelCombo.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
+            public void widgetSelected(org.eclipse.swt.events.SelectionEvent e) {
+                validatePage();
+            }
+        });
+    }
 
-	private void validatePage() {
-		if (boardModelCombo.getText().isEmpty()) {
-			setErrorMessage("Please select a board model.");
-			setPageComplete(false);
-		} else {
-			setErrorMessage(null);
-			setPageComplete(true);
-		}
-	}
+    private void validatePage() {
+        if (boardModelCombo.getText().isEmpty()) {
+            setErrorMessage("Please select a board model.");
+            setPageComplete(false);
+        } else {
+            setErrorMessage(null);
+            setPageComplete(true);
+        }
+    }
 
-	public String getBoardModel() {
-		return boardModelCombo.getText();
-	}
+    public String getBoardModel() {
+        return boardModelCombo.getText();
+    }
 }

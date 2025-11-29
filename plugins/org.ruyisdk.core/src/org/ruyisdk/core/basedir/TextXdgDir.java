@@ -1,13 +1,13 @@
 package org.ruyisdk.core.basedir;
 
 import java.nio.file.Path;
-
 import org.ruyisdk.core.config.Constants;
 
 /**
  * Demonstrates usage of XDG base directory specification to get standard directories.
- * 
- * <p>This class shows how to retrieve and use the standard XDG directories (config, cache, data, and
+ *
+ * <p>
+ * This class shows how to retrieve and use the standard XDG directories (config, cache, data, and
  * state) for application storage following the XDG Base Directory Specification.
  */
 public class TextXdgDir {

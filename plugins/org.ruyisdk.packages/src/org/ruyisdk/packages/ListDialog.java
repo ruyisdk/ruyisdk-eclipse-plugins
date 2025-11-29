@@ -1,23 +1,37 @@
 package org.ruyisdk.packages;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.List;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Shell;
 
+/**
+ * Dialog for list selection.
+ */
 public class ListDialog extends Dialog {
     private String[] items;
     private String selectedItem;
 
+    /**
+     * Constructs list dialog.
+     *
+     * @param parent parent shell
+     * @param items items to display
+     */
     public ListDialog(Shell parent, String[] items) {
         super(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
         this.items = items;
     }
 
+    /**
+     * Opens dialog and returns selected item.
+     *
+     * @return selected item or null
+     */
     public String open() {
         Shell shell = new Shell(getParent(), getStyle());
         shell.setText("Select Development Board");

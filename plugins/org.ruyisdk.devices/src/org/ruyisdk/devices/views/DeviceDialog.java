@@ -4,9 +4,16 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.ruyisdk.devices.model.Device;
 
+/**
+ * Dialog for adding or editing device configurations.
+ */
 public class DeviceDialog extends TitleAreaDialog {
     private Device device;
     private String titleText;
@@ -15,6 +22,12 @@ public class DeviceDialog extends TitleAreaDialog {
     private Text vendorText;
     private Text versionText;
 
+    /**
+     * Constructs a new device dialog.
+     *
+     * @param parentShell the parent shell
+     * @param device existing device to edit, or null for new device
+     */
     public DeviceDialog(Shell parentShell, Device device) {
         super(parentShell);
         this.device = device;
@@ -69,6 +82,11 @@ public class DeviceDialog extends TitleAreaDialog {
         super.okPressed();
     }
 
+    /**
+     * Gets the device configured in this dialog.
+     *
+     * @return the device
+     */
     public Device getDevice() {
         return device;
     }

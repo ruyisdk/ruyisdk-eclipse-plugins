@@ -4,7 +4,7 @@ import org.eclipse.ui.IStartup;
 import org.ruyisdk.ruyi.Activator;
 
 /**
- * Eclipse启动时自动执行的检测逻辑
+ * Eclipse启动时自动执行的检测逻辑.
  */
 public class RuyiStartup implements IStartup {
     @Override

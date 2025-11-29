@@ -11,21 +11,31 @@ import org.ruyisdk.ruyi.ui.RuyiInstallWizard;
 import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
- * Ruyi核心控制类
+ * Ruyi核心控制类.
  */
 public class RuyiCore {
     private volatile boolean isChecking;
     private final RuyiLogger logger;
 
+    /**
+     * Constructs the Ruyi core.
+     *
+     * @param logger the logger
+     */
     public RuyiCore(RuyiLogger logger) {
         this.logger = logger;
     }
 
+    /**
+     * Starts background environment check.
+     */
     public void startBackgroundCheck() {
-    	boolean autocheck = autoCheckAtStartup();
-    	logger.logInfo("RuyiAutoCheck set :" + autocheck);
-        if (isChecking || !autocheck) return;
-        
+        boolean autocheck = autoCheckAtStartup();
+        logger.logInfo("RuyiAutoCheck set :" + autocheck);
+        if (isChecking || !autocheck) {
+            return;
+        }
+
         isChecking = true;
         Job.create("Ruyi Environment Check", monitor -> {
             try {
@@ -37,16 +47,25 @@ public class RuyiCore {
             }
         }).schedule(2000); // 延迟2秒启动
     }
-    
+
+    /**
+     * Starts background jobs.
+     */
     public void startBackgroundJobs() {
-    	// 自定义后台任务
-    }
-    
-    public void shutdown() {
-        // 自定义清理工作
-    	logger.logInfo("RuyiCore services stopped successfully");
+        // 自定义后台任务
     }
 
+    /**
+     * Shuts down core services.
+     */
+    public void shutdown() {
+        // 自定义清理工作
+        logger.logInfo("RuyiCore services stopped successfully");
+    }
+
+    /**
+     * Runs manual check.
+     */
     public void runManualCheck() {
         Job.create("Manual Ruyi Check", monitor -> {
             CheckResult result = new CheckRuyiJob().runCheck(monitor);
@@ -59,41 +78,39 @@ public class RuyiCore {
         Display.getDefault().asyncExec(() -> {
             switch (result.getAction()) {
                 case INSTALL:
-//                    if (confirmAction("Install Ruyi", result.getMessage())) {
-                        RuyiInstallWizard.openForInstall();
-//                    } else {
-//                        StatusUtil.showInfo("You can install Ruyi later from Preferences");
-//                    }
+                    // if (confirmAction("Install Ruyi", result.getMessage())) {
+                    RuyiInstallWizard.openForInstall();
+                    // } else {
+                    // StatusUtil.showInfo("You can install Ruyi later from Preferences");
+                    // }
                     break;
-                    
+
                 case UPGRADE:
-//                    if (confirmAction("Upgrade Ruyi", result.getMessage())) {
-                        RuyiInstallWizard.openForUpgrade(
-                            result.getCurrentVersion(),
-                            result.getLatestVersion()
-                        );
-//                    }
+                    // if (confirmAction("Upgrade Ruyi", result.getMessage())) {
+                    RuyiInstallWizard.openForUpgrade(result.getCurrentVersion(), result.getLatestVersion());
+                    // }
                     break;
-                    
+
                 case NOTHING:
                     logger.logInfo(result.getMessage());
+                    break;
+
+                default:
+                    logger.logError("Unknown check result action", null);
                     break;
             }
         });
     }
 
     private boolean autoCheckAtStartup() {
-    	return RuyiProperties.isAutomaticDetectionEnabled();
-//        IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
-//        return prefs.getBoolean(RuyiPreferenceConstants.P_CHECK_ON_STARTUP) &&
-//              !prefs.getBoolean(RuyiPreferenceConstants.P_SKIP_VERSION_CHECK);
+        return RuyiProperties.isAutomaticDetectionEnabled();
+        // IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
+        // return prefs.getBoolean(RuyiPreferenceConstants.P_CHECK_ON_STARTUP) &&
+        // !prefs.getBoolean(RuyiPreferenceConstants.P_SKIP_VERSION_CHECK);
     }
 
     private boolean confirmAction(String title, String message) {
-        return MessageDialog.openQuestion(
-            Display.getDefault().getActiveShell(),
-            title,
-            message + "\n\nWould you like to proceed?"
-        );
+        return MessageDialog.openQuestion(Display.getDefault().getActiveShell(), title,
+                        message + "\n\nWould you like to proceed?");
     }
 }

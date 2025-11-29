@@ -1,10 +1,13 @@
 package org.ruyisdk.devices.providers;
 
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.ruyisdk.devices.model.Device;
 
+/**
+ * Label provider for displaying device information in table format.
+ */
 public class DeviceLabelProvider extends LabelProvider implements ITableLabelProvider {
     @Override
     public String getColumnText(Object element, int columnIndex) {

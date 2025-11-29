@@ -1,5 +1,10 @@
 package org.ruyisdk.projectcreator.launch;
 
+import static org.ruyisdk.projectcreator.launch.LaunchConstants.ATTR_LOCATION;
+import static org.ruyisdk.projectcreator.launch.LaunchConstants.ATTR_TOOL_ARGUMENTS;
+import static org.ruyisdk.projectcreator.launch.LaunchConstants.ATTR_WORKING_DIRECTORY;
+import static org.ruyisdk.projectcreator.launch.LaunchConstants.ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.QualifiedName;
@@ -14,10 +19,11 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 import org.ruyisdk.projectcreator.Activator;
+import org.ruyisdk.projectcreator.launch.LaunchConstants;
 
-
-import static org.ruyisdk.projectcreator.launch.LaunchConstants.*;
-
+/**
+ * Launch shortcut for building projects.
+ */
 public class BuildLaunchShortcut implements ILaunchShortcut {
 
     @Override
@@ -38,7 +44,8 @@ public class BuildLaunchShortcut implements ILaunchShortcut {
     private void launchProject(IProject project, String mode) {
         try {
             ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
-            ILaunchConfigurationType type = launchManager.getLaunchConfigurationType(ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
+            ILaunchConfigurationType type =
+                            launchManager.getLaunchConfigurationType(ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
 
             if (type == null) {
 
@@ -49,7 +56,8 @@ public class BuildLaunchShortcut implements ILaunchShortcut {
             String configName = launchManager.generateLaunchConfigurationName("Build " + project.getName());
             ILaunchConfigurationWorkingCopy wc = type.newInstance(null, configName);
 
-            String toolchainPath = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "toolchainPath"));
+            String toolchainPath =
+                            project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "toolchainPath"));
             String buildCmd = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "buildCmd"));
 
             if (buildCmd == null || toolchainPath == null) {
@@ -57,14 +65,14 @@ public class BuildLaunchShortcut implements ILaunchShortcut {
                 return;
             }
 
- 
+
             String command = "make";
             String args = "";
             int firstSpace = buildCmd.indexOf(' ');
             if (firstSpace > 0) {
                 args = buildCmd.substring(firstSpace + 1);
             }
-            
+
             String commandPath = toolchainPath + "/bin/" + command;
 
 
