@@ -5,14 +5,14 @@ Bundle-SymbolicName: org.ruyisdk.ruyi;singleton:=true
 Bundle-Version: 0.0.5.qualifier
 Import-Package: com.google.gson;version="2.11.0"
 Bundle-Activator: org.ruyisdk.ruyi.Activator
-Bundle-ClassPath: .,
- lib/gson-2.12.1.jar,
- lib/json-20250107.jar
+Bundle-ClassPath: .
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.31.100",
  org.ruyisdk.core,
  org.eclipse.ui;bundle-version="3.206.100",
  org.eclipse.jface;bundle-version="3.35.0",
- org.eclipse.equinox.app;bundle-version="1.7.200"
+ org.eclipse.equinox.app;bundle-version="1.7.200",
+ json;bundle-version="20250107",
+ com.google.gson;bundle-version="2.12.1"
 Automatic-Module-Name: org.ruyisdk.ruyi
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
