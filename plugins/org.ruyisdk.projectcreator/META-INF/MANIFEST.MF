@@ -12,7 +12,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.ui,
  org.ruyisdk.packages,
  org.ruyisdk.ruyi,
- org.ruyisdk.core
+ org.ruyisdk.core,
+ org.glassfish.javax.json;bundle-version="1.1.4"
 Export-Package: org.ruyisdk.projectcreator.builder
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
