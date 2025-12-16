@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+    <extension
+        point="org.eclipse.ui.views">
+        <category
+            id="org.ruyisdk.venv.category"
+            name="RuyiSDK"/>
+        <view
+            id="org.ruyisdk.venv.view"
+            name="Ruyi Venv"
+            class="org.ruyisdk.venv.views.VenvView"
+            category="org.ruyisdk.venv.category"/>
+    </extension>
+</plugin>
