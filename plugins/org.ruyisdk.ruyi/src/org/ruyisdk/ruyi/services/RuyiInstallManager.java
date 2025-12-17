@@ -149,21 +149,21 @@ public class RuyiInstallManager {
                             RoundingMode.HALF_UP);
 
             throw new Exception(
-                            String.format("需要至少 %s MB 空间，当前可用 %s MB", requiredMb.stripTrailingZeros().toPlainString(),
+                            String.format("需要至少 %s Mb 空间，当前可用 %s Mb", requiredMb.stripTrailingZeros().toPlainString(),
                                             freeMb.stripTrailingZeros().toPlainString()));
         }
 
         // 构造安全日志消息
         BigDecimal freeMb = BigDecimal.valueOf(freeSpaceBytes).divide(BigDecimal.valueOf(1024L * 1024L), 1,
                         RoundingMode.HALF_UP);
-        String msg = "磁盘空间充足 (可用: " + freeMb.toPlainString() + " MB)";
+        String msg = "磁盘空间充足 (可用: " + freeMb.toPlainString() + " Mb)";
         listener.logMessage(msg);
         listener.progressChanged(10, "准备完成");
     }
 
     private void downloadRuyi(IProgressMonitor monitor, InstallationListener listener) throws Exception {
         String archSuffix = SystemInfo.detectArchitecture().getSuffix();
-        latestRelease = RuyiApi.getLatestRelease(archSuffix);
+        latestRelease = RuyiAPI.getLatestRelease(archSuffix);
 
         // String ruyiInstallPath = Paths.get(installPath, latestRelease.getFilename()).toString();
         // Path ruyiInstallPath = Paths.get(RuyiFileUtils.getInstallPath().toString(), "ruyi");
