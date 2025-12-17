@@ -116,36 +116,13 @@ public class JsonParser {
                 bracketCount--;
                 if (bracketCount == 0 && start != -1) {
                     // get fully json
-                    String jsonFragment = jsonLine.substring(start, i + 1);
-                    String id = extractEntityId(jsonFragment);
-                    if (id != null) {
-                        entityIds.add(id);
-                    }
+                    String singleObject = jsonLine.substring(start, i + 1);
+                    parseSingleObject(singleObject, entityIds);
+                    start = -1;
                 }
             }
         }
         return entityIds;
-    }
-
-    /**
-     * Extracts the entity ID from a JSON fragment.
-     *
-     * @param jsonFragment JSON fragment string
-     * @return entity ID or null if not found
-     */
-    private static String extractEntityId(String jsonFragment) {
-        try (JsonReader reader = Json.createReader(new StringReader(jsonFragment))) {
-            JsonValue value = reader.read();
-            if (value.getValueType() == JsonValue.ValueType.OBJECT) {
-                JsonObject obj = value.asJsonObject();
-                if (obj.containsKey("entity_id")) {
-                    return obj.getString("entity_id");
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("无法解析的 JSON 对象: " + jsonFragment);
-        }
-        return null;
     }
 
     private static void parseSingleObject(String jsonStr, List<String> entityIds) {
