@@ -163,7 +163,7 @@ public class RuyiInstallManager {
 
     private void downloadRuyi(IProgressMonitor monitor, InstallationListener listener) throws Exception {
         String archSuffix = SystemInfo.detectArchitecture().getSuffix();
-        latestRelease = RuyiAPI.getLatestRelease(archSuffix);
+        latestRelease = RuyiApi.getLatestRelease(archSuffix);
 
         // String ruyiInstallPath = Paths.get(installPath, latestRelease.getFilename()).toString();
         // Path ruyiInstallPath = Paths.get(RuyiFileUtils.getInstallPath().toString(), "ruyi");
