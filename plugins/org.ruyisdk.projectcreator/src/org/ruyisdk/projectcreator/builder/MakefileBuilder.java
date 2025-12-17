@@ -87,7 +87,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
         logToFile(project, "Using toolchain prefix: " + prefix);
 
         // Determine the correct CFLAGS based on the toolchain
-        String cflags = determineCorrectCFLAGS(gccPath, project);
+        String cflags = determineCorrectCflags(gccPath, project);
         logToFile(project, "Using CFLAGS: " + cflags);
 
         // 4. Execute make with explicit CC and OBJCOPY variables
