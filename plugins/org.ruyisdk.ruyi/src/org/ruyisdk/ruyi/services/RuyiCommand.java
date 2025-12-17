@@ -186,7 +186,7 @@ public class RuyiCommand {
      * @throws Exception if upload fails
      */
     public static void telemetryUpload(String ruyiPath) throws Exception {
-        ProcessBuilder pb = new ProcessBuilder(ruyiPath + "/ruyi", " telemetry", "upload");
+        ProcessBuilder pb = new ProcessBuilder(ruyiPath + "/ruyi", "telemetry", "upload");
         pb.redirectErrorStream(true);
 
         try {
