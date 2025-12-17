@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This is a simplified pom.xml for IntelliJ IDEA to recognize the module structure.
+  The actual build uses pom.tycho file with Eclipse Tycho.
+  
+  DO NOT commit this file to Git - it's for local development only.
+  See .gitignore
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.ruyisdk</groupId>
+    <artifactId>ruyisdk-eclipse-plugins-parent</artifactId>
+    <version>0.0.5-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>features</artifactId>
+  <packaging>pom</packaging>
+  <name>[aggregator] features</name>
+
+  <modules>
+    <module>org.ruyisdk.feature</module>
+  </modules>
+
+</project>

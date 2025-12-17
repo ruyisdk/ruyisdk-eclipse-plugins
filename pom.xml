@@ -27,6 +27,10 @@
     <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Java version configuration -->
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
   </properties>
 
   <modules>
