@@ -54,15 +54,15 @@ public class VenvService {
             return List.of();
         }
         final Set<String> out = new LinkedHashSet<>();
-        for (Venv venv : venvs) {
+        for (final var venv : venvs) {
             if (venv == null) {
                 continue;
             }
-            final String p = venv.getPath();
+            final var p = venv.getPath();
             if (p == null) {
                 continue;
             }
-            final String trimmed = p.trim();
+            final var trimmed = p.trim();
             if (trimmed.isEmpty()) {
                 continue;
             }
@@ -76,7 +76,7 @@ public class VenvService {
             return List.of();
         }
         final var out = new ArrayList<Path>();
-        for (String p : pathStrings) {
+        for (final var p : pathStrings) {
             if (p == null || p.trim().isEmpty()) {
                 continue;
             }
@@ -138,24 +138,25 @@ public class VenvService {
     }
 
     private List<Venv> fetchVenvs() {
-        final var profiles = listProfiles();
+        final var profileInfos = listProfiles();
         final Map<String, String> profileQuirks = new HashMap<>();
-        for (var p : profiles) {
-            profileQuirks.put(p.getName(), p.getQuirks());
+        for (final var profileInfo : profileInfos) {
+            profileQuirks.put(profileInfo.getName(), profileInfo.getQuirks());
         }
 
-        final var venvs = listVenvs();
+        final var venvInfos = listVenvs();
         final var out = new ArrayList<Venv>();
-        for (var v : venvs) {
-            final var quirks = profileQuirks.getOrDefault(v.getProfile(), "");
-            out.add(new Venv(v.getPath(), v.getProfile(), v.getSysroot(), v.getActivated(), quirks));
+        for (final var venvInfo : venvInfos) {
+            final var quirks = profileQuirks.getOrDefault(venvInfo.getProfile(), "");
+            out.add(new Venv(venvInfo.getPath(), venvInfo.getProfile(), venvInfo.getSysroot(), venvInfo.getActivated(),
+                            quirks));
         }
         return out;
     }
 
     /** Fetches venvs asynchronously and passes them to the callback. */
     public void fetchVenvsAsync(Consumer<List<Venv>> callback) {
-        Job fetchJob = new Job("Fetching virtual environments") {
+        final var fetchJob = new Job("Fetching virtual environments") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
                 List<Venv> result;
@@ -177,7 +178,7 @@ public class VenvService {
         }
 
         final var out = new ArrayList<Venv>();
-        for (Path projectPath : projectPaths) {
+        for (final var projectPath : projectPaths) {
             if (projectPath == null) {
                 continue;
             }
@@ -186,11 +187,11 @@ public class VenvService {
             }
             try (Stream<Path> children = Files.list(projectPath)) {
                 children.filter(Objects::nonNull).filter(Files::isDirectory).forEach(childDir -> {
-                    final Path toml = childDir.resolve(VENV_CONFIG_FILE_NAME);
+                    final var toml = childDir.resolve(VENV_CONFIG_FILE_NAME);
                     if (!Files.isRegularFile(toml)) {
                         return;
                     }
-                    final DetectedVenvConfig cfg = parseVenvConfigBestEffort(toml);
+                    final var cfg = parseVenvConfigBestEffort(toml);
                     out.add(new Venv(childDir.toString(), cfg.profile, cfg.sysroot, projectPath.toString()));
                 });
             } catch (Exception e) {
@@ -202,7 +203,7 @@ public class VenvService {
 
     /** Detects project venvs asynchronously and passes them to the callback. */
     public void detectProjectVenvsAsync(Consumer<List<Venv>> callback) {
-        Job detectJob = new Job("Detecting virtual environments") {
+        final var detectJob = new Job("Detecting virtual environments") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
                 List<Venv> result;
@@ -221,7 +222,7 @@ public class VenvService {
 
     /** Deletes venv directories asynchronously and reports completion through the callback. */
     public void deleteVenvDirectoriesAsync(List<String> venvDirectoryPaths, Consumer<Exception> callback) {
-        Job deleteJob = new Job("Deleting virtual environments") {
+        final var deleteJob = new Job("Deleting virtual environments") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
                 try {
@@ -261,12 +262,12 @@ public class VenvService {
         String sysroot = "";
         boolean inConfig = false;
         try {
-            for (String rawLine : Files.readAllLines(tomlPath, StandardCharsets.UTF_8)) {
-                String line = rawLine == null ? "" : rawLine.trim();
+            for (final var rawLine : Files.readAllLines(tomlPath, StandardCharsets.UTF_8)) {
+                var line = rawLine == null ? "" : rawLine.trim();
                 if (line.isEmpty()) {
                     continue;
                 }
-                int commentIdx = line.indexOf('#');
+                final var commentIdx = line.indexOf('#');
                 if (commentIdx >= 0) {
                     line = line.substring(0, commentIdx).trim();
                     if (line.isEmpty()) {
@@ -280,12 +281,12 @@ public class VenvService {
                 if (!inConfig) {
                     continue;
                 }
-                int eq = line.indexOf('=');
+                final var eq = line.indexOf('=');
                 if (eq <= 0) {
                     continue;
                 }
-                String key = line.substring(0, eq).trim();
-                String val = line.substring(eq + 1).trim();
+                final var key = line.substring(0, eq).trim();
+                var val = line.substring(eq + 1).trim();
                 val = unquote(val);
                 if ("profile".equals(key)) {
                     profile = val;
@@ -303,10 +304,10 @@ public class VenvService {
         if (val == null) {
             return "";
         }
-        String s = val.trim();
+        final var s = val.trim();
         if (s.length() >= 2) {
-            char first = s.charAt(0);
-            char last = s.charAt(s.length() - 1);
+            final var first = s.charAt(0);
+            final var last = s.charAt(s.length() - 1);
             if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
                 return s.substring(1, s.length() - 1);
             }

@@ -22,54 +22,45 @@ public class VenvListViewModel {
     private boolean canDelete = false;
 
     private final VenvService service;
-    private final IObservableList<Venv> observableVenvList = new WritableList<Venv>(new ArrayList<Venv>(), Venv.class);
-    private final IObservableList<Venv> selectedVenvs = new WritableList<Venv>(new ArrayList<Venv>(), Venv.class);
-
+    private final IObservableList<Venv> observableVenvList = new WritableList<>(new ArrayList<>(), Venv.class);
+    private final IObservableList<Venv> selectedVenvs = new WritableList<>(new ArrayList<>(), Venv.class);
 
     /**
      * Creates a new view model.
      *
      * @param service the venv service
      */
-
     public VenvListViewModel(VenvService service) {
         this.service = service;
         selectedVenvs.addListChangeListener((IListChangeListener<Venv>) event -> updateCanDelete());
     }
-
 
     /**
      * Returns the observable list of detected venvs.
      *
      * @return the observable venv list
      */
-
     public IObservableList<Venv> getVenvList() {
         return observableVenvList;
     }
-
 
     /**
      * Returns the observable list of selected venvs.
      *
      * @return the observable list of selected venvs
      */
-
     public IObservableList<Venv> getSelectedVenvs() {
         return selectedVenvs;
     }
-
 
     /**
      * Returns whether delete is currently allowed.
      *
      * @return whether delete is currently allowed
      */
-
     public boolean isCanDelete() {
         return canDelete;
     }
-
 
     private void setCanDelete(boolean canDelete) {
         if (this.canDelete == canDelete) {
@@ -78,45 +69,37 @@ public class VenvListViewModel {
         pcs.firePropertyChange("canDelete", this.canDelete, this.canDelete = canDelete);
     }
 
-
     /**
      * Adds a property change listener.
      *
      * @param listener the listener
      */
-
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
     }
-
 
     /**
      * Removes a property change listener.
      *
      * @param listener the listener
      */
-
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         pcs.removePropertyChangeListener(listener);
     }
-
 
     private void setFetching(boolean isFetching) {
         this.isFetching = isFetching;
         updateCanDelete();
     }
 
-
     private void updateCanDelete() {
         setCanDelete(!isFetching && !getSelectedVenvDirectoryPaths().isEmpty());
     }
 
-
     /**
      * Triggers an asynchronous refresh of the detected venv list.
      */
-
-    public void onRefreshVenvList() {
+    public void onRefreshVenvListAsync() {
         if (isFetching) {
             return;
         }
@@ -131,30 +114,26 @@ public class VenvListViewModel {
         });
     }
 
-
     /**
      * Returns the selected venv directory paths.
      *
      * @return the selected venv directory paths
      */
-
     public List<String> getSelectedVenvDirectoryPaths() {
         return service.getVenvDirectoryPathsFromVenvs(new ArrayList<>(selectedVenvs));
     }
-
 
     /**
      * Deletes the selected venv directories.
      *
      * @param callback callback invoked with an error, or {@code null} on success
      */
-
     public void onDeleteSelectedVenvDirectories(Consumer<Exception> callback) {
         if (isFetching) {
             return;
         }
 
-        final List<String> venvPaths = getSelectedVenvDirectoryPaths();
+        final var venvPaths = getSelectedVenvDirectoryPaths();
         if (venvPaths.isEmpty()) {
             if (callback != null) {
                 callback.accept(null);
@@ -167,7 +146,7 @@ public class VenvListViewModel {
             observableVenvList.getRealm().asyncExec(() -> {
                 setFetching(false);
                 if (err == null) {
-                    onRefreshVenvList();
+                    onRefreshVenvListAsync();
                 }
                 if (callback != null) {
                     callback.accept(err);

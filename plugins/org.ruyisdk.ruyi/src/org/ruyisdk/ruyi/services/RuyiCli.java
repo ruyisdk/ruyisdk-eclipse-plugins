@@ -1,14 +1,15 @@
 package org.ruyisdk.ruyi.services;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -42,40 +43,40 @@ public class RuyiCli {
     /** Toolchain package information returned by the ruyi CLI. */
     public static class ToolchainInfo {
         private final String name;
-        private final java.util.List<String> versions;
+        private final List<String> versions;
 
         /** Creates an instance. */
-        public ToolchainInfo(String name, java.util.List<String> versions) {
+        public ToolchainInfo(String name, List<String> versions) {
             this.name = name;
-            this.versions = versions == null ? new java.util.ArrayList<>() : new java.util.ArrayList<>(versions);
+            this.versions = versions == null ? new ArrayList<>() : new ArrayList<>(versions);
         }
 
         public String getName() {
             return name;
         }
 
-        public java.util.List<String> getVersions() {
-            return java.util.Collections.unmodifiableList(versions);
+        public List<String> getVersions() {
+            return Collections.unmodifiableList(versions);
         }
     }
 
     /** Emulator package information returned by the ruyi CLI. */
     public static class EmulatorInfo {
         private final String name;
-        private final java.util.List<String> versions;
+        private final List<String> versions;
 
         /** Creates an instance. */
-        public EmulatorInfo(String name, java.util.List<String> versions) {
+        public EmulatorInfo(String name, List<String> versions) {
             this.name = name;
-            this.versions = versions == null ? new java.util.ArrayList<>() : new java.util.ArrayList<>(versions);
+            this.versions = versions == null ? new ArrayList<>() : new ArrayList<>(versions);
         }
 
         public String getName() {
             return name;
         }
 
-        public java.util.List<String> getVersions() {
-            return java.util.Collections.unmodifiableList(versions);
+        public List<String> getVersions() {
+            return Collections.unmodifiableList(versions);
         }
     }
 
@@ -188,30 +189,30 @@ public class RuyiCli {
 
     /** Lists available profiles as reported by the ruyi CLI. */
     public static List<ProfileInfo> listProfiles() {
-        List<ProfileInfo> out = new ArrayList<>();
+        final var out = new ArrayList<ProfileInfo>();
         try {
-            RunResult res = runRuyi(Arrays.asList("--porcelain", "list", "profiles"));
-            String all = res.getOutput();
-            int exit = res.getExitCode();
-            if (exit != 0 && (all == null || all.isEmpty())) {
+            var result = runRuyi(Arrays.asList("--porcelain", "list", "profiles"));
+            var output = result.getOutput();
+            final var exit = result.getExitCode();
+            if (exit != 0 && (output == null || output.isEmpty())) {
                 // fallback to non-porcelain
-                res = runRuyi(Arrays.asList("list", "profiles"));
-                all = res.getOutput();
+                result = runRuyi(Arrays.asList("list", "profiles"));
+                output = result.getOutput();
             }
 
-            if (all == null || all.isEmpty()) {
+            if (output == null || output.isEmpty()) {
                 return out;
             }
 
-            String trimmed = all.trim();
+            final var trimmed = output.trim();
             if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
                 // try parse JSON array/object
                 try {
-                    JSONArray arr = new JSONArray(trimmed);
+                    final var arr = new JSONArray(trimmed);
                     for (int i = 0; i < arr.length(); i++) {
-                        JSONObject o = arr.getJSONObject(i);
-                        String name = o.optString("name", o.optString("id", ""));
-                        String quirks = o.optString("quirks", "");
+                        final var o = arr.getJSONObject(i);
+                        final var name = o.optString("name", o.optString("id", ""));
+                        final var quirks = o.optString("quirks", "");
                         out.add(new ProfileInfo(name, quirks));
                     }
                     return out;
@@ -221,24 +222,22 @@ public class RuyiCli {
             }
 
             // plain text parsing: lines like "wch-qingke-v2a (needs quirks: {'wch'})"
-            // plain text parsing: lines like "wch-qingke-v2a (needs quirks: {'wch'})"
-            Pattern namePtn = Pattern.compile("^\\s*([^\\s(]+)", Pattern.CASE_INSENSITIVE);
-            Pattern quirksPtn = Pattern.compile("needs quirks:\\s*\\{([^}]*)\\}", Pattern.CASE_INSENSITIVE);
-            BufferedReader r =
-                            new BufferedReader(new InputStreamReader(new java.io.ByteArrayInputStream(all.getBytes())));
+            final var namePtn = Pattern.compile("^\\s*([^\\s(]+)", Pattern.CASE_INSENSITIVE);
+            final var quirksPtn = Pattern.compile("needs quirks:\\s*\\{([^}]*)\\}", Pattern.CASE_INSENSITIVE);
+            final var reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(output.getBytes())));
             String line;
-            while ((line = r.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.isEmpty()) {
                     continue;
                 }
-                Matcher m = namePtn.matcher(line);
+                final var m = namePtn.matcher(line);
                 String name = null;
                 if (m.find()) {
                     name = m.group(1);
                 }
                 String quirks = "";
-                Matcher q = quirksPtn.matcher(line);
+                final var q = quirksPtn.matcher(line);
                 if (q.find()) {
                     quirks = q.group(1).trim();
                     // normalize quotes and whitespace
@@ -258,7 +257,7 @@ public class RuyiCli {
     /** Lists available news items using the ruyi CLI. */
     public static List<NewsListItemInfo> listNewsItems(boolean onlyUnread) {
         try {
-            List<String> args = new ArrayList<>();
+            final var args = new ArrayList<String>();
             args.add("--porcelain");
             args.add("news");
             args.add("list");
@@ -266,8 +265,8 @@ public class RuyiCli {
                 args.add("--new");
             }
 
-            RunResult res = runRuyi(args);
-            return parseNewsListFromString(res.getOutput());
+            final var result = runRuyi(args);
+            return parseNewsListFromString(result.getOutput());
         } catch (Exception e) {
             // ignore
         }
@@ -280,33 +279,33 @@ public class RuyiCli {
             if (idOrOrd == null || idOrOrd.trim().isEmpty()) {
                 return null;
             }
-            List<String> args = Arrays.asList("--porcelain", "news", "read", "--quiet", idOrOrd);
-            RunResult res = runRuyi(args);
-            return parseNewsReadFromString(res.getOutput());
+            final var args = Arrays.asList("--porcelain", "news", "read", "--quiet", idOrOrd);
+            final var result = runRuyi(args);
+            return parseNewsReadFromString(result.getOutput());
         } catch (Exception e) {
             return null;
         }
     }
 
     /** Parses the output of a news list command. */
-    public static List<NewsListItemInfo> parseNewsListFromString(String all) {
-        List<NewsListItemInfo> out = new ArrayList<>();
-        if (all == null || all.trim().isEmpty()) {
+    public static List<NewsListItemInfo> parseNewsListFromString(String input) {
+        final var out = new ArrayList<NewsListItemInfo>();
+        if (input == null || input.trim().isEmpty()) {
             return out;
         }
         try {
-            for (JSONObject o : parseConcatenatedJsonObjects(all)) {
+            for (final var o : parseConcatenatedJsonObjects(input)) {
                 if (o == null) {
                     continue;
                 }
-                String ty = o.optString("ty", "");
+                final var ty = o.optString("ty", "");
                 if (!"newsitem-v1".equalsIgnoreCase(ty)) {
                     continue;
                 }
-                String id = o.optString("id", "").trim();
-                int ord = o.optInt("ord", -1);
-                boolean isRead = o.optBoolean("is_read", false);
-                JSONArray langs = o.optJSONArray("langs");
+                var id = o.optString("id", "").trim();
+                final var ord = o.optInt("ord", -1);
+                final var isRead = o.optBoolean("is_read", false);
+                final var langs = o.optJSONArray("langs");
                 String title = chooseNewsDisplayTitle(langs);
                 if (title == null || title.trim().isEmpty()) {
                     title = id;
@@ -326,51 +325,51 @@ public class RuyiCli {
     }
 
     /** Parses the output of a news read command. */
-    public static NewsReadResult parseNewsReadFromString(String all) {
-        if (all == null || all.trim().isEmpty()) {
+    public static NewsReadResult parseNewsReadFromString(String input) {
+        if (input == null || input.trim().isEmpty()) {
             return null;
         }
         try {
-            List<JSONObject> objs = parseConcatenatedJsonObjects(all);
+            final var objs = parseConcatenatedJsonObjects(input);
             if (objs.isEmpty()) {
                 return null;
             }
-            JSONObject o = objs.get(0);
+            final var o = objs.get(0);
             if (o == null) {
                 return null;
             }
-            String id = o.optString("id", "").trim();
-            int ord = o.optInt("ord", -1);
-            boolean isRead = o.optBoolean("is_read", false);
-            JSONArray langs = o.optJSONArray("langs");
-            String title = chooseNewsDisplayTitle(langs);
-            String content = chooseNewsContent(langs);
+            final var id = o.optString("id", "").trim();
+            final var ord = o.optInt("ord", -1);
+            final var isRead = o.optBoolean("is_read", false);
+            final var langs = o.optJSONArray("langs");
+            final var title = chooseNewsDisplayTitle(langs);
+            final var content = chooseNewsContent(langs);
             return new NewsReadResult(id, ord, isRead, title, content);
         } catch (Exception e) {
             return null;
         }
     }
 
-    private static List<JSONObject> parseConcatenatedJsonObjects(String s) {
-        List<JSONObject> out = new ArrayList<>();
-        if (s == null) {
+    private static List<JSONObject> parseConcatenatedJsonObjects(String input) {
+        final var out = new ArrayList<JSONObject>();
+        if (input == null) {
             return out;
         }
         try {
-            JSONTokener t = new JSONTokener(s);
+            final var t = new JSONTokener(input);
             while (true) {
-                char c = t.nextClean();
+                final var c = t.nextClean();
                 if (c == 0) {
                     break;
                 }
                 t.back();
-                Object v = t.nextValue();
+                final var v = t.nextValue();
                 if (v instanceof JSONObject) {
                     out.add((JSONObject) v);
                 } else if (v instanceof JSONArray) {
-                    JSONArray arr = (JSONArray) v;
+                    final var arr = (JSONArray) v;
                     for (int i = 0; i < arr.length(); i++) {
-                        Object el = arr.get(i);
+                        final var el = arr.get(i);
                         if (el instanceof JSONObject) {
                             out.add((JSONObject) el);
                         }
@@ -386,7 +385,7 @@ public class RuyiCli {
     }
 
     private static String chooseNewsDisplayTitle(JSONArray langs) {
-        JSONObject best = chooseBestNewsLang(langs);
+        final var best = chooseBestNewsLang(langs);
         if (best == null) {
             return "";
         }
@@ -394,7 +393,7 @@ public class RuyiCli {
     }
 
     private static String chooseNewsContent(JSONArray langs) {
-        JSONObject best = chooseBestNewsLang(langs);
+        final var best = chooseBestNewsLang(langs);
         if (best == null) {
             return "";
         }
@@ -408,27 +407,27 @@ public class RuyiCli {
 
         // Prefer an explicit English entry if available, else match current locale, else first.
         JSONObject first = null;
-        String sysLang = Locale.getDefault() == null ? "" : Locale.getDefault().toString();
+        final var sysLang = Locale.getDefault() == null ? "" : Locale.getDefault().toString();
         for (int i = 0; i < langs.length(); i++) {
-            JSONObject o = langs.optJSONObject(i);
+            final var o = langs.optJSONObject(i);
             if (o == null) {
                 continue;
             }
             if (first == null) {
                 first = o;
             }
-            String lang = o.optString("lang", "");
+            final var lang = o.optString("lang", "");
             if ("en_US".equalsIgnoreCase(lang)) {
                 return o;
             }
         }
         if (!sysLang.isEmpty()) {
             for (int i = 0; i < langs.length(); i++) {
-                JSONObject o = langs.optJSONObject(i);
+                final var o = langs.optJSONObject(i);
                 if (o == null) {
                     continue;
                 }
-                String lang = o.optString("lang", "");
+                final var lang = o.optString("lang", "");
                 if (sysLang.equalsIgnoreCase(lang)) {
                     return o;
                 }
@@ -439,7 +438,7 @@ public class RuyiCli {
 
     private static String readAll(Process p) throws IOException {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-            StringBuilder sb = new StringBuilder();
+            final var sb = new StringBuilder();
             String l;
             while ((l = br.readLine()) != null) {
                 sb.append(l).append('\n');
@@ -459,25 +458,25 @@ public class RuyiCli {
             // fall through to return empty result
         }
         if (install == null || install.trim().isEmpty()) {
-            String msg = "Ruyi install path not configured (RuyiFileUtils.getInstallPath() returned empty)";
+            final var msg = "Ruyi install path not configured (RuyiFileUtils.getInstallPath() returned empty)";
             return new RunResult(-1, msg);
         }
         try {
-            String exe = install + File.separator + "ruyi";
-            List<String> cmd = new ArrayList<>();
+            final var exe = install + File.separator + "ruyi";
+            final var cmd = new ArrayList<String>();
             cmd.add(exe);
             if (args != null && !args.isEmpty()) {
                 cmd.addAll(args);
             }
-            ProcessBuilder pb = new ProcessBuilder(cmd);
+            final var pb = new ProcessBuilder(cmd);
             pb.redirectErrorStream(true);
-            Process p = pb.start();
-            String all = readAll(p);
-            int exit = p.waitFor();
+            final var p = pb.start();
+            final var rawOutput = readAll(p);
+            final var exit = p.waitFor();
             // Build a readable command string (quote args containing spaces)
-            StringBuilder cmdStrBuilder = new StringBuilder();
+            final var cmdStrBuilder = new StringBuilder();
             for (int i = 0; i < cmd.size(); i++) {
-                String part = cmd.get(i);
+                final var part = cmd.get(i);
                 if (part.contains(" ")) {
                     cmdStrBuilder.append('\'').append(part).append('\'');
                 } else {
@@ -487,19 +486,19 @@ public class RuyiCli {
                     cmdStrBuilder.append(' ');
                 }
             }
-            String cmdString = cmdStrBuilder.toString();
-            String output = all == null ? "" : all;
+            final var cmdString = cmdStrBuilder.toString();
+            final var output = rawOutput == null ? "" : rawOutput;
             if (exit != 0) {
-                String hint = "\nCommand: " + cmdString + "\n";
+                final var hint = "\nCommand: " + cmdString + "\n";
                 return new RunResult(exit, output + hint);
             }
             return new RunResult(exit, output);
         } catch (IOException | InterruptedException e) {
             // If process start fails, include the attempted command for debugging
-            StringBuilder cmdStrBuilder = new StringBuilder();
+            final var cmdStrBuilder = new StringBuilder();
             if (args != null) {
                 cmdStrBuilder.append(install == null ? "ruyi" : install + File.separator + "ruyi");
-                for (String a : args) {
+                for (final var a : args) {
                     cmdStrBuilder.append(' ');
                     if (a.contains(" ")) {
                         cmdStrBuilder.append('\'').append(a).append('\'');
@@ -508,8 +507,8 @@ public class RuyiCli {
                     }
                 }
             }
-            String cmdString = cmdStrBuilder.toString();
-            String out = e.getMessage() == null ? "" : e.getMessage();
+            final var cmdString = cmdStrBuilder.toString();
+            final var out = e.getMessage() == null ? "" : e.getMessage();
             if (cmdString.isEmpty()) {
                 return new RunResult(-1, out);
             }
@@ -564,10 +563,10 @@ public class RuyiCli {
         }
         // Use the documented package atom syntax: name(version)
         // Example: ruyi install 'gnu-upstream(0.20231118.0)'
-        String atom = name + "(" + version + ")";
-        List<String> args = Arrays.asList("--porcelain", "install", atom);
-        RunResult res = run(args);
-        return res;
+        final var atom = name + "(" + version + ")";
+        final var args = Arrays.asList("--porcelain", "install", atom);
+        final var result = run(args);
+        return result;
     }
 
     /**
@@ -594,7 +593,7 @@ public class RuyiCli {
         if (profile == null || profile.trim().isEmpty()) {
             return new RunResult(-1, "Invalid profile");
         }
-        List<String> args = new ArrayList<>();
+        final var args = new ArrayList<String>();
         args.add("--porcelain");
         args.add("venv");
         // Pass toolchain/emulator atoms using the documented parentheses syntax
@@ -613,7 +612,7 @@ public class RuyiCli {
     // Extract top-level JSON objects from a concatenated stream (handles multiple back-to-back
     // objects).
     private static List<String> extractJsonObjects(String s) {
-        List<String> objs = new ArrayList<>();
+        final var objs = new ArrayList<String>();
         if (s == null || s.isEmpty()) {
             return objs;
         }
@@ -640,15 +639,15 @@ public class RuyiCli {
     // Placeholder implementations: attempt to call list and parse toolchains/emulators if present.
     /** Lists available toolchains as reported by the ruyi CLI. */
     public static List<ToolchainInfo> listToolchains() {
-        List<ToolchainInfo> out = new ArrayList<>();
+        final var out = new ArrayList<ToolchainInfo>();
         try {
-            RunResult res = runRuyi(
+            final var result = runRuyi(
                             Arrays.asList("--porcelain", "list", "--category-is", "toolchain", "--name-contains", ""));
-            String all = res.getOutput();
-            if (all == null || all.isEmpty()) {
+            final var output = result.getOutput();
+            if (output == null || output.isEmpty()) {
                 return out;
             }
-            out = parseToolchainsFromString(all);
+            out.addAll(parseToolchainsFromString(output));
         } catch (Exception e) {
             // ignore
         }
@@ -659,37 +658,37 @@ public class RuyiCli {
      * Parse toolchain package objects from a porcelain output string (may contain concatenated JSON
      * objects). This helper is public to make parsing testable.
      */
-    public static List<ToolchainInfo> parseToolchainsFromString(String all) {
-        List<ToolchainInfo> out = new ArrayList<>();
+    public static List<ToolchainInfo> parseToolchainsFromString(String input) {
+        final var out = new ArrayList<ToolchainInfo>();
         try {
-            if (all == null || all.isEmpty()) {
+            if (input == null || input.isEmpty()) {
                 return out;
             }
-            List<String> objs = extractJsonObjects(all);
-            for (String jo : objs) {
+            final var objs = extractJsonObjects(input);
+            for (final var jo : objs) {
                 if (jo == null || jo.trim().isEmpty()) {
                     continue;
                 }
                 try {
-                    JSONObject o = new JSONObject(jo);
-                    String category = o.optString("category", "");
+                    final var o = new JSONObject(jo);
+                    final var category = o.optString("category", "");
                     if (!"toolchain".equalsIgnoreCase(category)) {
                         continue;
                     }
-                    String pkgName = o.optString("name", "").trim();
+                    final var pkgName = o.optString("name", "").trim();
                     if (pkgName.isEmpty()) {
                         continue;
                     }
-                    java.util.List<String> versions = new java.util.ArrayList<>();
-                    JSONArray vers = o.optJSONArray("vers");
+                    final var versions = new ArrayList<String>();
+                    final var vers = o.optJSONArray("vers");
                     if (vers != null && vers.length() > 0) {
                         for (int vi = 0; vi < vers.length(); vi++) {
                             try {
-                                JSONObject v = vers.optJSONObject(vi);
+                                final var v = vers.optJSONObject(vi);
                                 if (v == null) {
                                     continue;
                                 }
-                                String sem = v.optString("semver", v.optString("version", "")).trim();
+                                final var sem = v.optString("semver", v.optString("version", "")).trim();
                                 if (sem != null && !sem.isEmpty()) {
                                     versions.add(sem);
                                 }
@@ -714,15 +713,15 @@ public class RuyiCli {
 
     /** Lists available emulators as reported by the ruyi CLI. */
     public static List<EmulatorInfo> listEmulators() {
-        List<EmulatorInfo> out = new ArrayList<>();
+        final var out = new ArrayList<EmulatorInfo>();
         try {
-            RunResult res = runRuyi(
+            final var result = runRuyi(
                             Arrays.asList("--porcelain", "list", "--category-is", "emulator", "--name-contains", ""));
-            String all = res.getOutput();
-            if (all == null || all.isEmpty()) {
+            final var output = result.getOutput();
+            if (output == null || output.isEmpty()) {
                 return out;
             }
-            out = parseEmulatorsFromString(all);
+            out.addAll(parseEmulatorsFromString(output));
         } catch (Exception e) {
             // ignore
         }
@@ -733,37 +732,37 @@ public class RuyiCli {
      * Parse emulator package objects from a porcelain output string (may contain concatenated JSON
      * objects). This helper is public to make parsing testable.
      */
-    public static List<EmulatorInfo> parseEmulatorsFromString(String all) {
-        List<EmulatorInfo> out = new ArrayList<>();
+    public static List<EmulatorInfo> parseEmulatorsFromString(String input) {
+        final var out = new ArrayList<EmulatorInfo>();
         try {
-            if (all == null || all.isEmpty()) {
+            if (input == null || input.isEmpty()) {
                 return out;
             }
-            List<String> objs = extractJsonObjects(all);
-            for (String jo : objs) {
+            final var objs = extractJsonObjects(input);
+            for (final var jo : objs) {
                 if (jo == null || jo.trim().isEmpty()) {
                     continue;
                 }
                 try {
-                    JSONObject o = new JSONObject(jo);
-                    String category = o.optString("category", "");
+                    final var o = new JSONObject(jo);
+                    final var category = o.optString("category", "");
                     if (!"emulator".equalsIgnoreCase(category)) {
                         continue;
                     }
-                    String pkgName = o.optString("name", "").trim();
+                    final var pkgName = o.optString("name", "").trim();
                     if (pkgName.isEmpty()) {
                         continue;
                     }
-                    java.util.List<String> versions = new java.util.ArrayList<>();
-                    JSONArray vers = o.optJSONArray("vers");
+                    final var versions = new ArrayList<String>();
+                    final var vers = o.optJSONArray("vers");
                     if (vers != null && vers.length() > 0) {
                         for (int vi = 0; vi < vers.length(); vi++) {
                             try {
-                                JSONObject v = vers.optJSONObject(vi);
+                                final var v = vers.optJSONObject(vi);
                                 if (v == null) {
                                     continue;
                                 }
-                                String sem = v.optString("semver", v.optString("version", "")).trim();
+                                final var sem = v.optString("semver", v.optString("version", "")).trim();
                                 if (sem != null && !sem.isEmpty()) {
                                     versions.add(sem);
                                 }
@@ -791,35 +790,35 @@ public class RuyiCli {
      * simple VenvInfo entries.
      */
     public static List<VenvInfo> listVenvs() {
-        List<VenvInfo> out = new ArrayList<>();
+        final var out = new ArrayList<VenvInfo>();
         try {
-            String home = System.getProperty("user.home");
+            final var home = System.getProperty("user.home");
             if (home == null) {
                 return out;
             }
-            java.io.File homeDir = new java.io.File(home);
-            java.io.File[] children = homeDir.listFiles();
+            final var homeDir = new File(home);
+            final var children = homeDir.listFiles();
             if (children == null) {
                 return out;
             }
-            for (java.io.File f : children) {
-                if (!f.isDirectory()) {
+            for (final var dir : children) {
+                if (!dir.isDirectory()) {
                     continue;
                 }
                 // common marker for venvs: bin/activate (POSIX) or Scripts/activate (Windows)
-                java.io.File binActivate = new java.io.File(f, "bin/activate");
-                java.io.File scriptsActivate = new java.io.File(f, "Scripts/activate");
+                final var binActivate = new File(dir, "bin/activate");
+                final var scriptsActivate = new File(dir, "Scripts/activate");
                 if (binActivate.exists() || scriptsActivate.exists()) {
-                    String path = f.getAbsolutePath();
-                    String profile = f.getName();
-                    String sysroot = new java.io.File(f, "sysroot").getAbsolutePath();
+                    final var path = dir.getAbsolutePath();
+                    final var profile = dir.getName();
+                    final var sysroot = new File(dir, "sysroot").getAbsolutePath();
                     out.add(new VenvInfo(path, profile, sysroot, Boolean.TRUE));
                 }
                 // also consider directories named *-venv or ruyiVenv
-                if (f.getName().toLowerCase().endsWith("-venv") || f.getName().equalsIgnoreCase("ruyivenv")) {
-                    String path = f.getAbsolutePath();
-                    String profile = f.getName().replaceAll("-venv$", "");
-                    String sysroot = new java.io.File(f, "sysroot").getAbsolutePath();
+                if (dir.getName().toLowerCase().endsWith("-venv") || dir.getName().equalsIgnoreCase("ruyivenv")) {
+                    final var path = dir.getAbsolutePath();
+                    final var profile = dir.getName().replaceAll("-venv$", "");
+                    final var sysroot = new File(dir, "sysroot").getAbsolutePath();
                     out.add(new VenvInfo(path, profile, sysroot, Boolean.FALSE));
                 }
             }

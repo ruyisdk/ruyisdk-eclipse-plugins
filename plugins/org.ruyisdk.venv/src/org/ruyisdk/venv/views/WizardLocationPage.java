@@ -7,11 +7,14 @@ import org.eclipse.core.databinding.property.Properties;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.ruyisdk.venv.viewmodel.VenvWizardViewModel;
@@ -19,19 +22,23 @@ import org.ruyisdk.venv.viewmodel.VenvWizardViewModel;
 /**
  * Wizard page for selecting a venv location and name.
  */
-public class WizardLocationPage extends org.eclipse.jface.wizard.WizardPage {
+public class WizardLocationPage extends WizardPage {
 
     private final VenvWizardViewModel viewModel;
-    private Combo pathCombo;
-    private ComboViewer pathComboViewer;
-    private Text venvNameText;
-    private Text summaryText;
     private DataBindingContext dbc;
 
+    private Composite container;
 
-    WizardLocationPage(VenvWizardViewModel vm) {
+    private Text summaryText;
+    private Text venvNameText;
+    private Combo venvPathCombo;
+    private ComboViewer venvPathComboViewer;
+    private Button browseButton;
+
+
+    WizardLocationPage(VenvWizardViewModel viewModel) {
         super("locationPage");
-        this.viewModel = vm;
+        this.viewModel = viewModel;
         setTitle("Venv Location");
         setDescription("Review summary and select the venv location.");
     }
@@ -39,10 +46,60 @@ public class WizardLocationPage extends org.eclipse.jface.wizard.WizardPage {
 
     @Override
     public void createControl(Composite parent) {
+        createLayouts(parent);
+        addControls();
+        registerEvents();
+    }
+
+    private void createLayouts(Composite parent) {
+        container = new Composite(parent, SWT.NONE);
+        container.setLayout(new GridLayout(3, false));
+
+        setControl(container);
+    }
+
+    private void addControls() {
+        final var summaryLabel = new Label(container, SWT.NONE);
+        {
+            final var gridData = new GridData(GridData.FILL_HORIZONTAL);
+            gridData.horizontalSpan = 3;
+            summaryLabel.setLayoutData(gridData);
+        }
+        summaryLabel.setText("Summary:");
+
+        summaryText = new Text(container, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+        {
+            final var gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+            gridData.horizontalSpan = 3;
+            summaryText.setLayoutData(gridData);
+        }
+        summaryText.setText(viewModel.getSummaryText());
+        summaryText.setEditable(false);
+
+        final var nameLabel = new Label(container, SWT.NONE);
+        nameLabel.setText("Venv Name:");
+
+        venvNameText = new Text(container, SWT.BORDER);
+        {
+            var gridData = new GridData(GridData.FILL_HORIZONTAL);
+            gridData.horizontalSpan = 2;
+            venvNameText.setLayoutData(gridData);
+        }
+
+        final var locationLabel = new Label(container, SWT.NONE);
+        locationLabel.setText("Venv Path:");
+        venvPathCombo = new Combo(container, SWT.BORDER | SWT.DROP_DOWN);
+        venvPathCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        venvPathCombo.setText("");
+        venvPathComboViewer = new ComboViewer(venvPathCombo);
+
+        browseButton = new Button(container, SWT.PUSH);
+        browseButton.setText("Browse...");
+    }
+
+    private void registerEvents() {
         dbc = new DataBindingContext();
 
-        Composite container = new Composite(parent, SWT.NONE);
-        container.setLayout(new GridLayout(3, false));
         container.addDisposeListener(e -> {
             if (dbc != null) {
                 dbc.dispose();
@@ -50,35 +107,8 @@ public class WizardLocationPage extends org.eclipse.jface.wizard.WizardPage {
             }
         });
 
-        Label summaryLabel = new Label(container, SWT.NONE);
-        summaryLabel.setText("Summary:");
-        GridData labelGd = new GridData(GridData.FILL_HORIZONTAL);
-        labelGd.horizontalSpan = 3;
-        summaryLabel.setLayoutData(labelGd);
-
-        summaryText = new Text(container, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
-        GridData sd = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-        sd.horizontalSpan = 3;
-        summaryText.setLayoutData(sd);
-        summaryText.setEditable(false);
-        summaryText.setText(viewModel.getSummaryText());
-
-        Label nameLabel = new Label(container, SWT.NONE);
-        nameLabel.setText("Venv Name:");
-        venvNameText = new Text(container, SWT.BORDER);
-        venvNameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        new Label(container, SWT.NONE);
-
-        Label locationLabel = new Label(container, SWT.NONE);
-        locationLabel.setText("Venv Path:");
-        pathCombo = new Combo(container, SWT.BORDER | SWT.DROP_DOWN);
-        pathCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        pathCombo.setText("");
-        pathComboViewer = new ComboViewer(pathCombo);
-        ViewerSupport.bind(pathComboViewer, viewModel.getProjectRootPaths(), Properties.selfValue(String.class));
-
-        final var pathObservable = WidgetProperties.comboSelection().observe(pathCombo);
         final var nameObservable = WidgetProperties.text(SWT.Modify).observe(venvNameText);
+        final var pathObservable = WidgetProperties.comboSelection().observe(venvPathCombo);
 
         dbc.bindValue(pathObservable, BeanProperties.value(VenvWizardViewModel.class, "venvLocation", String.class)
                         .observe(viewModel));
@@ -87,11 +117,20 @@ public class WizardLocationPage extends org.eclipse.jface.wizard.WizardPage {
         dbc.bindValue(WidgetProperties.text().observe(summaryText), BeanProperties
                         .value(VenvWizardViewModel.class, "summaryText", String.class).observe(viewModel));
 
+        ViewerSupport.bind(venvPathComboViewer, viewModel.getProjectRootPaths(), Properties.selfValue(String.class));
+
+        browseButton.addListener(SWT.Selection, e -> {
+            String selectedPath = new DirectoryDialog(getShell()).open();
+            if (selectedPath != null) {
+                venvPathCombo.setText(selectedPath);
+            }
+        });
+
         final var completeObservable = new ComputedValue<Boolean>() {
             @Override
             protected Boolean calculate() {
-                final String path = pathObservable.getValue();
-                final String name = nameObservable.getValue();
+                final var path = pathObservable.getValue();
+                final var name = nameObservable.getValue();
                 return path != null && !path.trim().isEmpty() && name != null && !name.trim().isEmpty();
             }
         };
@@ -101,18 +140,6 @@ public class WizardLocationPage extends org.eclipse.jface.wizard.WizardPage {
                 getWizard().getContainer().updateButtons();
             }
         });
-
-        org.eclipse.swt.widgets.Button browse = new org.eclipse.swt.widgets.Button(container, SWT.PUSH);
-        browse.setText("Browse...");
-        browse.addListener(SWT.Selection, e -> {
-            org.eclipse.swt.widgets.DirectoryDialog dd = new org.eclipse.swt.widgets.DirectoryDialog(getShell());
-            String sel = dd.open();
-            if (sel != null) {
-                pathCombo.setText(sel);
-            }
-        });
-
-        setControl(container);
         setPageComplete(Boolean.TRUE.equals(completeObservable.getValue()));
     }
 }

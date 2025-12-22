@@ -1,6 +1,6 @@
 package org.ruyisdk.news.viewmodel;
 
-import org.ruyisdk.news.model.DataFetchService;
+import org.ruyisdk.news.model.NewsFetchService;
 import org.ruyisdk.news.model.NewsItem;
 
 /**
@@ -8,7 +8,7 @@ import org.ruyisdk.news.model.NewsItem;
  */
 public class NewsDetailsViewModel {
 
-    private DataFetchService service;
+    private NewsFetchService service;
 
     private boolean isFetching = false;
 
@@ -19,7 +19,7 @@ public class NewsDetailsViewModel {
      * @param service the service used to fetch news details
      */
 
-    public NewsDetailsViewModel(DataFetchService service) {
+    public NewsDetailsViewModel(NewsFetchService service) {
         this.service = service;
     }
 

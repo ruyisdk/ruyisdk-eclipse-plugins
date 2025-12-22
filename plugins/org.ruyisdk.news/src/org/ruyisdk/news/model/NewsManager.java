@@ -1,6 +1,5 @@
 package org.ruyisdk.news.model;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
@@ -10,16 +9,9 @@ import java.util.List;
  * Manages a list of news items and notifies listeners on changes.
  */
 public class NewsManager {
-    private List<NewsItem> newsList;
-    private PropertyChangeSupport propertyChangeSupport;
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
-    /**
-     * Creates a new {@link NewsManager}.
-     */
-    public NewsManager() {
-        newsList = new ArrayList<>();
-        propertyChangeSupport = new PropertyChangeSupport(this);
-    }
+    private final List<NewsItem> newsList = new ArrayList<>();
 
     /**
      * Adds a property change listener.
@@ -27,7 +19,7 @@ public class NewsManager {
      * @param listener the listener
      */
     public void addPropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.addPropertyChangeListener(listener);
+        pcs.addPropertyChangeListener(listener);
     }
 
     /**
@@ -36,7 +28,7 @@ public class NewsManager {
      * @param listener the listener
      */
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.removePropertyChangeListener(listener);
+        pcs.removePropertyChangeListener(listener);
     }
 
     /**
@@ -46,7 +38,7 @@ public class NewsManager {
      */
     public void addNews(NewsItem news) {
         newsList.add(news);
-        propertyChangeSupport.firePropertyChange("newsList", null, newsList);
+        pcs.firePropertyChange("newsList", null, newsList);
     }
 
     /**
@@ -56,7 +48,7 @@ public class NewsManager {
      */
     public void removeNews(NewsItem news) {
         newsList.remove(news);
-        propertyChangeSupport.firePropertyChange("newsList", null, newsList);
+        pcs.firePropertyChange("newsList", null, newsList);
     }
 
     /**
@@ -78,29 +70,7 @@ public class NewsManager {
         int index = newsList.indexOf(oldNews);
         if (index != -1) {
             newsList.set(index, newNews);
-            propertyChangeSupport.firePropertyChange("newsList", null, newsList);
-        }
-    }
-
-    /**
-     * Adds a listener for news list changes.
-     *
-     * @param taskListener the listener
-     */
-    public void addNewsListener(NewsListener taskListener) {
-        // TODO Auto-generated method stub
-        propertyChangeSupport.addPropertyChangeListener(taskListener);
-    }
-
-    /**
-     * A listener for news list changes.
-     */
-    public static class NewsListener implements PropertyChangeListener {
-        /** {@inheritDoc} */
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            // TODO Auto-generated method stub
-
+            pcs.firePropertyChange("newsList", null, newsList);
         }
     }
 }

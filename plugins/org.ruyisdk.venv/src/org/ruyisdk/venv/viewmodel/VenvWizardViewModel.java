@@ -41,7 +41,7 @@ public class VenvWizardViewModel {
 
     /** Available sysroot selection strategies. */
     public enum SysrootOption {
-        NO_SYSROOT, DEFAULT_SYSROOT, FROM_TOOLCHAIN
+        NONE_SYSROOT, DEFAULT_SYSROOT, FOREIGN_TOOLCHAIN
     }
 
     /** Creates a new view model instance. */
@@ -57,13 +57,13 @@ public class VenvWizardViewModel {
     }
 
     private void updateSummaryText() {
-        String old = this.summaryText;
+        final var old = this.summaryText;
         this.summaryText = buildSummaryText();
         pcs.firePropertyChange("summaryText", old, this.summaryText);
     }
 
     private void recomputeConfigurationPageComplete() {
-        boolean old = this.configurationPageComplete;
+        final var old = this.configurationPageComplete;
         this.configurationPageComplete = computeConfigurationPageComplete();
         pcs.firePropertyChange("configurationPageComplete", old, this.configurationPageComplete);
     }
@@ -105,12 +105,12 @@ public class VenvWizardViewModel {
     }
 
     private String buildSummaryText() {
-        StringBuilder sb = new StringBuilder();
+        final var sb = new StringBuilder();
         sb.append("Profile: ");
         if (selectedProfileIndex >= 0 && selectedProfileIndex < profiles.size()) {
-            Profile profile = profiles.get(selectedProfileIndex);
+            final var profile = profiles.get(selectedProfileIndex);
             sb.append(profile.getName());
-            String quirks = profile.getQuirks();
+            final var quirks = profile.getQuirks();
             if (quirks != null && !quirks.isEmpty()) {
                 sb.append(" (quirks: ").append(quirks).append(")");
             }
@@ -119,7 +119,7 @@ public class VenvWizardViewModel {
 
         sb.append("Toolchain: ");
         if (selectedToolchainIndex >= 0 && selectedToolchainIndex < toolchains.size()) {
-            Toolchain toolchain = toolchains.get(selectedToolchainIndex);
+            final var toolchain = toolchains.get(selectedToolchainIndex);
             sb.append(toolchain.getName());
             final var versions = toolchain.getVersions();
             if (selectedToolchainVersionIndex >= 0 && versions != null
@@ -133,7 +133,7 @@ public class VenvWizardViewModel {
         if (!emulatorEnabled) {
             sb.append("disabled");
         } else if (selectedEmulatorIndex >= 0 && selectedEmulatorIndex < emulators.size()) {
-            Emulator emulator = emulators.get(selectedEmulatorIndex);
+            final var emulator = emulators.get(selectedEmulatorIndex);
             sb.append(emulator.getName());
             final var versions = emulator.getVersions();
             if (selectedEmulatorVersionIndex >= 0 && versions != null
@@ -153,24 +153,24 @@ public class VenvWizardViewModel {
             toolchains.clear();
             emulators.clear();
 
-            final var rp = service.listProfiles();
-            if (rp != null) {
-                for (var pi : rp) {
-                    profiles.add(new Profile(pi.getName(), pi.getQuirks()));
+            final var profileInfos = service.listProfiles();
+            if (profileInfos != null) {
+                for (final var profileInfo : profileInfos) {
+                    profiles.add(new Profile(profileInfo.getName(), profileInfo.getQuirks()));
                 }
             }
 
-            final var rt = service.listToolchains();
-            if (rt != null) {
-                for (var ti : rt) {
-                    toolchains.add(new Toolchain(ti.getName(), ti.getVersions()));
+            final var toolchainInfos = service.listToolchains();
+            if (toolchainInfos != null) {
+                for (final var toolchainInfo : toolchainInfos) {
+                    toolchains.add(new Toolchain(toolchainInfo.getName(), toolchainInfo.getVersions()));
                 }
             }
 
-            final var re = service.listEmulators();
-            if (re != null) {
-                for (var ei : re) {
-                    emulators.add(new Emulator(ei.getName(), ei.getVersions()));
+            final var emulatorInfos = service.listEmulators();
+            if (emulatorInfos != null) {
+                for (final var emulatorInfo : emulatorInfos) {
+                    emulators.add(new Emulator(emulatorInfo.getName(), emulatorInfo.getVersions()));
                 }
             }
         } catch (Exception ex) {
@@ -180,11 +180,11 @@ public class VenvWizardViewModel {
 
     /** Updates the CLI index and refreshes view model data. */
     public RuyiCli.RunResult updateIndex() {
-        final var r = service.updateIndex();
+        final var result = service.updateIndex();
         refreshListsBestEffort();
         recomputeDerivedState();
         pcs.firePropertyChange("dataRefreshed", null, Boolean.TRUE);
-        return r;
+        return result;
     }
 
     private RuyiCli.RunResult installToolchain(String name, String version) {
@@ -197,8 +197,8 @@ public class VenvWizardViewModel {
                         || selectedToolchainVersionIndex < 0) {
             return new RuyiCli.RunResult(-1, "No toolchain selected");
         }
-        String name = toolchains.get(selectedToolchainIndex).getName();
-        String version = toolchains.get(selectedToolchainIndex).getVersions().get(selectedToolchainVersionIndex);
+        final var name = toolchains.get(selectedToolchainIndex).getName();
+        final var version = toolchains.get(selectedToolchainIndex).getVersions().get(selectedToolchainVersionIndex);
         return installToolchain(name, version);
     }
 
@@ -215,8 +215,8 @@ public class VenvWizardViewModel {
                         || selectedEmulatorVersionIndex < 0) {
             return new RuyiCli.RunResult(-1, "Emulator enabled but not selected");
         }
-        String name = emulators.get(selectedEmulatorIndex).getName();
-        String version = emulators.get(selectedEmulatorIndex).getVersions().get(selectedEmulatorVersionIndex);
+        final var name = emulators.get(selectedEmulatorIndex).getName();
+        final var version = emulators.get(selectedEmulatorIndex).getVersions().get(selectedEmulatorVersionIndex);
         return installEmulator(name, version);
     }
 
@@ -227,11 +227,11 @@ public class VenvWizardViewModel {
 
     /** Creates a virtual environment using the current wizard selections. */
     public RuyiCli.RunResult createVenv() {
-        String parent = this.venvLocation;
+        final var parent = this.venvLocation;
         if (parent == null || parent.trim().isEmpty()) {
             return new RuyiCli.RunResult(-1, "Venv parent path is empty");
         }
-        String name = this.venvName;
+        final var name = this.venvName;
         if (name == null || name.trim().isEmpty()) {
             return new RuyiCli.RunResult(-1, "Venv name is empty");
         }
@@ -240,8 +240,8 @@ public class VenvWizardViewModel {
                         || selectedToolchainVersionIndex < 0) {
             return new RuyiCli.RunResult(-1, "No toolchain selected");
         }
-        String toolchainName = toolchains.get(selectedToolchainIndex).getName();
-        String toolchainVersion =
+        final var toolchainName = toolchains.get(selectedToolchainIndex).getName();
+        final var toolchainVersion =
                         toolchains.get(selectedToolchainIndex).getVersions().get(selectedToolchainVersionIndex);
 
         String profile = null;
@@ -260,8 +260,8 @@ public class VenvWizardViewModel {
             emulatorVersion = emulators.get(selectedEmulatorIndex).getVersions().get(selectedEmulatorVersionIndex);
         }
 
-        File tgt = new File(parent, name);
-        String path = tgt.getPath();
+        final var target = new File(parent, name);
+        final var path = target.getPath();
         return createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
     }
 
@@ -277,7 +277,7 @@ public class VenvWizardViewModel {
 
     /** Sets the selected profile index. */
     public void setSelectedProfileIndex(int index) {
-        int old = this.selectedProfileIndex;
+        final var old = this.selectedProfileIndex;
         this.selectedProfileIndex = index;
         pcs.firePropertyChange("selectedProfileIndex", old, this.selectedProfileIndex);
         recomputeDerivedState();
@@ -295,7 +295,7 @@ public class VenvWizardViewModel {
 
     /** Sets the selected toolchain index. */
     public void setSelectedToolchainIndex(int index) {
-        int old = this.selectedToolchainIndex;
+        final var old = this.selectedToolchainIndex;
         this.selectedToolchainIndex = index;
         pcs.firePropertyChange("selectedToolchainIndex", old, this.selectedToolchainIndex);
         if (old != index) {
@@ -311,7 +311,7 @@ public class VenvWizardViewModel {
 
     /** Sets the selected toolchain version index. */
     public void setSelectedToolchainVersionIndex(int index) {
-        int old = this.selectedToolchainVersionIndex;
+        final var old = this.selectedToolchainVersionIndex;
         this.selectedToolchainVersionIndex = index;
         pcs.firePropertyChange("selectedToolchainVersionIndex", old, this.selectedToolchainVersionIndex);
         recomputeDerivedState();
@@ -329,7 +329,7 @@ public class VenvWizardViewModel {
 
     /** Sets the selected emulator index. */
     public void setSelectedEmulatorIndex(int index) {
-        int old = this.selectedEmulatorIndex;
+        final var old = this.selectedEmulatorIndex;
         this.selectedEmulatorIndex = index;
         pcs.firePropertyChange("selectedEmulatorIndex", old, this.selectedEmulatorIndex);
         if (old != index) {
@@ -345,7 +345,7 @@ public class VenvWizardViewModel {
 
     /** Sets the selected emulator version index. */
     public void setSelectedEmulatorVersionIndex(int index) {
-        int old = this.selectedEmulatorVersionIndex;
+        final var old = this.selectedEmulatorVersionIndex;
         this.selectedEmulatorVersionIndex = index;
         pcs.firePropertyChange("selectedEmulatorVersionIndex", old, this.selectedEmulatorVersionIndex);
         recomputeDerivedState();
@@ -358,7 +358,7 @@ public class VenvWizardViewModel {
 
     /** Enables or disables emulator selection. */
     public void setEmulatorEnabled(boolean enabled) {
-        boolean old = this.emulatorEnabled;
+        final var old = this.emulatorEnabled;
         this.emulatorEnabled = enabled;
         pcs.firePropertyChange("emulatorEnabled", old, this.emulatorEnabled);
         if (!enabled) {
@@ -375,7 +375,7 @@ public class VenvWizardViewModel {
 
     /** Sets the sysroot selection option. */
     public void setSysrootOption(SysrootOption option) {
-        SysrootOption old = this.sysrootOption;
+        final var old = this.sysrootOption;
         this.sysrootOption = option;
         pcs.firePropertyChange("sysrootOption", old, this.sysrootOption);
         recomputeDerivedState();
@@ -387,9 +387,9 @@ public class VenvWizardViewModel {
     }
 
     /** Sets the configured venv parent directory. */
-    public void setVenvLocation(String loc) {
-        String old = this.venvLocation;
-        this.venvLocation = loc == null ? "" : loc;
+    public void setVenvLocation(String location) {
+        final var old = this.venvLocation;
+        this.venvLocation = location == null ? "" : location;
         pcs.firePropertyChange("venvLocation", old, this.venvLocation);
     }
 
@@ -403,7 +403,7 @@ public class VenvWizardViewModel {
         final Runnable update = () -> {
             projectRootPaths.clear();
             if (paths != null) {
-                for (String path : paths) {
+                for (final var path : paths) {
                     if (path == null || path.trim().isEmpty()) {
                         continue;
                     }
@@ -425,7 +425,7 @@ public class VenvWizardViewModel {
 
     /** Sets the venv directory name. */
     public void setVenvName(String name) {
-        String old = this.venvName;
+        final var old = this.venvName;
         this.venvName = name == null ? "" : name;
         pcs.firePropertyChange("venvName", old, this.venvName);
     }
