@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
-import org.ruyisdk.news.model.DataFetchService;
+import org.ruyisdk.news.model.NewsFetchService;
 import org.ruyisdk.news.model.NewsItem;
 
 /**
@@ -17,11 +17,10 @@ public class NewsListViewModel {
     private boolean isFetching = false;
     private String infoText = UpdatingState.notUpdated;
 
-    private DataFetchService service;
+    private NewsFetchService service;
 
-    private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
-    private final IObservableList<NewsItem> observableNewsList =
-                    new WritableList<NewsItem>(new ArrayList<NewsItem>(), NewsItem.class);
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private final IObservableList<NewsItem> observableNewsList = new WritableList<>(new ArrayList<>(), NewsItem.class);
 
     private class UpdatingState {
         private static final String notUpdated = "Not Updated, yet";
@@ -34,7 +33,7 @@ public class NewsListViewModel {
      *
      * @param service the service used to fetch news
      */
-    public NewsListViewModel(DataFetchService service) {
+    public NewsListViewModel(NewsFetchService service) {
         this.service = service;
     }
 
@@ -54,7 +53,7 @@ public class NewsListViewModel {
      * @param listener the listener
      */
     public void addPropertyChangeListener(PropertyChangeListener listener) {
-        changeSupport.addPropertyChangeListener(listener);
+        pcs.addPropertyChangeListener(listener);
     }
 
     /**
@@ -63,7 +62,7 @@ public class NewsListViewModel {
      * @param listener the listener
      */
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        changeSupport.removePropertyChangeListener(listener);
+        pcs.removePropertyChangeListener(listener);
     }
 
     /**
@@ -81,7 +80,7 @@ public class NewsListViewModel {
      * @param infoText the info text
      */
     public void setInfoText(String infoText) {
-        changeSupport.firePropertyChange("infoText", this.infoText, this.infoText = infoText);
+        pcs.firePropertyChange("infoText", this.infoText, this.infoText = infoText);
     }
 
     /**
@@ -90,7 +89,7 @@ public class NewsListViewModel {
      * @param isFetching whether a fetch operation is in progress
      */
     public void setFetching(boolean isFetching) {
-        changeSupport.firePropertyChange("fetching", this.isFetching, this.isFetching = isFetching);
+        pcs.firePropertyChange("fetching", this.isFetching, this.isFetching = isFetching);
     }
 
     /**
@@ -105,7 +104,7 @@ public class NewsListViewModel {
     /**
      * Triggers an asynchronous update of the news list.
      */
-    public void onUpdateNewsList() {
+    public void onUpdateNewsListAsync() {
         if (isFetching()) {
             return;
         }

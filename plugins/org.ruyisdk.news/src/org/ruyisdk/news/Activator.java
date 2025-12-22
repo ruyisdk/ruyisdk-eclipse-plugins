@@ -2,7 +2,7 @@ package org.ruyisdk.news;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.ruyisdk.news.model.DataFetchService;
+import org.ruyisdk.news.model.NewsFetchService;
 import org.ruyisdk.news.model.NewsManager;
 
 /**
@@ -16,13 +16,13 @@ public class Activator extends AbstractUIPlugin {
     // The shared instance
     private static Activator plugin;
     private static NewsManager newsManager;
-    private static DataFetchService service;
+    private static NewsFetchService service;
 
     public NewsManager getNewsManager() {
         return newsManager;
     }
 
-    public DataFetchService getService() {
+    public NewsFetchService getService() {
         return service;
     }
 
@@ -37,7 +37,7 @@ public class Activator extends AbstractUIPlugin {
         plugin = this;
 
         newsManager = new NewsManager();
-        service = new DataFetchService();
+        service = new NewsFetchService();
     }
 
     @Override

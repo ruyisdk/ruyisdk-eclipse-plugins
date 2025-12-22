@@ -10,7 +10,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.ruyisdk.ruyi.services.RuyiCli;
 
 /** Service for fetching news data via the Ruyi CLI. */
-public class DataFetchService {
+public class NewsFetchService {
     /** Fetches news details asynchronously. */
     public void fetchNewsDetailsAsync(String id, Consumer<String> callback) {
         fetchNewsDetailsAsync(id, callback, null);

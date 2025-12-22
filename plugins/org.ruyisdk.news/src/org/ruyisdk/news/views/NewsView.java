@@ -70,6 +70,9 @@ public class NewsView extends ViewPart {
 
         // initialize states
         toggleDetailControls(false);
+
+        // initial data load
+        newsListViewModel.onUpdateNewsListAsync();
     }
 
     private void createLayouts(Composite parent) {
@@ -153,9 +156,11 @@ public class NewsView extends ViewPart {
         }
 
         detailTextBox = new Text(middleComposite, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
-        final var gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-        gridData.heightHint = 100;
-        detailTextBox.setLayoutData(gridData);
+        {
+            final var gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+            gridData.heightHint = 100;
+            detailTextBox.setLayoutData(gridData);
+        }
 
         updateButton = new Button(bottomComposite, SWT.PUSH);
         updateButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
@@ -198,7 +203,7 @@ public class NewsView extends ViewPart {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 updateButton.setEnabled(false);
-                newsListViewModel.onUpdateNewsList();
+                newsListViewModel.onUpdateNewsListAsync();
             }
         });
 
