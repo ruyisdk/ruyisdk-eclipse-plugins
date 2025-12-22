@@ -70,6 +70,9 @@ public class NewsView extends ViewPart {
 
         // initialize states
         toggleDetailControls(false);
+
+        // initial data load
+        newsListViewModel.onUpdateNewsListAsync();
     }
 
     private void createLayouts(Composite parent) {
@@ -198,7 +201,7 @@ public class NewsView extends ViewPart {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 updateButton.setEnabled(false);
-                newsListViewModel.onUpdateNewsList();
+                newsListViewModel.onUpdateNewsListAsync();
             }
         });
 

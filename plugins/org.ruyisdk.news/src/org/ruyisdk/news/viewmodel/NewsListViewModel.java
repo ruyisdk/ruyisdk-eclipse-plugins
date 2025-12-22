@@ -105,7 +105,7 @@ public class NewsListViewModel {
     /**
      * Triggers an asynchronous update of the news list.
      */
-    public void onUpdateNewsList() {
+    public void onUpdateNewsListAsync() {
         if (isFetching()) {
             return;
         }
