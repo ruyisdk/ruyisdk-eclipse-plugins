@@ -147,6 +147,18 @@
         </executions>
       </plugin>
 
+      <!-- Tycho Surefire for running OSGi/JUnit tests -->
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-surefire-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+          <providerHint>junit4</providerHint>
+          <useUIHarness>false</useUIHarness>
+          <useUIThread>false</useUIThread>
+        </configuration>
+      </plugin>
+
       <!-- Formatter for code format validation -->
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>
@@ -173,47 +185,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>package-bundles-before-tests</id>
-      <activation>
-        <!-- Activate only for OSGi bundle projects (Eclipse plug-ins & test bundles). -->
-        <file>
-          <exists>META-INF/MANIFEST.MF</exists>
-        </file>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>tycho-packaging-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>package-plugin-before-tests</id>
-                <phase>process-test-classes</phase>
-                <goals>
-                  <goal>package-plugin</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-install-plugin</artifactId>
-            <version>3.1.2</version>
-            <executions>
-              <execution>
-                <id>install-bundle-before-tests</id>
-                <phase>process-test-classes</phase>
-                <goals>
-                  <goal>install</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
