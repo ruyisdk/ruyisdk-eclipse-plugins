@@ -178,6 +178,7 @@ public class VenvWizardViewModel {
         }
     }
 
+    // TODO: no returning RuyiCli.RunResult
     /** Updates the CLI index and refreshes view model data. */
     public RuyiCli.RunResult updateIndex() {
         final var result = service.updateIndex();
@@ -187,10 +188,12 @@ public class VenvWizardViewModel {
         return result;
     }
 
+    // TODO: no returning RuyiCli.RunResult
     private RuyiCli.RunResult installToolchain(String name, String version) {
         return service.installPackage(name, version);
     }
 
+    // TODO: no returning RuyiCli.RunResult
     /** Installs the currently-selected toolchain package. */
     public RuyiCli.RunResult installToolchain() {
         if (selectedToolchainIndex < 0 || selectedToolchainIndex >= toolchains.size()
@@ -202,10 +205,12 @@ public class VenvWizardViewModel {
         return installToolchain(name, version);
     }
 
+    // TODO: no returning RuyiCli.RunResult
     private RuyiCli.RunResult installEmulator(String name, String version) {
         return service.installPackage(name, version);
     }
 
+    // TODO: no returning RuyiCli.RunResult
     /** Installs the currently-selected emulator package when enabled. */
     public RuyiCli.RunResult installEmulator() {
         if (!emulatorEnabled) {
@@ -220,11 +225,15 @@ public class VenvWizardViewModel {
         return installEmulator(name, version);
     }
 
+    // TODO: pass all arguments to service as-is
+    // TODO: no returning RuyiCli.RunResult
     private RuyiCli.RunResult createVenv(String path, String toolchainName, String toolchainVersion, String profile,
                     String emulatorName, String emulatorVersion) {
         return service.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
     }
 
+    // TODO: eliminate path-related and validation things
+    // TODO: no returning RuyiCli.RunResult
     /** Creates a virtual environment using the current wizard selections. */
     public RuyiCli.RunResult createVenv() {
         final var parent = this.venvLocation;
