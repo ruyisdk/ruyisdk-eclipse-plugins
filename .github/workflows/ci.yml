@@ -155,7 +155,7 @@ jobs:
           tag_name: continuous
           make_latest: false
           prerelease: true
-          generate_release_notes: false
+          generate_release_notes: true
           body_path: ${{ github.workspace }}/.github/resources/release/release_note_continuous.md
           files: |
             ${{ env.output_file_name }}
