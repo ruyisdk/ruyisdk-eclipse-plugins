@@ -17,4 +17,3 @@ Require-Bundle: org.eclipse.ui,
 Export-Package: org.ruyisdk.projectcreator.builder
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
-Import-Package: org.ruyisdk.ruyi.util

@@ -36,19 +36,6 @@
     <module>tests</module>
   </modules>
 
-  <repositories>
-    <repository>
-      <id>eclipse-project-release</id>
-      <layout>p2</layout>
-      <url>https://download.eclipse.org/releases/2024-12/</url>
-    </repository>
-    <repository>
-      <id>eclipse-project-updates</id>
-      <layout>p2</layout>
-      <url>https://download.eclipse.org/eclipse/updates/4.34/</url>
-    </repository>
-  </repositories>
-
   <build>
     <plugins>
       <!-- do not use "prerequisites", but this. see:
@@ -80,6 +67,25 @@
         <artifactId>tycho-maven-plugin</artifactId>
         <version>${tycho.version}</version>
         <extensions>true</extensions>
+      </plugin>
+
+      <!-- Use the repository target definition used in Eclipse IDE so Tycho resolves the
+           same p2-installed bundles (target.target). This points Tycho at the
+           project's target definition file. -->
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+          <!-- Enable automatic wrapping of Maven POM dependencies as OSGi
+               bundles during target platform resolution. This lets Tycho
+               treat plain Maven jars as bundles when resolving the target
+               platform. -->
+          <pomDependencies>wrapAsBundle</pomDependencies>
+          <target>
+            <file>${maven.multiModuleProjectDirectory}/target.target</file>
+          </target>
+        </configuration>
       </plugin>
 
       <!-- replace "SNAPSHOT" and "qualifier" with actual timestamp -->
@@ -141,6 +147,18 @@
         </executions>
       </plugin>
 
+      <!-- Tycho Surefire for running OSGi/JUnit tests -->
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-surefire-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+          <providerHint>junit4</providerHint>
+          <useUIHarness>false</useUIHarness>
+          <useUIThread>false</useUIThread>
+        </configuration>
+      </plugin>
+
       <!-- Formatter for code format validation -->
       <plugin>
         <groupId>net.revelc.code.formatter</groupId>
@@ -167,71 +185,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.glassfish</groupId>
-      <artifactId>javax.json</artifactId>
-      <version>1.1.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>20250107</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.12.1</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
-  <profiles>
-    <profile>
-      <id>package-bundles-before-tests</id>
-      <activation>
-        <!-- Activate only for OSGi bundle projects (Eclipse plug-ins & test bundles). -->
-        <file>
-          <exists>META-INF/MANIFEST.MF</exists>
-        </file>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.eclipse.tycho</groupId>
-            <artifactId>tycho-packaging-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>package-plugin-before-tests</id>
-                <phase>process-test-classes</phase>
-                <goals>
-                  <goal>package-plugin</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-install-plugin</artifactId>
-            <version>3.1.2</version>
-            <executions>
-              <execution>
-                <id>install-bundle-before-tests</id>
-                <phase>process-test-classes</phase>
-                <goals>
-                  <goal>install</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
