@@ -31,6 +31,7 @@
     <module>org.ruyisdk.packages</module>
     <module>org.ruyisdk.projectcreator</module>
     <module>org.ruyisdk.ui</module>
+    <module>org.ruyisdk.venv</module>
   </modules>
 
 </project>
