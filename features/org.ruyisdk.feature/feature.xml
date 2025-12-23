@@ -358,4 +358,29 @@ You may add additional accurate notices of copyright ownership.
          version="0.0.0"
          unpack="false"/>
 
+   <!-- Third-party bundles required by our plugins.
+        These are pulled from Eclipse Orbit (p2) and included in the feature
+        so they get installed along with our plugins. -->
+   <plugin
+         id="org.glassfish.javax.json"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.google.gson"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <!-- org.json library wrapped as OSGi bundle (bundle symbolic name is "json") -->
+   <plugin
+         id="json"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>

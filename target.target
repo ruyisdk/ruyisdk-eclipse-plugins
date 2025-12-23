@@ -1,10 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="Running Platform">
+<target name="RuyiSDK Target Platform">
 	<locations>
-		<location path="${eclipse_home}" type="Profile"/>
-		<location includeDependencyDepth="none" includeSource="true" missingManifest="generate" type="Maven">
+		<!-- Eclipse 2024-12 release -->
+		<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+			<repository location="https://download.eclipse.org/releases/2024-12/"/>
+			<unit id="org.eclipse.cdt.feature.group" version="0.0.0"/>
+			<unit id="org.eclipse.pde.feature.group" version="0.0.0"/>
+			<unit id="org.eclipse.sdk.feature.group" version="0.0.0"/>
+		</location>
+		<!-- Maven dependencies wrapped as OSGi bundles.
+		     These are included in the target platform and will be available
+		     during compilation and at runtime. -->
+		<location includeDependencyDepth="none" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
 			<dependencies>
+				<dependency>
+					<groupId>com.google.code.gson</groupId>
+					<artifactId>gson</artifactId>
+					<version>2.12.1</version>
+					<type>jar</type>
+				</dependency>
+				<dependency>
+					<groupId>junit</groupId>
+					<artifactId>junit</artifactId>
+					<version>4.13.2</version>
+					<type>jar</type>
+				</dependency>
 				<dependency>
 					<groupId>org.glassfish</groupId>
 					<artifactId>javax.json</artifactId>
@@ -12,9 +33,9 @@
 					<type>jar</type>
 				</dependency>
 				<dependency>
-					<groupId>com.google.code.gson</groupId>
-					<artifactId>gson</artifactId>
-					<version>2.12.1</version>
+					<groupId>org.hamcrest</groupId>
+					<artifactId>hamcrest-core</artifactId>
+					<version>1.3</version>
 					<type>jar</type>
 				</dependency>
 				<dependency>
@@ -26,10 +47,4 @@
 			</dependencies>
 		</location>
 	</locations>
-	<environment>
-		<arch>x86_64</arch>
-		<os>linux</os>
-		<ws>gtk</ws>
-		<nl>en_US</nl>
-	</environment>
 </target>
