@@ -1,7 +1,9 @@
 package org.ruyisdk.news;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.ruyisdk.news.model.NewsFetchService;
 import org.ruyisdk.news.model.NewsManager;
 import org.ruyisdk.ruyi.util.RuyiLogger;
@@ -18,7 +20,9 @@ public class Activator extends AbstractUIPlugin {
     private static Activator plugin;
     private static NewsManager newsManager;
     private static NewsFetchService service;
-    private RuyiLogger logger;
+
+    private static final RuyiLogger LOGGER =
+                    new RuyiLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
     public NewsManager getNewsManager() {
         return newsManager;
@@ -30,32 +34,36 @@ public class Activator extends AbstractUIPlugin {
 
     @Override
     public void start(BundleContext context) throws Exception {
+        LOGGER.logInfo("News plugin starting");
+
         super.start(context);
         plugin = this;
-        logger = getLogger();
         newsManager = new NewsManager();
         service = new NewsFetchService();
 
-        logger.logInfo("News plugin started");
+        LOGGER.logInfo("News plugin started");
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        logger.logInfo("News plugin stopping");
+        LOGGER.logInfo("News plugin stopping");
 
         newsManager = null;
         service = null;
-        logger = null;
         plugin = null;
         super.stop(context);
+
+        LOGGER.logInfo("News plugin stopped");
     }
 
-    /** Returns the plugin logger. */
-    public RuyiLogger getLogger() {
-        if (logger == null) {
-            logger = new RuyiLogger(getLog(), PLUGIN_ID);
-        }
-        return logger;
+    /**
+     * Returns a logger that does not depend on {@link #getDefault()} being initialized.
+     *
+     * <p>
+     * This is safe to call during early class loading (e.g., before {@link #start(BundleContext)}).
+     */
+    public static RuyiLogger getLogger() {
+        return LOGGER;
     }
 
     /**

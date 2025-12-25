@@ -5,26 +5,26 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.core.RuyiCore;
-import org.ruyisdk.ruyi.jobs.CheckRuyiJob;
 import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
  * Handler for check installation command.
  */
 public class CheckInstallationHandler extends AbstractHandler {
-    private static final RuyiLogger logger = Activator.getDefault().getLogger();
+    private static final RuyiLogger LOGGER = Activator.getLogger();
+
     private RuyiCore ruyiCore; // 核心服务
 
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
         try {
-            logger.logInfo("Manual installation check triggered");
-            ruyiCore = new RuyiCore(logger);
+            LOGGER.logInfo("Manual installation check triggered");
+            ruyiCore = new RuyiCore(LOGGER);
             ruyiCore.runManualCheck();
-            logger.logInfo("Ruyi activated successfully.");
+            LOGGER.logInfo("Ruyi activated successfully.");
             return null;
         } catch (Exception e) {
-            logger.logError("Failed to execute check installation command", e);
+            LOGGER.logError("Failed to execute check installation command", e);
             throw new ExecutionException("Check installation failed", e);
         }
     }

@@ -18,7 +18,7 @@ import org.ruyisdk.venv.model.VenvService;
  */
 public class VenvListViewModel {
 
-    private static final RuyiLogger logger = Activator.getDefault().getLogger();
+    private static final RuyiLogger LOGGER = Activator.getLogger();
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
@@ -108,14 +108,14 @@ public class VenvListViewModel {
             return;
         }
 
-        logger.logInfo("Refreshing venv list");
+        LOGGER.logInfo("Refreshing venv list");
 
         setFetching(true);
         service.detectProjectVenvsAsync(result -> {
             observableVenvList.getRealm().asyncExec(() -> {
                 observableVenvList.clear();
                 observableVenvList.addAll(result);
-                logger.logInfo("Venv list refreshed; count=" + result.size());
+                LOGGER.logInfo("Venv list refreshed; count=" + result.size());
                 setFetching(false);
             });
         });
@@ -148,7 +148,7 @@ public class VenvListViewModel {
             return;
         }
 
-        logger.logInfo("Deleting selected venv directories: count=" + venvPaths.size());
+        LOGGER.logInfo("Deleting selected venv directories: count=" + venvPaths.size());
 
         setFetching(true);
         service.deleteVenvDirectoriesAsync(venvPaths, err -> {

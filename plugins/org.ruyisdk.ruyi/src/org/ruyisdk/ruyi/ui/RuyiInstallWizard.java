@@ -44,6 +44,8 @@ import org.ruyisdk.ruyi.util.StatusUtil;
  * Wizard for Ruyi installation and upgrade.
  */
 public class RuyiInstallWizard extends Wizard {
+    private static final RuyiLogger LOGGER = Activator.getLogger();
+
     /**
      * Wizard operation mode.
      */
@@ -298,7 +300,7 @@ public class RuyiInstallWizard extends Wizard {
             super("installationPage");
             this.mode = mode;
             // this.installManager = Activator.getDefault().getRuyiCore().getInstallManager();
-            this.installManager = new RuyiInstallManager(Activator.getDefault().getLogger());
+            this.installManager = new RuyiInstallManager(LOGGER);
             setTitle(mode == Mode.INSTALL ? "Installing Ruyi" : "Upgrading Ruyi");
             setDescription(mode == Mode.INSTALL ? "Please wait while Ruyi is being installed"
                             : "Upgrading to the latest version...");

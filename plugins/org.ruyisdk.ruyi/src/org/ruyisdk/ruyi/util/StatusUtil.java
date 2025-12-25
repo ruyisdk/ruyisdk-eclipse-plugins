@@ -11,6 +11,8 @@ import org.ruyisdk.ruyi.Activator;
  */
 public class StatusUtil {
 
+    private static final RuyiLogger LOGGER = Activator.getLogger();
+
     /**
      * Shows an info dialog.
      *
@@ -59,7 +61,7 @@ public class StatusUtil {
      * @param ex the exception
      */
     public static void logAndShow(String message, Throwable ex) {
-        Activator.getDefault().getLogger().logError(message, ex);
+        LOGGER.logError(message, ex);
         showError(message + ": " + ex.getMessage());
     }
 }

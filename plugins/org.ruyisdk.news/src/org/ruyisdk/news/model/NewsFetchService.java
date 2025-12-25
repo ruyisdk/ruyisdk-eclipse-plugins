@@ -13,7 +13,7 @@ import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /** Service for fetching news data via the Ruyi CLI. */
 public class NewsFetchService {
-    private static final RuyiLogger logger = Activator.getDefault().getLogger();
+    private static final RuyiLogger LOGGER = Activator.getLogger();
 
     /** Fetches news details asynchronously. */
     public void fetchNewsDetailsAsync(String id, Consumer<String> callback) {
@@ -25,17 +25,17 @@ public class NewsFetchService {
         Job fetchJob = new Job("Fetching News Details") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
-                logger.logInfo("Fetching news details: id=" + id);
+                LOGGER.logInfo("Fetching news details: id=" + id);
                 String result = "";
                 try {
                     RuyiCli.NewsReadResult read = RuyiCli.readNewsItem(id);
                     if (read != null) {
                         result = read.getContent() == null ? "" : read.getContent();
                     }
-                    logger.logInfo("Fetched news details: id=" + id + ", length=" + result.length());
+                    LOGGER.logInfo("Fetched news details: id=" + id + ", length=" + result.length());
                 } catch (Exception e) {
                     String msg = e.getMessage() == null ? "Failed to read news details" : e.getMessage();
-                    logger.logError("Failed to fetch news details: id=" + id, e);
+                    LOGGER.logError("Failed to fetch news details: id=" + id, e);
                     if (errorCallback != null) {
                         errorCallback.accept(msg);
                     }
@@ -58,7 +58,7 @@ public class NewsFetchService {
         Job fetchJob = new Job("Fetching News List") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
-                logger.logInfo("Fetching news list");
+                LOGGER.logInfo("Fetching news list");
                 var newsList = new ArrayList<NewsItem>();
                 try {
                     int unreadCount = 0;
@@ -69,10 +69,10 @@ public class NewsFetchService {
                         }
                         newsList.add(new NewsItem(item.getTitle(), item.getId(), unread));
                     }
-                    logger.logInfo("Fetched news list: count=" + newsList.size() + ", unread=" + unreadCount);
+                    LOGGER.logInfo("Fetched news list: count=" + newsList.size() + ", unread=" + unreadCount);
                 } catch (Exception e) {
                     String msg = e.getMessage() == null ? "Failed to list news" : e.getMessage();
-                    logger.logError("Failed to fetch news list", e);
+                    LOGGER.logError("Failed to fetch news list", e);
                     if (errorCallback != null) {
                         errorCallback.accept(msg);
                     }
