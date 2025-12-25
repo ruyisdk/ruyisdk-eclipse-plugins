@@ -14,7 +14,7 @@ import org.ruyisdk.ruyi.util.RuyiLogger;
  * Job for checking Ruyi environment.
  */
 public class CheckRuyiJob {
-    private static final RuyiLogger logger = Activator.getDefault().getLogger();
+    private static final RuyiLogger LOGGER = Activator.getLogger();
 
     /**
      * Runs Ruyi environment check.
@@ -50,10 +50,10 @@ public class CheckRuyiJob {
 
             return CheckResult.ok();
         } catch (OperationCanceledException e) {
-            logger.logInfo("Version check cancelled");
+            LOGGER.logInfo("Version check cancelled");
             throw e;
         } catch (Exception e) {
-            logger.logError("Version check failed", e);
+            LOGGER.logError("Version check failed", e);
             throw new RuntimeException("Check failed: " + e.getMessage(), e);
         } finally {
             monitor.done();

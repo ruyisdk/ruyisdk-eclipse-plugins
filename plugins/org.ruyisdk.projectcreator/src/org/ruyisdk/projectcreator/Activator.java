@@ -21,11 +21,6 @@ public class Activator extends AbstractUIPlugin {
     private IResourceChangeListener buildListener;
 
     /**
-     * Constructs the activator.
-     */
-    public Activator() {}
-
-    /**
      * Starts the plugin.
      *
      * @param context bundle context

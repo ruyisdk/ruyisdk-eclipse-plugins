@@ -15,13 +15,6 @@ public class Activator extends AbstractUIPlugin {
 
 
     /**
-     * Constructs the activator.
-     */
-    public Activator() {
-        // Parent class AbstractUIPlugin handles initialization automatically
-    }
-
-    /**
      * Starts the plugin.
      *
      * @param context the bundle context

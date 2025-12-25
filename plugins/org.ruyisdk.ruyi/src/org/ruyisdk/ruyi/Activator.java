@@ -1,10 +1,12 @@
 package org.ruyisdk.ruyi;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.ruyisdk.ruyi.core.RuyiCore;
 import org.ruyisdk.ruyi.util.RuyiLogger;
 
@@ -16,18 +18,9 @@ public class Activator extends AbstractUIPlugin {
     public static final String PLUGIN_ID = "org.ruyisdk.ruyi";
     private static Activator plugin; // 共享实例
     private RuyiCore ruyiCore; // 核心服务
-    private RuyiLogger logger;
 
-    /**
-     * Constructs the activator.
-     */
-    public Activator() {
-        // 保证单例
-        if (plugin != null) {
-            throw new IllegalStateException("Activator already initialized");
-        }
-        plugin = this;
-    }
+    private static final RuyiLogger LOGGER =
+                    new RuyiLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
     /**
      * Starts the plugin.
@@ -38,26 +31,16 @@ public class Activator extends AbstractUIPlugin {
     @Override
     public void start(BundleContext context) throws Exception {
         super.start(context);
-        // plugin = this;
+        plugin = this;
 
-        try {
-            // 1. 初始化日志系统
-            logger = new RuyiLogger(getLog());
+        // 1. 加载默认首选项
+        // RuyiPreferenceInitializer.doInitializeDefaultPreferences();
 
-            // 2. 加载默认首选项
-            // RuyiPreferenceInitializer.doInitializeDefaultPreferences();
+        // 2. 启动核心服务
+        ruyiCore = new RuyiCore(LOGGER);
+        ruyiCore.startBackgroundJobs();
 
-            // 3. 启动核心服务
-            ruyiCore = new RuyiCore(logger);
-            ruyiCore.startBackgroundJobs();
-
-            logger.logInfo("Ruyi activated successfully.");
-        } catch (Exception e) {
-            String msg = "Failed to activate Ruyi plugin";
-            logger.logError(msg, e);
-            throw new RuntimeException(msg, e);
-        }
-
+        LOGGER.logInfo("Ruyi activated successfully.");
     }
 
     /**
@@ -79,9 +62,9 @@ public class Activator extends AbstractUIPlugin {
             // 2. 清理资源
             cleanupResources();
 
-            logger.logInfo("Ruyi plugin deactivated");
+            LOGGER.logInfo("Ruyi plugin deactivated");
         } catch (Exception e) {
-            logger.logError("Error during plugin deactivation", e);
+            LOGGER.logError("Error during plugin deactivation", e);
         } finally {
             plugin = null;
             super.stop(context);
@@ -107,12 +90,13 @@ public class Activator extends AbstractUIPlugin {
     }
 
     /**
-     * Gets the logger instance.
+     * Returns a logger that does not depend on {@link #getDefault()} being initialized.
      *
-     * @return the logger
+     * <p>
+     * This is safe to call during early class loading (e.g., before {@link #start(BundleContext)}).
      */
-    public RuyiLogger getLogger() {
-        return logger;
+    public static RuyiLogger getLogger() {
+        return LOGGER;
     }
 
     @Override
