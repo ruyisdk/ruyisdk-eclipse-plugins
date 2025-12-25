@@ -63,11 +63,21 @@ public class NewsFetchService {
                 try {
                     int unreadCount = 0;
                     for (var item : RuyiCli.listNewsItems(false)) {
-                        boolean unread = !item.isRead();
+                        if (item == null) {
+                            continue;
+                        }
+
+                        final Boolean isRead = item.isRead();
+                        boolean unread = isRead == null || !isRead.booleanValue();
                         if (unread) {
                             unreadCount++;
                         }
-                        newsList.add(new NewsItem(item.getTitle(), item.getId(), unread));
+
+                        final Integer ordObj = item.getOrd();
+                        final int ord = ordObj == null ? -1 : ordObj.intValue();
+                        final String title = item.getTitle() == null ? "" : item.getTitle();
+                        final String id = item.getId() == null ? "" : item.getId();
+                        newsList.add(new NewsItem(ord, title, id, unread));
                     }
                     LOGGER.logInfo("Fetched news list: count=" + newsList.size() + ", unread=" + unreadCount);
                 } catch (Exception e) {

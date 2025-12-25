@@ -115,12 +115,12 @@ public class RuyiCli {
     /** Summary information for a news item returned by the ruyi CLI. */
     public static class NewsListItemInfo {
         private final String id;
-        private final int ord;
-        private final boolean read;
+        private final Integer ord;
+        private final Boolean read;
         private final String title;
 
         /** Creates an instance. */
-        public NewsListItemInfo(String id, int ord, boolean read, String title) {
+        public NewsListItemInfo(String id, Integer ord, Boolean read, String title) {
             this.id = id;
             this.ord = ord;
             this.read = read;
@@ -131,11 +131,11 @@ public class RuyiCli {
             return id;
         }
 
-        public int getOrd() {
+        public Integer getOrd() {
             return ord;
         }
 
-        public boolean isRead() {
+        public Boolean isRead() {
             return read;
         }
 
@@ -147,13 +147,13 @@ public class RuyiCli {
     /** Full content and metadata for a news item returned by the ruyi CLI. */
     public static class NewsReadResult {
         private final String id;
-        private final int ord;
-        private final boolean read;
+        private final Integer ord;
+        private final Boolean read;
         private final String title;
         private final String content;
 
         /** Creates an instance. */
-        public NewsReadResult(String id, int ord, boolean read, String title, String content) {
+        public NewsReadResult(String id, Integer ord, Boolean read, String title, String content) {
             this.id = id;
             this.ord = ord;
             this.read = read;
@@ -165,11 +165,11 @@ public class RuyiCli {
             return id;
         }
 
-        public int getOrd() {
+        public Integer getOrd() {
             return ord;
         }
 
-        public boolean isRead() {
+        public Boolean isRead() {
             return read;
         }
 
@@ -298,25 +298,16 @@ public class RuyiCli {
                 if (o == null) {
                     continue;
                 }
-                final var ty = o.optString("ty", "");
+                final var ty = o.optString("ty", null);
                 if (!"newsitem-v1".equalsIgnoreCase(ty)) {
                     continue;
                 }
-                var id = o.optString("id", "").trim();
-                final var ord = o.optInt("ord", -1);
-                final var isRead = o.optBoolean("is_read", false);
+                final var id = o.optString("id", null);
+                final var ord = o.optIntegerObject("ord", null);
+                final var isRead = o.optBooleanObject("is_read", null);
                 final var langs = o.optJSONArray("langs");
-                String title = chooseNewsDisplayTitle(langs);
-                if (title == null || title.trim().isEmpty()) {
-                    title = id;
-                }
-                if (id == null || id.isEmpty()) {
-                    // Defensive: fall back to ord as string if id is absent.
-                    id = ord >= 0 ? String.valueOf(ord) : "";
-                }
-                if (id != null && !id.isEmpty()) {
-                    out.add(new NewsListItemInfo(id, ord, isRead, title));
-                }
+                final var title = chooseNewsDisplayTitle(langs);
+                out.add(new NewsListItemInfo(id, ord, isRead, title));
             }
         } catch (Exception e) {
             // ignore
@@ -338,9 +329,9 @@ public class RuyiCli {
             if (o == null) {
                 return null;
             }
-            final var id = o.optString("id", "").trim();
-            final var ord = o.optInt("ord", -1);
-            final var isRead = o.optBoolean("is_read", false);
+            final var id = o.optString("id", null);
+            final var ord = o.optIntegerObject("ord", null);
+            final var isRead = o.optBooleanObject("is_read", null);
             final var langs = o.optJSONArray("langs");
             final var title = chooseNewsDisplayTitle(langs);
             final var content = chooseNewsContent(langs);
@@ -387,17 +378,17 @@ public class RuyiCli {
     private static String chooseNewsDisplayTitle(JSONArray langs) {
         final var best = chooseBestNewsLang(langs);
         if (best == null) {
-            return "";
+            return null;
         }
-        return best.optString("display_title", "");
+        return best.optString("display_title", null);
     }
 
     private static String chooseNewsContent(JSONArray langs) {
         final var best = chooseBestNewsLang(langs);
         if (best == null) {
-            return "";
+            return null;
         }
-        return best.optString("content", "");
+        return best.optString("content", null);
     }
 
     private static JSONObject chooseBestNewsLang(JSONArray langs) {

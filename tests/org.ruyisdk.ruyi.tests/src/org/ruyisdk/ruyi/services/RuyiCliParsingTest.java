@@ -109,12 +109,12 @@ public class RuyiCliParsingTest {
             assertEquals(2, items.size());
 
             assertEquals("2024-01-14-ruyi-news", items.get(0).getId());
-            assertEquals(1, items.get(0).getOrd());
-            assertFalse(items.get(0).isRead());
+            assertEquals(Integer.valueOf(1), items.get(0).getOrd());
+            assertEquals(Boolean.FALSE, items.get(0).isRead());
             assertEquals("Ruyi News", items.get(0).getTitle());
 
             assertEquals("2024-01-21-ruyi-news", items.get(1).getId());
-            assertTrue(items.get(1).isRead());
+            assertEquals(Boolean.TRUE, items.get(1).isRead());
             assertEquals("Second", items.get(1).getTitle());
         } finally {
             Locale.setDefault(old);
@@ -122,10 +122,10 @@ public class RuyiCliParsingTest {
     }
 
     /**
-     * Falls back to ordinal as ID when the porcelain object is missing an id.
+     * Leaves the ID as null when the porcelain object is missing an id.
      */
     @Test
-    public void parseNewsListFallsBackToOrdWhenIdMissing() {
+    public void parseNewsListKeepsNullIdWhenIdMissing() {
         String sample = """
                         {"ty":"newsitem-v1","ord":7,"is_read":false,"langs":[{"lang":"en_US","display_title":"T","content":"C"}]}
                         """;
@@ -133,8 +133,8 @@ public class RuyiCliParsingTest {
         List<RuyiCli.NewsListItemInfo> items = RuyiCli.parseNewsListFromString(sample);
         assertNotNull(items);
         assertEquals(1, items.size());
-        assertEquals("7", items.get(0).getId());
-        assertEquals(7, items.get(0).getOrd());
+        assertEquals(null, items.get(0).getId());
+        assertEquals(Integer.valueOf(7), items.get(0).getOrd());
     }
 
     /**
@@ -153,8 +153,8 @@ public class RuyiCliParsingTest {
             RuyiCli.NewsReadResult r = RuyiCli.parseNewsReadFromString(sample);
             assertNotNull(r);
             assertEquals("2024-01-14-ruyi-news", r.getId());
-            assertEquals(1, r.getOrd());
-            assertTrue(r.isRead());
+            assertEquals(Integer.valueOf(1), r.getOrd());
+            assertEquals(Boolean.TRUE, r.isRead());
             assertEquals("English Title", r.getTitle());
             assertEquals("English Content", r.getContent());
         } finally {
