@@ -118,18 +118,21 @@ public class NewsView extends ViewPart {
             // TODO: use Tuple and loop to eliminate duplicates
             {
                 final var column = new TableViewerColumn(tableViewer, SWT.CENTER);
-                column.getColumn().setText("Unread");
-                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(5, 60));
+                final var tableColumn = column.getColumn();
+                tableColumn.setText("Unread");
+                tableColumnLayout.setColumnData(tableColumn, new ColumnWeightData(5, 60));
             }
             {
                 final var column = new TableViewerColumn(tableViewer, SWT.NONE);
-                column.getColumn().setText("Title");
-                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(100, 20));
+                final var tableColumn = column.getColumn();
+                tableColumn.setText("Title");
+                tableColumnLayout.setColumnData(tableColumn, new ColumnWeightData(100, 20));
             }
             {
                 final var column = new TableViewerColumn(tableViewer, SWT.NONE);
-                column.getColumn().setText("ID");
-                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(50, 20));
+                final var tableColumn = column.getColumn();
+                tableColumn.setText("ID");
+                tableColumnLayout.setColumnData(tableColumn, new ColumnWeightData(50, 20));
             }
             tableComposite.setLayout(tableColumnLayout);
 

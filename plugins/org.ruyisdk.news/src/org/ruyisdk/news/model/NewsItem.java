@@ -4,28 +4,49 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 /**
- * A news item with title, id, unread status, and optional details.
+ * A news item with ordinal/index, title, id, unread status, and details.
  */
 public class NewsItem {
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
+    private int ord;
     private String title;
     private String id;
-    private Boolean unread;
+    private boolean unread;
     private String details = "";
-    private Boolean detailsFetched = false;
+    private boolean detailsFetched = false;
 
     /**
      * Creates a news item.
      *
+     * @param ord the ordinal/index
      * @param title the title
      * @param id the id
      * @param unread whether the item is unread
      */
-    public NewsItem(String title, String id, Boolean unread) {
+    public NewsItem(int ord, String title, String id, boolean unread) {
         this.title = title;
         this.id = id;
         this.unread = unread;
+        this.ord = ord;
+    }
+
+    /**
+     * Returns the ordinal/index.
+     *
+     * @return the ordinal/index
+     */
+    public int getOrd() {
+        return ord;
+    }
+
+    /**
+     * Sets the ordinal/index.
+     *
+     * @param ord the ordinal/index
+     */
+    public void setOrd(int ord) {
+        pcs.firePropertyChange("ord", this.ord, this.ord = ord);
     }
 
     /**
@@ -33,7 +54,7 @@ public class NewsItem {
      *
      * @return whether the item is unread
      */
-    public Boolean getUnread() {
+    public boolean getUnread() {
         return unread;
     }
 
@@ -42,7 +63,7 @@ public class NewsItem {
      *
      * @param unread whether the item is unread
      */
-    public void setUnread(Boolean unread) {
+    public void setUnread(boolean unread) {
         pcs.firePropertyChange("unread", this.unread, this.unread = unread);
     }
 
@@ -105,7 +126,7 @@ public class NewsItem {
      *
      * @return whether details have been fetched
      */
-    public Boolean getDetailsFetched() {
+    public boolean getDetailsFetched() {
         return detailsFetched;
     }
 
@@ -114,8 +135,8 @@ public class NewsItem {
      *
      * @param detailsFetched whether details have been fetched
      */
-    public void setDetailsFetched(Boolean detailsFetched) {
-        this.detailsFetched = detailsFetched;
+    public void setDetailsFetched(boolean detailsFetched) {
+        pcs.firePropertyChange("detailsFetched", this.detailsFetched, this.detailsFetched = detailsFetched);
     }
 
     /**
