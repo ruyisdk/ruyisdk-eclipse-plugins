@@ -33,10 +33,10 @@ public class Activator extends AbstractUIPlugin {
         super.start(context);
         plugin = this;
 
-        // 2. 加载默认首选项
+        // 1. 加载默认首选项
         // RuyiPreferenceInitializer.doInitializeDefaultPreferences();
 
-        // 3. 启动核心服务
+        // 2. 启动核心服务
         ruyiCore = new RuyiCore(LOGGER);
         ruyiCore.startBackgroundJobs();
 
