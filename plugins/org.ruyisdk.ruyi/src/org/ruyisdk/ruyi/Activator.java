@@ -19,17 +19,6 @@ public class Activator extends AbstractUIPlugin {
     private RuyiLogger logger;
 
     /**
-     * Constructs the activator.
-     */
-    public Activator() {
-        // 保证单例
-        if (plugin != null) {
-            throw new IllegalStateException("Activator already initialized");
-        }
-        plugin = this;
-    }
-
-    /**
      * Starts the plugin.
      *
      * @param context bundle context
@@ -38,26 +27,19 @@ public class Activator extends AbstractUIPlugin {
     @Override
     public void start(BundleContext context) throws Exception {
         super.start(context);
-        // plugin = this;
+        plugin = this;
 
-        try {
-            // 1. 初始化日志系统
-            logger = new RuyiLogger(getLog());
+        // 1. 初始化日志系统
+        logger = getLogger();
 
-            // 2. 加载默认首选项
-            // RuyiPreferenceInitializer.doInitializeDefaultPreferences();
+        // 2. 加载默认首选项
+        // RuyiPreferenceInitializer.doInitializeDefaultPreferences();
 
-            // 3. 启动核心服务
-            ruyiCore = new RuyiCore(logger);
-            ruyiCore.startBackgroundJobs();
+        // 3. 启动核心服务
+        ruyiCore = new RuyiCore(logger);
+        ruyiCore.startBackgroundJobs();
 
-            logger.logInfo("Ruyi activated successfully.");
-        } catch (Exception e) {
-            String msg = "Failed to activate Ruyi plugin";
-            logger.logError(msg, e);
-            throw new RuntimeException(msg, e);
-        }
-
+        logger.logInfo("Ruyi activated successfully.");
     }
 
     /**
@@ -112,6 +94,9 @@ public class Activator extends AbstractUIPlugin {
      * @return the logger
      */
     public RuyiLogger getLogger() {
+        if (logger == null) {
+            logger = new RuyiLogger(getLog(), PLUGIN_ID);
+        }
         return logger;
     }
 

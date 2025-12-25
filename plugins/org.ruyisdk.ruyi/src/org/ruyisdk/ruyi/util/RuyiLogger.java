@@ -10,6 +10,7 @@ import org.ruyisdk.ruyi.Activator;
  */
 public class RuyiLogger {
     private final ILog eclipseLog;
+    private final String pluginId;
 
     /**
      * Constructs a logger.
@@ -17,7 +18,18 @@ public class RuyiLogger {
      * @param eclipseLog the Eclipse log
      */
     public RuyiLogger(ILog eclipseLog) {
+        this(eclipseLog, Activator.PLUGIN_ID);
+    }
+
+    /**
+     * Constructs a logger.
+     *
+     * @param eclipseLog the Eclipse log
+     * @param pluginId the plugin ID used for {@link IStatus} entries
+     */
+    public RuyiLogger(ILog eclipseLog, String pluginId) {
         this.eclipseLog = eclipseLog;
+        this.pluginId = pluginId == null ? Activator.PLUGIN_ID : pluginId;
     }
 
     /**
@@ -57,7 +69,7 @@ public class RuyiLogger {
      * @param exception the exception
      */
     public void log(int severity, String message, Throwable exception) {
-        IStatus status = new Status(severity, Activator.PLUGIN_ID, message, exception);
+        IStatus status = new Status(severity, pluginId, message, exception);
         eclipseLog.log(status);
     }
 

@@ -1,7 +1,9 @@
 package org.ruyisdk.news.viewmodel;
 
+import org.ruyisdk.news.Activator;
 import org.ruyisdk.news.model.NewsFetchService;
 import org.ruyisdk.news.model.NewsItem;
+import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
  * View model for fetching and exposing selected news details.
@@ -11,6 +13,8 @@ public class NewsDetailsViewModel {
     private NewsFetchService service;
 
     private boolean isFetching = false;
+
+    private static final RuyiLogger logger = Activator.getDefault().getLogger();
 
 
     /**
@@ -37,6 +41,8 @@ public class NewsDetailsViewModel {
         if (isFetching) {
             return;
         }
+
+        logger.logInfo("News details requested: id=" + selected.getId());
 
         selected.setUnread(false);
         selected.setDetails("<fetching news details>");

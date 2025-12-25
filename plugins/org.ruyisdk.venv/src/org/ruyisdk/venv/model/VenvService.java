@@ -22,10 +22,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.ruyisdk.ruyi.services.RuyiCli;
+import org.ruyisdk.ruyi.util.RuyiLogger;
+import org.ruyisdk.venv.Activator;
 
 /** Service facade for listing and managing Ruyi virtual environments. */
 public class VenvService {
     private static final String VENV_CONFIG_FILE_NAME = "ruyi-venv.toml";
+
+    private static final RuyiLogger logger = Activator.getDefault().getLogger();
 
     private static List<Path> getOpenProjectPaths() {
         final var out = new ArrayList<Path>();
@@ -91,6 +95,7 @@ public class VenvService {
         try {
             return RuyiCli.listProfiles();
         } catch (Exception e) {
+            logger.logError("Failed to list profiles", e);
             return new ArrayList<>();
         }
     }
@@ -100,6 +105,7 @@ public class VenvService {
         try {
             return RuyiCli.listToolchains();
         } catch (Exception e) {
+            logger.logError("Failed to list toolchains", e);
             return new ArrayList<>();
         }
     }
@@ -109,6 +115,7 @@ public class VenvService {
         try {
             return RuyiCli.listEmulators();
         } catch (Exception e) {
+            logger.logError("Failed to list emulators", e);
             return new ArrayList<>();
         }
     }
@@ -117,24 +124,58 @@ public class VenvService {
         try {
             return RuyiCli.listVenvs();
         } catch (Exception e) {
+            logger.logError("Failed to list virtual environments", e);
             return new ArrayList<>();
         }
     }
 
     /** Updates the local package index via the Ruyi CLI. */
     public RuyiCli.RunResult updateIndex() {
-        return RuyiCli.update();
+        logger.logInfo("Updating Ruyi package index");
+        try {
+            final var result = RuyiCli.update();
+            if (result != null) {
+                logger.logInfo("Ruyi package index update finished: exit=" + result.getExitCode());
+            }
+            return result;
+        } catch (Exception e) {
+            logger.logError("Failed to update Ruyi package index", e);
+            throw e;
+        }
     }
 
     /** Installs a package via the Ruyi CLI. */
     public RuyiCli.RunResult installPackage(String name, String version) {
-        return RuyiCli.installPackage(name, version);
+        logger.logInfo("Installing package: name=" + name + ", version=" + version);
+        try {
+            final var result = RuyiCli.installPackage(name, version);
+            if (result != null) {
+                logger.logInfo("Package install finished: name=" + name + ", version=" + version + ", exit="
+                                + result.getExitCode());
+            }
+            return result;
+        } catch (Exception e) {
+            logger.logError("Failed to install package: name=" + name + ", version=" + version, e);
+            throw e;
+        }
     }
 
     /** Creates a new venv via the Ruyi CLI. */
     public RuyiCli.RunResult createVenv(String path, String toolchainName, String toolchainVersion, String profile,
                     String emulatorName, String emulatorVersion) {
-        return RuyiCli.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
+        logger.logInfo("Creating venv: path=" + path + ", profile=" + profile + ", toolchain=" + toolchainName + ":"
+                        + toolchainVersion + ", emulator=" + emulatorName + ":" + emulatorVersion);
+        try {
+            final var result = RuyiCli.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName,
+                            emulatorVersion);
+            if (result != null) {
+                logger.logInfo("Venv creation finished: path=" + path + ", exit=" + result.getExitCode());
+            }
+            return result;
+        } catch (Exception e) {
+            logger.logError("Failed to create venv: path=" + path, e);
+            throw e;
+        }
     }
 
     private List<Venv> fetchVenvs() {
@@ -151,6 +192,7 @@ public class VenvService {
             out.add(new Venv(venvInfo.getPath(), venvInfo.getProfile(), venvInfo.getSysroot(), venvInfo.getActivated(),
                             quirks));
         }
+        logger.logInfo("Fetched venv list: count=" + out.size());
         return out;
     }
 
@@ -159,12 +201,15 @@ public class VenvService {
         final var fetchJob = new Job("Fetching virtual environments") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
+                logger.logInfo("Fetching venv list (async)");
                 List<Venv> result;
                 try {
                     result = fetchVenvs();
                 } catch (Exception e) {
+                    logger.logError("Failed to fetch venv list", e);
                     result = new ArrayList<>();
                 }
+                logger.logInfo("Venv list fetch completed: count=" + result.size());
                 callback.accept(result);
                 return Status.OK_STATUS;
             }
@@ -177,6 +222,7 @@ public class VenvService {
             return List.of();
         }
 
+        logger.logInfo("Detecting project venvs: openProjects=" + projectPaths.size());
         final var out = new ArrayList<Venv>();
         for (final var projectPath : projectPaths) {
             if (projectPath == null) {
@@ -195,9 +241,11 @@ public class VenvService {
                     out.add(new Venv(childDir.toString(), cfg.profile, cfg.sysroot, projectPath.toString()));
                 });
             } catch (Exception e) {
+                logger.logError("Failed to scan project for venv config: path=" + projectPath, e);
                 // ignore per-project failures
             }
         }
+        logger.logInfo("Project venv detection completed: count=" + out.size());
         return out;
     }
 
@@ -206,13 +254,16 @@ public class VenvService {
         final var detectJob = new Job("Detecting virtual environments") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
+                logger.logInfo("Detecting project venvs (async)");
                 List<Venv> result;
                 try {
                     final var projectPaths = getOpenProjectPaths();
                     result = detectProjectVenvs(projectPaths);
                 } catch (Exception e) {
+                    logger.logError("Failed to detect project venvs", e);
                     result = List.of();
                 }
+                logger.logInfo("Project venv detection finished: count=" + result.size());
                 callback.accept(result);
                 return Status.OK_STATUS;
             }
@@ -225,18 +276,23 @@ public class VenvService {
         final var deleteJob = new Job("Deleting virtual environments") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
+                logger.logInfo("Deleting venv directories: count="
+                                + (venvDirectoryPaths == null ? 0 : venvDirectoryPaths.size()));
                 try {
                     final var venvDirectories = toPathList(venvDirectoryPaths);
                     if (venvDirectories != null) {
                         for (Path dir : venvDirectories) {
+                            logger.logInfo("Deleting venv directory: path=" + dir);
                             deleteDirectoryRecursively(dir);
                         }
                     }
                     if (callback != null) {
                         callback.accept(null);
                     }
+                    logger.logInfo("Venv directory deletion finished");
                     return Status.OK_STATUS;
                 } catch (Exception e) {
+                    logger.logError("Failed to delete venv directories", e);
                     if (callback != null) {
                         callback.accept(e);
                     }
@@ -295,6 +351,7 @@ public class VenvService {
                 }
             }
         } catch (Exception e) {
+            logger.logWarning("Failed to parse venv config: path=" + tomlPath, e);
             // ignore parse failures
         }
         return new DetectedVenvConfig(profile, sysroot);

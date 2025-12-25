@@ -147,6 +147,7 @@ public class VenvWizardViewModel {
         return sb.toString();
     }
 
+    // TODO: remove try-catch
     private void refreshListsBestEffort() {
         try {
             profiles.clear();

@@ -8,6 +8,8 @@ import java.util.function.Consumer;
 import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.ruyisdk.ruyi.util.RuyiLogger;
+import org.ruyisdk.venv.Activator;
 import org.ruyisdk.venv.model.Venv;
 import org.ruyisdk.venv.model.VenvService;
 
@@ -15,6 +17,8 @@ import org.ruyisdk.venv.model.VenvService;
  * View model for the venv list view.
  */
 public class VenvListViewModel {
+
+    private static final RuyiLogger logger = Activator.getDefault().getLogger();
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
@@ -104,11 +108,14 @@ public class VenvListViewModel {
             return;
         }
 
+        logger.logInfo("Refreshing venv list");
+
         setFetching(true);
         service.detectProjectVenvsAsync(result -> {
             observableVenvList.getRealm().asyncExec(() -> {
                 observableVenvList.clear();
                 observableVenvList.addAll(result);
+                logger.logInfo("Venv list refreshed; count=" + result.size());
                 setFetching(false);
             });
         });
@@ -140,6 +147,8 @@ public class VenvListViewModel {
             }
             return;
         }
+
+        logger.logInfo("Deleting selected venv directories: count=" + venvPaths.size());
 
         setFetching(true);
         service.deleteVenvDirectoriesAsync(venvPaths, err -> {
