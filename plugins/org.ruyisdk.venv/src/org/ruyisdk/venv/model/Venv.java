@@ -12,31 +12,27 @@ public class Venv {
     private String sysroot;
     private String projectPath;
     private String quirks;
-    private Boolean activated;
+    private String toolchainPath;
+    private String toolchainPrefix;
 
-    /** Creates a venv model for a standalone venv. */
-    public Venv(String path, String profile, String sysroot, Boolean activated) {
-        this(path, profile, sysroot, activated, "");
-    }
-
-    /** Creates a venv model for a standalone venv with quirks. */
-    public Venv(String path, String profile, String sysroot, Boolean activated, String quirks) {
-        this.path = path;
-        this.profile = profile;
-        this.sysroot = sysroot;
-        this.projectPath = "";
-        this.activated = activated;
-        this.quirks = quirks;
-    }
-
-    /** Creates a venv model for a project venv. */
-    public Venv(String path, String profile, String sysroot, String projectPath) {
+    private Venv(String path, String profile, String sysroot, String projectPath, String quirks) {
         this.path = path;
         this.profile = profile;
         this.sysroot = sysroot;
         this.projectPath = projectPath == null ? "" : projectPath;
-        this.activated = null;
-        this.quirks = "";
+        this.quirks = quirks == null ? "" : quirks;
+        this.toolchainPath = "";
+        this.toolchainPrefix = "";
+    }
+
+    /** Creates a venv model for a standalone venv with quirks. */
+    public static Venv createStandalone(String path, String profile, String sysroot, String quirks) {
+        return new Venv(path, profile, sysroot, "", quirks);
+    }
+
+    /** Creates a venv model for a project venv. */
+    public static Venv createForProject(String path, String profile, String sysroot, String projectPath) {
+        return new Venv(path, profile, sysroot, projectPath, "");
     }
 
     /** Returns the venv path. */
@@ -80,16 +76,6 @@ public class Venv {
                         this.projectPath = projectPath == null ? "" : projectPath);
     }
 
-    /** Returns whether the venv is activated. */
-    public Boolean getActivated() {
-        return activated;
-    }
-
-    /** Updates whether the venv is activated. */
-    public void setActivated(Boolean activated) {
-        pcs.firePropertyChange("activated", this.activated, this.activated = activated);
-    }
-
     /** Registers a listener for property changes. */
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(listener);
@@ -108,5 +94,27 @@ public class Venv {
     /** Updates the quirks string. */
     public void setQuirks(String quirks) {
         pcs.firePropertyChange("quirks", this.quirks, this.quirks = quirks);
+    }
+
+    /** Returns the toolchain bin directory path (derived from venv). */
+    public String getToolchainPath() {
+        return toolchainPath;
+    }
+
+    /** Updates the toolchain bin directory path. */
+    public void setToolchainPath(String toolchainPath) {
+        pcs.firePropertyChange("toolchainPath", this.toolchainPath,
+                        this.toolchainPath = toolchainPath == null ? "" : toolchainPath);
+    }
+
+    /** Returns the toolchain prefix (e.g., "riscv64-unknown-elf"). */
+    public String getToolchainPrefix() {
+        return toolchainPrefix;
+    }
+
+    /** Updates the toolchain prefix. */
+    public void setToolchainPrefix(String toolchainPrefix) {
+        pcs.firePropertyChange("toolchainPrefix", this.toolchainPrefix,
+                        this.toolchainPrefix = toolchainPrefix == null ? "" : toolchainPrefix);
     }
 }

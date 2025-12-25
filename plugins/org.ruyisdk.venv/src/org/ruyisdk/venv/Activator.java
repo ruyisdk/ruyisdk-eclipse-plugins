@@ -5,7 +5,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.ruyisdk.ruyi.util.RuyiLogger;
-import org.ruyisdk.venv.model.VenvService;
+import org.ruyisdk.venv.model.VenvConfigurationService;
+import org.ruyisdk.venv.model.VenvDetectionService;
 
 /**
  * The activator class controls the plug-in life cycle.
@@ -17,13 +18,20 @@ public class Activator extends AbstractUIPlugin {
 
     // The shared instance
     private static Activator plugin;
-    private static VenvService service;
+    private static VenvDetectionService service;
+    private static VenvConfigurationService configService;
 
     private static final RuyiLogger LOGGER =
                     new RuyiLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
-    public VenvService getService() {
+    /** Returns the venv service. */
+    public VenvDetectionService getService() {
         return service;
+    }
+
+    /** Returns the venv configuration service. */
+    public VenvConfigurationService getConfigService() {
+        return configService;
     }
 
     @Override
@@ -32,7 +40,8 @@ public class Activator extends AbstractUIPlugin {
 
         super.start(context);
         plugin = this;
-        service = new VenvService();
+        service = new VenvDetectionService();
+        configService = new VenvConfigurationService();
 
         LOGGER.logInfo("Venv plugin started");
     }
@@ -41,6 +50,7 @@ public class Activator extends AbstractUIPlugin {
     public void stop(BundleContext context) throws Exception {
         LOGGER.logInfo("Venv plugin stopping");
 
+        configService = null;
         service = null;
         plugin = null;
         super.stop(context);

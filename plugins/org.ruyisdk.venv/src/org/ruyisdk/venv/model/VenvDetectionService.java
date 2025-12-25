@@ -26,7 +26,7 @@ import org.ruyisdk.ruyi.util.RuyiLogger;
 import org.ruyisdk.venv.Activator;
 
 /** Service facade for listing and managing Ruyi virtual environments. */
-public class VenvService {
+public class VenvDetectionService {
     private static final String VENV_CONFIG_FILE_NAME = "ruyi-venv.toml";
     private static final RuyiLogger LOGGER = Activator.getLogger();
 
@@ -188,8 +188,7 @@ public class VenvService {
         final var out = new ArrayList<Venv>();
         for (final var venvInfo : venvInfos) {
             final var quirks = profileQuirks.getOrDefault(venvInfo.getProfile(), "");
-            out.add(new Venv(venvInfo.getPath(), venvInfo.getProfile(), venvInfo.getSysroot(), venvInfo.getActivated(),
-                            quirks));
+            out.add(Venv.createStandalone(venvInfo.getPath(), venvInfo.getProfile(), venvInfo.getSysroot(), quirks));
         }
         LOGGER.logInfo("Fetched venv list: count=" + out.size());
         return out;
@@ -237,7 +236,15 @@ public class VenvService {
                         return;
                     }
                     final var cfg = parseVenvConfigBestEffort(toml);
-                    out.add(new Venv(childDir.toString(), cfg.profile, cfg.sysroot, projectPath.toString()));
+                    final var venv = Venv.createForProject(childDir.toString(), cfg.profile, cfg.sysroot,
+                                    projectPath.toString());
+
+                    // Derive toolchain path and prefix from venv's bin directory
+                    final var toolchainInfo = deriveToolchainInfo(childDir);
+                    venv.setToolchainPath(toolchainInfo.binPath);
+                    venv.setToolchainPrefix(toolchainInfo.prefix);
+
+                    out.add(venv);
                 });
             } catch (Exception e) {
                 LOGGER.logError("Failed to scan project for venv config: path=" + projectPath, e);
@@ -310,6 +317,50 @@ public class VenvService {
             this.profile = profile == null ? "" : profile;
             this.sysroot = sysroot == null ? "" : sysroot;
         }
+    }
+
+    private static final class DerivedToolchainInfo {
+        private final String binPath;
+        private final String prefix;
+
+        private DerivedToolchainInfo(String binPath, String prefix) {
+            this.binPath = binPath == null ? "" : binPath;
+            this.prefix = prefix == null ? "" : prefix;
+        }
+    }
+
+    /**
+     * Derives toolchain bin path and prefix by scanning the venv's bin directory for a GCC executable.
+     */
+    private static DerivedToolchainInfo deriveToolchainInfo(Path venvPath) {
+        if (venvPath == null) {
+            return new DerivedToolchainInfo("", "");
+        }
+        final var binDir = venvPath.resolve("bin");
+        if (!Files.isDirectory(binDir)) {
+            return new DerivedToolchainInfo("", "");
+        }
+        try (Stream<Path> entries = Files.list(binDir)) {
+            for (final var entry : (Iterable<Path>) entries::iterator) {
+                if (entry == null) {
+                    continue;
+                }
+                final var fileName = entry.getFileName();
+                if (fileName == null) {
+                    continue;
+                }
+                final var name = fileName.toString();
+                // Look for *-gcc executable
+                if (name.endsWith("-gcc") && Files.isRegularFile(entry)) {
+                    final var prefix = name.substring(0, name.length() - "-gcc".length());
+                    return new DerivedToolchainInfo(binDir.toString(), prefix);
+                }
+            }
+        } catch (Exception e) {
+            // ignore scan failures
+        }
+        // No GCC found, but bin directory exists
+        return new DerivedToolchainInfo(binDir.toString(), "");
     }
 
     private static DetectedVenvConfig parseVenvConfigBestEffort(Path tomlPath) {

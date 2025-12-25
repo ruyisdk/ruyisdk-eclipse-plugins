@@ -48,13 +48,14 @@ public class VenvView extends ViewPart {
 
     private Button absPathCheckBox;
     private TableViewer tableViewer;
-    private Button toggleButton;
+    private Button applyButton;
     private Button deleteButton;
     private Button newButton;
 
     @Override
     public void createPartControl(Composite parent) {
-        venvListViewModel = new VenvListViewModel(Activator.getDefault().getService());
+        final var activator = Activator.getDefault();
+        venvListViewModel = new VenvListViewModel(activator.getService(), activator.getConfigService());
 
         createLayouts(parent);
         addControls();
@@ -101,17 +102,22 @@ public class VenvView extends ViewPart {
             {
                 final var column = new TableViewerColumn(tableViewer, SWT.LEFT);
                 column.getColumn().setText("Profile");
-                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(20, 150));
+                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(15, 120));
+            }
+            {
+                final var column = new TableViewerColumn(tableViewer, SWT.LEFT);
+                column.getColumn().setText("Toolchain Prefix");
+                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(20, 180));
             }
             {
                 final var column = new TableViewerColumn(tableViewer, SWT.LEFT);
                 column.getColumn().setText("Sysroot");
-                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(40, 300));
+                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(30, 250));
             }
             {
                 final var column = new TableViewerColumn(tableViewer, SWT.LEFT);
                 column.getColumn().setText("Project Path");
-                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(60, 500));
+                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(35, 300));
             }
             tableComposite.setLayout(tableColumnLayout);
 
@@ -120,18 +126,16 @@ public class VenvView extends ViewPart {
 
             final var contentProvider = new ObservableListContentProvider<Venv>();
             tableViewer.setContentProvider(contentProvider);
-            tableViewer.setLabelProvider(
-                            new ObservableMapLabelProvider(Properties.observeEach(contentProvider.getKnownElements(),
-                                            BeanProperties.values(Venv.class, "profile", "sysroot", "projectPath"))));
+            tableViewer.setLabelProvider(new ObservableMapLabelProvider(
+                            Properties.observeEach(contentProvider.getKnownElements(), BeanProperties.values(Venv.class,
+                                            "profile", "toolchainPrefix", "sysroot", "projectPath"))));
 
             tableViewer.setInput(venvListViewModel.getVenvList());
         }
 
-
-        toggleButton = new Button(buttonBar, SWT.PUSH);
-        toggleButton.setText("Toggle activation");
-        toggleButton.setEnabled(false);
-        toggleButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+        applyButton = new Button(buttonBar, SWT.PUSH);
+        applyButton.setText("Apply to Project");
+        applyButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 
         deleteButton = new Button(buttonBar, SWT.PUSH);
         deleteButton.setText("Delete...");
@@ -148,6 +152,19 @@ public class VenvView extends ViewPart {
         dbc.bindList(ViewerProperties.multipleSelection().observe(tableViewer), venvListViewModel.getSelectedVenvs());
         dbc.bindValue(WidgetProperties.enabled().observe(deleteButton), BeanProperties
                         .value(VenvListViewModel.class, "canDelete", Boolean.class).observe(venvListViewModel));
+        dbc.bindValue(WidgetProperties.enabled().observe(applyButton), BeanProperties
+                        .value(VenvListViewModel.class, "canApply", Boolean.class).observe(venvListViewModel));
+
+        applyButton.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                venvListViewModel.onApplySelectedVenvConfig(result -> {
+                    container.getDisplay().asyncExec(() -> {
+                        MessageDialog.openInformation(container.getShell(), "Apply Configuration", result.getMessage());
+                    });
+                });
+            }
+        });
 
         deleteButton.addSelectionListener(new SelectionAdapter() {
             @Override
