@@ -1,5 +1,7 @@
 package org.ruyisdk.venv.model;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Consumer;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
@@ -226,9 +228,14 @@ public class VenvConfigurationService {
         applyJob.schedule();
     }
 
-    /** Finds a project by its file system path. */
+    /** Finds a project by its file system path, using normalized path comparison. */
     private IProject findProjectByPath(String projectPath) {
         if (projectPath == null || projectPath.trim().isEmpty()) {
+            return null;
+        }
+
+        final var normalizedTarget = normalizePath(projectPath);
+        if (normalizedTarget == null) {
             return null;
         }
 
@@ -241,10 +248,28 @@ public class VenvConfigurationService {
             if (location == null) {
                 continue;
             }
-            if (location.toOSString().equals(projectPath)) {
+            final var projectLocation = normalizePath(location.toOSString());
+            if (projectLocation != null && projectLocation.equals(normalizedTarget)) {
                 return project;
             }
         }
         return null;
+    }
+
+    /** Normalizes a file system path, resolving symlinks if possible. */
+    private Path normalizePath(String pathString) {
+        if (pathString == null || pathString.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return Paths.get(pathString).toRealPath();
+        } catch (Exception e) {
+            // Fall back to normalized path if real path resolution fails (e.g., path doesn't exist)
+            try {
+                return Paths.get(pathString).normalize().toAbsolutePath();
+            } catch (Exception e2) {
+                return null;
+            }
+        }
     }
 }
