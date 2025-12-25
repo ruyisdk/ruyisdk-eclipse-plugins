@@ -12,13 +12,13 @@ import org.ruyisdk.ruyi.services.RuyiCli;
 import org.ruyisdk.venv.model.Emulator;
 import org.ruyisdk.venv.model.Profile;
 import org.ruyisdk.venv.model.Toolchain;
-import org.ruyisdk.venv.model.VenvService;
+import org.ruyisdk.venv.model.VenvDetectionService;
 
 /** View model backing the venv creation wizard UI. */
 public class VenvWizardViewModel {
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    private final VenvService service;
+    private final VenvDetectionService service;
 
     private boolean configurationPageComplete;
     private String summaryText = "";
@@ -45,7 +45,7 @@ public class VenvWizardViewModel {
     }
 
     /** Creates a new view model instance. */
-    public VenvWizardViewModel(VenvService service) {
+    public VenvWizardViewModel(VenvDetectionService service) {
         this.service = service;
         refreshListsBestEffort();
         recomputeDerivedState();

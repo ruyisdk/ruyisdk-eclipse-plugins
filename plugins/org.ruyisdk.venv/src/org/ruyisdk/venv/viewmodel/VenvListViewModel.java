@@ -11,7 +11,8 @@ import org.eclipse.core.databinding.observable.list.WritableList;
 import org.ruyisdk.ruyi.util.RuyiLogger;
 import org.ruyisdk.venv.Activator;
 import org.ruyisdk.venv.model.Venv;
-import org.ruyisdk.venv.model.VenvService;
+import org.ruyisdk.venv.model.VenvConfigurationService;
+import org.ruyisdk.venv.model.VenvDetectionService;
 
 /**
  * View model for the venv list view.
@@ -24,8 +25,10 @@ public class VenvListViewModel {
 
     private boolean isFetching = false;
     private boolean canDelete = false;
+    private boolean canApply = false;
 
-    private final VenvService service;
+    private final VenvDetectionService service;
+    private final VenvConfigurationService configService;
     private final IObservableList<Venv> observableVenvList = new WritableList<>(new ArrayList<>(), Venv.class);
     private final IObservableList<Venv> selectedVenvs = new WritableList<>(new ArrayList<>(), Venv.class);
 
@@ -33,10 +36,15 @@ public class VenvListViewModel {
      * Creates a new view model.
      *
      * @param service the venv service
+     * @param configService the configuration service
      */
-    public VenvListViewModel(VenvService service) {
+    public VenvListViewModel(VenvDetectionService service, VenvConfigurationService configService) {
         this.service = service;
-        selectedVenvs.addListChangeListener((IListChangeListener<Venv>) event -> updateCanDelete());
+        this.configService = configService;
+        selectedVenvs.addListChangeListener((IListChangeListener<Venv>) event -> {
+            updateCanDelete();
+            updateCanApply();
+        });
     }
 
     /**
@@ -74,6 +82,22 @@ public class VenvListViewModel {
     }
 
     /**
+     * Returns whether apply configuration is currently allowed.
+     *
+     * @return whether apply is currently allowed
+     */
+    public boolean isCanApply() {
+        return canApply;
+    }
+
+    private void setCanApply(boolean canApply) {
+        if (this.canApply == canApply) {
+            return;
+        }
+        pcs.firePropertyChange("canApply", this.canApply, this.canApply = canApply);
+    }
+
+    /**
      * Adds a property change listener.
      *
      * @param listener the listener
@@ -94,10 +118,22 @@ public class VenvListViewModel {
     private void setFetching(boolean isFetching) {
         this.isFetching = isFetching;
         updateCanDelete();
+        updateCanApply();
     }
 
     private void updateCanDelete() {
         setCanDelete(!isFetching && !getSelectedVenvDirectoryPaths().isEmpty());
+    }
+
+    private void updateCanApply() {
+        // Can apply if exactly one venv is selected and it has a project path
+        if (isFetching || selectedVenvs.size() != 1) {
+            setCanApply(false);
+            return;
+        }
+        final var selected = selectedVenvs.get(0);
+        final var projectPath = selected.getProjectPath();
+        setCanApply(projectPath != null && !projectPath.isEmpty());
     }
 
     /**
@@ -159,6 +195,44 @@ public class VenvListViewModel {
                 }
                 if (callback != null) {
                     callback.accept(err);
+                }
+            });
+        });
+    }
+
+    /**
+     * Applies the selected venv's configuration to its associated project.
+     *
+     * @param callback callback invoked with the result
+     */
+    public void onApplySelectedVenvConfig(Consumer<VenvConfigurationService.ApplyResult> callback) {
+        if (isFetching) {
+            if (callback != null) {
+                callback.accept(new VenvConfigurationService.ApplyResult(false, "Operation in progress"));
+            }
+            return;
+        }
+
+        if (selectedVenvs.size() != 1) {
+            if (callback != null) {
+                callback.accept(new VenvConfigurationService.ApplyResult(false, "No venv selected"));
+            }
+            return;
+        }
+
+        final var selected = selectedVenvs.get(0);
+        LOGGER.logInfo("Applying venv configuration to project: venv=" + selected.getPath());
+        setFetching(true);
+        configService.applyToProjectAsync(selected, result -> {
+            observableVenvList.getRealm().asyncExec(() -> {
+                setFetching(false);
+                if (result.isSuccess()) {
+                    LOGGER.logInfo("Venv configuration applied successfully");
+                } else {
+                    LOGGER.logWarning("Venv configuration failed: " + result.getMessage(), null);
+                }
+                if (callback != null) {
+                    callback.accept(result);
                 }
             });
         });

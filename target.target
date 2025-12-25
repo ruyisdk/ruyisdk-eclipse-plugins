@@ -8,6 +8,9 @@
 			<unit id="org.eclipse.cdt.feature.group" version="0.0.0"/>
 			<unit id="org.eclipse.pde.feature.group" version="0.0.0"/>
 			<unit id="org.eclipse.sdk.feature.group" version="0.0.0"/>
+			<unit id="org.eclipse.embedcdt.feature.group" version="0.0.0"/>
+			<unit id="org.eclipse.embedcdt.managedbuild.cross.riscv.feature.group" version="0.0.0"/>
+			<unit id="org.eclipse.tm.terminal.feature.feature.group" version="0.0.0"/>
 		</location>
 		<!-- Maven dependencies wrapped as OSGi bundles.
 		     These are included in the target platform and will be available
