@@ -12,4 +12,18 @@
             class="org.ruyisdk.venv.views.VenvView"
             category="org.ruyisdk.venv.category"/>
     </extension>
+
+    <extension point="org.eclipse.ui.menus">
+        <menuContribution
+            locationURI="menu:org.ruyisdk.ruyi.menus.main?after=additions">
+            <command
+                commandId="org.eclipse.ui.views.showView"
+                label="Venv (Virtual Environments)"
+                tooltip="Open Ruyi Venv view">
+                <parameter
+                    name="org.eclipse.ui.views.showView.viewId"
+                    value="org.ruyisdk.venv.view" />
+            </command>
+        </menuContribution>
+    </extension>
 </plugin>
