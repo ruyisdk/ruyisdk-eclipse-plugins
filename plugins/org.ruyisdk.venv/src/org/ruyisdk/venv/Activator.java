@@ -18,15 +18,15 @@ public class Activator extends AbstractUIPlugin {
 
     // The shared instance
     private static Activator plugin;
-    private static VenvDetectionService service;
+    private static VenvDetectionService detectionService;
     private static VenvConfigurationService configService;
 
     private static final RuyiLogger LOGGER =
                     new RuyiLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
     /** Returns the venv service. */
-    public VenvDetectionService getService() {
-        return service;
+    public VenvDetectionService getDetectionService() {
+        return detectionService;
     }
 
     /** Returns the venv configuration service. */
@@ -40,7 +40,7 @@ public class Activator extends AbstractUIPlugin {
 
         super.start(context);
         plugin = this;
-        service = new VenvDetectionService();
+        detectionService = new VenvDetectionService();
         configService = new VenvConfigurationService();
 
         LOGGER.logInfo("Venv plugin started");
@@ -51,7 +51,7 @@ public class Activator extends AbstractUIPlugin {
         LOGGER.logInfo("Venv plugin stopping");
 
         configService = null;
-        service = null;
+        detectionService = null;
         plugin = null;
         super.stop(context);
 

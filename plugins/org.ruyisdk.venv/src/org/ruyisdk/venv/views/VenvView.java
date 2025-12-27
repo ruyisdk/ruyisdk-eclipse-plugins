@@ -55,7 +55,7 @@ public class VenvView extends ViewPart {
     @Override
     public void createPartControl(Composite parent) {
         final var activator = Activator.getDefault();
-        venvListViewModel = new VenvListViewModel(activator.getService(), activator.getConfigService());
+        venvListViewModel = new VenvListViewModel(activator.getDetectionService(), activator.getConfigService());
 
         createLayouts(parent);
         addControls();
@@ -201,7 +201,7 @@ public class VenvView extends ViewPart {
         newButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                final var wizardViewModel = new VenvWizardViewModel(Activator.getDefault().getService());
+                final var wizardViewModel = new VenvWizardViewModel(Activator.getDefault().getDetectionService());
                 wizardViewModel.setProjectRootPaths(getOpenProjectRootPaths());
                 final var dialog = new WizardDialog(container.getShell(), new VenvWizard(wizardViewModel));
                 if (dialog.open() == WizardDialog.OK) {
