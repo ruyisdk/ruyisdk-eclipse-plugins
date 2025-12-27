@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core
 Bundle-SymbolicName: org.ruyisdk.core;singleton:=true
-Bundle-Version: 0.0.5.qualifier
+Bundle-Version: 0.1.0.qualifier
 Automatic-Module-Name: org.ruyisdk.core
 Bundle-Activator: org.ruyisdk.core.Activator
 Bundle-ActivationPolicy: lazy
