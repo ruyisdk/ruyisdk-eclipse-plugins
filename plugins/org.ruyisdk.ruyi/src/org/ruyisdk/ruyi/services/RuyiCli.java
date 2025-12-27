@@ -182,7 +182,7 @@ public class RuyiCli {
         }
     }
 
-    /* Minimal wrapper around the `ruyi` CLI to fetch package lists. */
+    /* Minimal wrapper around the `ruyi` CLI (primarily porcelain output). */
     // All calls to the `ruyi` executable use the canonical install path
     // returned by `RuyiFileUtils.getInstallPath()`. Process creation is
     // centralized in `runRuyi(...)` below.
@@ -440,7 +440,7 @@ public class RuyiCli {
 
     // Centralized process invocation for ruyi. Uses only the canonical
     // installation directory provided by RuyiFileUtils.getInstallPath(). If
-    // no install path is available this returns an empty output with exit -1.
+    // no install path is available this returns exit -1 with a message.
     private static RunResult runRuyi(List<String> args) {
         String install = null;
         try {
@@ -567,7 +567,7 @@ public class RuyiCli {
      * @param path destination filesystem path for the venv (required)
      * @param toolchainName toolchain package name (required)
      * @param toolchainVersion toolchain version (required)
-     * @param profile optional profile name (may be null)
+     * @param profile profile name (required)
      * @param emulatorName optional emulator package name (may be null)
      * @param emulatorVersion optional emulator version (may be null)
      * @return RunResult with exit code and captured output
@@ -627,7 +627,7 @@ public class RuyiCli {
         return objs;
     }
 
-    // Placeholder implementations: attempt to call list and parse toolchains/emulators if present.
+    // Package list helpers: call porcelain `list` and parse its JSON-ish output.
     /** Lists available toolchains as reported by the ruyi CLI. */
     public static List<ToolchainInfo> listToolchains() {
         final var out = new ArrayList<ToolchainInfo>();

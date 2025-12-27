@@ -27,7 +27,7 @@ public class VenvListViewModel {
     private boolean canDelete = false;
     private boolean canApply = false;
 
-    private final VenvDetectionService service;
+    private final VenvDetectionService detectionService;
     private final VenvConfigurationService configService;
     private final IObservableList<Venv> observableVenvList = new WritableList<>(new ArrayList<>(), Venv.class);
     private final IObservableList<Venv> selectedVenvs = new WritableList<>(new ArrayList<>(), Venv.class);
@@ -35,11 +35,11 @@ public class VenvListViewModel {
     /**
      * Creates a new view model.
      *
-     * @param service the venv service
+     * @param detectionService the venv detection service
      * @param configService the configuration service
      */
-    public VenvListViewModel(VenvDetectionService service, VenvConfigurationService configService) {
-        this.service = service;
+    public VenvListViewModel(VenvDetectionService detectionService, VenvConfigurationService configService) {
+        this.detectionService = detectionService;
         this.configService = configService;
         selectedVenvs.addListChangeListener((IListChangeListener<Venv>) event -> {
             updateCanDelete();
@@ -147,7 +147,7 @@ public class VenvListViewModel {
         LOGGER.logInfo("Refreshing venv list");
 
         setFetching(true);
-        service.detectProjectVenvsAsync(result -> {
+        detectionService.detectProjectVenvsAsync(result -> {
             observableVenvList.getRealm().asyncExec(() -> {
                 observableVenvList.clear();
                 observableVenvList.addAll(result);
@@ -163,7 +163,7 @@ public class VenvListViewModel {
      * @return the selected venv directory paths
      */
     public List<String> getSelectedVenvDirectoryPaths() {
-        return service.getVenvDirectoryPathsFromVenvs(new ArrayList<>(selectedVenvs));
+        return detectionService.getVenvDirectoryPathsFromVenvs(new ArrayList<>(selectedVenvs));
     }
 
     /**
@@ -187,7 +187,7 @@ public class VenvListViewModel {
         LOGGER.logInfo("Deleting selected venv directories: count=" + venvPaths.size());
 
         setFetching(true);
-        service.deleteVenvDirectoriesAsync(venvPaths, err -> {
+        detectionService.deleteVenvDirectoriesAsync(venvPaths, err -> {
             observableVenvList.getRealm().asyncExec(() -> {
                 setFetching(false);
                 if (err == null) {

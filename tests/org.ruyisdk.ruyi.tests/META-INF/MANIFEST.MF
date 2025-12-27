@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ruyi Tests
 Bundle-SymbolicName: org.ruyisdk.ruyi.tests
-Bundle-Version: 0.0.5.qualifier
+Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: ISCAS
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.ruyisdk.ruyi,
