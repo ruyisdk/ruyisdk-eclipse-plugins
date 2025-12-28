@@ -66,7 +66,7 @@ public class VenvConfigurationService {
         LOGGER.logInfo("Applying venv configuration: venv=" + venv.getPath() + ", project=" + venv.getProjectPath());
 
         final var projectPath = venv.getProjectPath();
-        if (projectPath == null || projectPath.trim().isEmpty()) {
+        if (projectPath == null || projectPath.isBlank()) {
             return new ApplyResult(false, "Venv has no associated project path");
         }
 
@@ -230,7 +230,7 @@ public class VenvConfigurationService {
 
     /** Finds a project by its file system path, using normalized path comparison. */
     private IProject findProjectByPath(String projectPath) {
-        if (projectPath == null || projectPath.trim().isEmpty()) {
+        if (projectPath == null || projectPath.isBlank()) {
             return null;
         }
 
@@ -258,7 +258,7 @@ public class VenvConfigurationService {
 
     /** Normalizes a file system path, resolving symlinks if possible. */
     private Path normalizePath(String pathString) {
-        if (pathString == null || pathString.trim().isEmpty()) {
+        if (pathString == null || pathString.isBlank()) {
             return null;
         }
         try {

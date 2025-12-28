@@ -131,7 +131,7 @@ public class WizardLocationPage extends WizardPage {
             protected Boolean calculate() {
                 final var path = pathObservable.getValue();
                 final var name = nameObservable.getValue();
-                return path != null && !path.trim().isEmpty() && name != null && !name.trim().isEmpty();
+                return path != null && !path.isBlank() && name != null && !name.isBlank();
             }
         };
         completeObservable.addValueChangeListener(e -> {
