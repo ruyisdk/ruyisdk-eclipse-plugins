@@ -62,14 +62,10 @@ public class VenvDetectionService {
                 continue;
             }
             final var p = venv.getPath();
-            if (p == null) {
+            if (p == null || p.isBlank()) {
                 continue;
             }
-            final var trimmed = p.trim();
-            if (trimmed.isEmpty()) {
-                continue;
-            }
-            out.add(trimmed);
+            out.add(p);
         }
         return List.copyOf(out);
     }
@@ -83,7 +79,7 @@ public class VenvDetectionService {
             if (p == null || p.isBlank()) {
                 continue;
             }
-            out.add(Path.of(p.trim()));
+            out.add(Path.of(p));
         }
         out.removeIf(Objects::isNull);
         return out;
