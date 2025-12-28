@@ -80,7 +80,7 @@ public class VenvDetectionService {
         }
         final var out = new ArrayList<Path>();
         for (final var p : pathStrings) {
-            if (p == null || p.trim().isEmpty()) {
+            if (p == null || p.isBlank()) {
                 continue;
             }
             out.add(Path.of(p.trim()));

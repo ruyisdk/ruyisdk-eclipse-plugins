@@ -276,7 +276,7 @@ public class RuyiCli {
     /** Reads a news item by ID or ordinal using the ruyi CLI. */
     public static NewsReadResult readNewsItem(String idOrOrd) {
         try {
-            if (idOrOrd == null || idOrOrd.trim().isEmpty()) {
+            if (idOrOrd == null || idOrOrd.isBlank()) {
                 return null;
             }
             final var args = Arrays.asList("--porcelain", "news", "read", "--quiet", idOrOrd);
@@ -290,7 +290,7 @@ public class RuyiCli {
     /** Parses the output of a news list command. */
     public static List<NewsListItemInfo> parseNewsListFromString(String input) {
         final var out = new ArrayList<NewsListItemInfo>();
-        if (input == null || input.trim().isEmpty()) {
+        if (input == null || input.isBlank()) {
             return out;
         }
         try {
@@ -317,7 +317,7 @@ public class RuyiCli {
 
     /** Parses the output of a news read command. */
     public static NewsReadResult parseNewsReadFromString(String input) {
-        if (input == null || input.trim().isEmpty()) {
+        if (input == null || input.isBlank()) {
             return null;
         }
         try {
@@ -448,7 +448,7 @@ public class RuyiCli {
         } catch (Exception e) {
             // fall through to return empty result
         }
-        if (install == null || install.trim().isEmpty()) {
+        if (install == null || install.isBlank()) {
             final var msg = "Ruyi install path not configured (RuyiFileUtils.getInstallPath() returned empty)";
             return new RunResult(-1, msg);
         }
@@ -549,7 +549,7 @@ public class RuyiCli {
      * arguments so callers don't build parameter strings themselves.
      */
     public static RunResult installPackage(String name, String version) {
-        if (name == null || name.trim().isEmpty() || version == null || version.trim().isEmpty()) {
+        if (name == null || name.isBlank() || version == null || version.isBlank()) {
             return new RunResult(-1, "Invalid package name or version");
         }
         // Use the documented package atom syntax: name(version)
@@ -574,14 +574,14 @@ public class RuyiCli {
      */
     public static RunResult createVenv(String path, String toolchainName, String toolchainVersion, String profile,
                     String emulatorName, String emulatorVersion) {
-        if (path == null || path.trim().isEmpty()) {
+        if (path == null || path.isBlank()) {
             return new RunResult(-1, "Empty venv path");
         }
-        if (toolchainName == null || toolchainName.trim().isEmpty() || toolchainVersion == null
-                        || toolchainVersion.trim().isEmpty()) {
+        if (toolchainName == null || toolchainName.isBlank() || toolchainVersion == null
+                        || toolchainVersion.isBlank()) {
             return new RunResult(-1, "Invalid toolchain");
         }
-        if (profile == null || profile.trim().isEmpty()) {
+        if (profile == null || profile.isBlank()) {
             return new RunResult(-1, "Invalid profile");
         }
         final var args = new ArrayList<String>();
@@ -590,8 +590,7 @@ public class RuyiCli {
         // Pass toolchain/emulator atoms using the documented parentheses syntax
         args.add("--toolchain");
         args.add(toolchainName + "(" + toolchainVersion + ")");
-        if (emulatorName != null && !emulatorName.trim().isEmpty() && emulatorVersion != null
-                        && !emulatorVersion.trim().isEmpty()) {
+        if (emulatorName != null && !emulatorName.isBlank() && emulatorVersion != null && !emulatorVersion.isBlank()) {
             args.add("--emulator");
             args.add(emulatorName + "(" + emulatorVersion + ")");
         }
@@ -657,7 +656,7 @@ public class RuyiCli {
             }
             final var objs = extractJsonObjects(input);
             for (final var jo : objs) {
-                if (jo == null || jo.trim().isEmpty()) {
+                if (jo == null || jo.isBlank()) {
                     continue;
                 }
                 try {
@@ -731,7 +730,7 @@ public class RuyiCli {
             }
             final var objs = extractJsonObjects(input);
             for (final var jo : objs) {
-                if (jo == null || jo.trim().isEmpty()) {
+                if (jo == null || jo.isBlank()) {
                     continue;
                 }
                 try {

@@ -238,11 +238,11 @@ public class VenvWizardViewModel {
     /** Creates a virtual environment using the current wizard selections. */
     public RuyiCli.RunResult createVenv() {
         final var parent = this.venvLocation;
-        if (parent == null || parent.trim().isEmpty()) {
+        if (parent == null || parent.isBlank()) {
             return new RuyiCli.RunResult(-1, "Venv parent path is empty");
         }
         final var name = this.venvName;
-        if (name == null || name.trim().isEmpty()) {
+        if (name == null || name.isBlank()) {
             return new RuyiCli.RunResult(-1, "Venv name is empty");
         }
 
@@ -414,7 +414,7 @@ public class VenvWizardViewModel {
             projectRootPaths.clear();
             if (paths != null) {
                 for (final var path : paths) {
-                    if (path == null || path.trim().isEmpty()) {
+                    if (path == null || path.isBlank()) {
                         continue;
                     }
                     projectRootPaths.add(path);
