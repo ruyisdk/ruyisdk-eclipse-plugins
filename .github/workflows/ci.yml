@@ -106,7 +106,6 @@ jobs:
 
   publish_releases:
     name: Publish Releases
-    if: ${{ needs.config.outputs.make_continuous_release == 'true' }}
     needs:
       - config
       - build_and_upload
@@ -125,7 +124,17 @@ jobs:
         with:
           name: ${{ env.output_file_name }}
 
+      - name: Prepare Release Notes
+        run: |
+          set -ex
+
+          for f in $(find '${{ github.workspace }}/.github/resources/release/' -name '*.md'); do
+            # https://stackoverflow.com/questions/10107459/replace-a-word-with-multiple-lines-using-sed/10108037#10108037
+            perl -i.bak -pe 's/%FILE_LIST%/$ENV{"output_file_list"}/g' "$f" && rm "$f.bak"
+          done
+
       - name: Delete Old Continuous Releases
+        if: ${{ needs.config.outputs.make_continuous_release == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -141,22 +150,14 @@ jobs:
             done
           fi
 
-      - name: Prepare Release Notes
-        run: |
-          set -ex
-
-          for f in $(find '${{ github.workspace }}/.github/resources/release/' -name '*.md'); do
-            # https://stackoverflow.com/questions/10107459/replace-a-word-with-multiple-lines-using-sed/10108037#10108037
-            perl -i.bak -pe 's/%FILE_LIST%/$ENV{"output_file_list"}/g' "$f" && rm "$f.bak"
-          done
-
       - name: Publish a Continuous Release
+        if: ${{ needs.config.outputs.make_continuous_release == 'true' }}
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090  # v2.4.1
         with:
           name: Continuous
           tag_name: continuous
           make_latest: false
-          prerelease: true
+          prerelease: false
           generate_release_notes: true
           body_path: ${{ github.workspace }}/.github/resources/release/release_note_continuous.md
           files: |
@@ -173,9 +174,9 @@ jobs:
           files: |
             ${{ env.output_file_name }}
 
-  publish_github_pages:
-    name: Publish GitHub Pages
-    if: ${{ needs.config.outputs.make_versioning_release == 'true' }}
+  continuously_publish_github_pages:
+    name: Publish GitHub Pages for Continuous Release
+    if: ${{ needs.config.outputs.make_continuous_release == 'true' }}
     needs:
       - config
       - build_and_upload
