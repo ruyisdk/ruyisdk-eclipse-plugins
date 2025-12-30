@@ -26,22 +26,45 @@ jobs:
     name: Configuration
     runs-on: ubuntu-latest
     timeout-minutes: 1
+    env:
+      # e.g. "ruyisdk-eclipse-plugins-0.1.0.zip". no "v" prefixes.
+      released_file_name_template: "ruyisdk-eclipse-plugins-%VERSION_NUMBER%.zip"
     outputs:
       datetime: ${{ steps.the_work.outputs.datetime }}
       # if main branch updates, publish continuous releases
-      make_continuous_release: ${{ steps.the_work.outputs.continuous }}
+      make_continuous_release: ${{ steps.the_work.outputs.is_continuous }}
       # if tag added, publish versioning releases
-      make_versioning_release: ${{ steps.the_work.outputs.versioning }}
+      make_versioning_release: ${{ steps.the_work.outputs.is_versioning }}
+      version_number: ${{ steps.the_work.outputs.ver_num }}
+      released_file_name: ${{ steps.the_work.outputs.ver_file_name }}
     steps:
       - name: The Work
         id: the_work
         run: |
-          set -ex
+          set -exu
 
           echo "datetime=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S %z')" >> "$GITHUB_OUTPUT"
 
-          echo 'continuous=${{ github.ref_type == 'tag' || (github.ref_type == 'branch' && github.ref_name == 'main') }}' >> "$GITHUB_OUTPUT"
-          echo 'versioning=${{ github.ref_type == 'tag' }}' >> "$GITHUB_OUTPUT"
+          echo 'is_continuous=${{ github.ref_type == 'tag' || (github.ref_type == 'branch' && github.ref_name == 'main') }}' >> "$GITHUB_OUTPUT"
+
+          is_versioning="${{ github.ref_type == 'tag' }}"
+          echo "is_versioning=$is_versioning" >> "$GITHUB_OUTPUT"
+
+          git_tag='${{ github.ref_name }}'
+
+          if [[ "$is_versioning" = 'true' ]]; then
+            # "v0.1.0" -> "0.1.0"
+            ver_num="${git_tag#v}"
+          else
+            # continuous
+            ver_num='continuous'
+          fi
+
+          echo "ver_num=$ver_num" >> "$GITHUB_OUTPUT"
+
+          ver_file_name="$(sed "s/%VERSION_NUMBER%/$ver_num/" <<<"$released_file_name_template")"
+
+          echo "ver_file_name=$ver_file_name" >> "$GITHUB_OUTPUT"
 
   build_and_upload:
     name: Build and Upload
@@ -115,6 +138,7 @@ jobs:
       contents: write
     env:
       output_file_list: ${{ needs.build_and_upload.outputs.output_file_list }}
+      released_file_name: ${{ needs.config.outputs.released_file_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5.0.0
@@ -161,7 +185,14 @@ jobs:
           generate_release_notes: true
           body_path: ${{ github.workspace }}/.github/resources/release/release_note_continuous.md
           files: |
-            ${{ env.output_file_name }}
+            ${{ env.released_file_name }}
+
+      - name: Rename versioning released files
+        if: ${{ needs.config.outputs.make_versioning_release == 'true' }}
+        run: |
+          set -ex
+
+          mv '${{ env.output_file_name }}' '${{ env.released_file_name }}'
 
       - name: Publish a Versioning Release
         if: ${{ needs.config.outputs.make_versioning_release == 'true' }}
@@ -172,7 +203,7 @@ jobs:
           generate_release_notes: true
           body_path: ${{ github.workspace }}/.github/resources/release/release_note_versioning.md
           files: |
-            ${{ env.output_file_name }}
+            ${{ env.released_file_name }}
 
   continuously_publish_github_pages:
     name: Publish GitHub Pages for Continuous Release
@@ -180,7 +211,6 @@ jobs:
     needs:
       - config
       - build_and_upload
-      - publish_releases
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
