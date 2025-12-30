@@ -1,4 +1,4 @@
-# custom-plugins
+# RuyiSDK Eclipse Plugins
 
 ## 目录结构说明
 
