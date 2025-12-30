@@ -46,7 +46,9 @@ jobs:
   build_and_upload:
     name: Build and Upload
     if: ${{ needs.dco.result == 'success' }}
-    needs: dco
+    needs:
+      - dco
+      - config
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
