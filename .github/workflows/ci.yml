@@ -185,7 +185,7 @@ jobs:
           generate_release_notes: true
           body_path: ${{ github.workspace }}/.github/resources/release/release_note_continuous.md
           files: |
-            ${{ env.released_file_name }}
+            ${{ env.output_file_name }}
 
       - name: Rename versioning released files
         if: ${{ needs.config.outputs.make_versioning_release == 'true' }}
