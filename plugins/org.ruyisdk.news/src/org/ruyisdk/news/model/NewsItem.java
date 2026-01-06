@@ -14,6 +14,7 @@ public class NewsItem {
     private String id;
     private boolean unread;
     private String details = "";
+    private String detailsHtml = "";
     private boolean detailsFetched = false;
 
     /**
@@ -119,6 +120,24 @@ public class NewsItem {
      */
     public void setDetails(String details) {
         pcs.firePropertyChange("details", this.details, this.details = details);
+    }
+
+    /**
+     * Returns the details as rendered HTML.
+     *
+     * @return the details HTML
+     */
+    public String getDetailsHtml() {
+        return detailsHtml;
+    }
+
+    /**
+     * Sets the details HTML.
+     *
+     * @param detailsHtml the details HTML
+     */
+    public void setDetailsHtml(String detailsHtml) {
+        pcs.firePropertyChange("detailsHtml", this.detailsHtml, this.detailsHtml = detailsHtml);
     }
 
     /**
