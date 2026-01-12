@@ -146,11 +146,7 @@ public class VenvWizard extends Wizard {
 
                 final var detailsText = new Text(composite,
                                 SWT.BORDER | SWT.READ_ONLY | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-                {
-                    var gridData = new GridData(GridData.FILL_HORIZONTAL);
-                    gridData.heightHint = 120;
-                    detailsText.setLayoutData(gridData);
-                }
+                detailsText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
                 detailsText.setText(details == null ? "" : details);
 
                 return composite;
