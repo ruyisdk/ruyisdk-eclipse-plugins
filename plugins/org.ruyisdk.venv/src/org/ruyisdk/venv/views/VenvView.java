@@ -48,6 +48,7 @@ public class VenvView extends ViewPart {
 
     private Button absPathCheckBox;
     private TableViewer tableViewer;
+    private Button refreshButton;
     private Button applyButton;
     private Button deleteButton;
     private Button newButton;
@@ -79,7 +80,7 @@ public class VenvView extends ViewPart {
         buttonBar = new Composite(container, SWT.NONE);
         buttonBar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         {
-            var gridLayout = new GridLayout(3, false);
+            var gridLayout = new GridLayout(4, false);
             gridLayout.marginWidth = 0;
             buttonBar.setLayout(gridLayout);
         }
@@ -133,6 +134,10 @@ public class VenvView extends ViewPart {
             tableViewer.setInput(venvListViewModel.getVenvList());
         }
 
+        refreshButton = new Button(buttonBar, SWT.PUSH);
+        refreshButton.setText("Refresh List");
+        refreshButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+
         applyButton = new Button(buttonBar, SWT.PUSH);
         applyButton.setText("Apply to Project");
         applyButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
@@ -150,10 +155,19 @@ public class VenvView extends ViewPart {
         dbc = new DataBindingContext();
 
         dbc.bindList(ViewerProperties.multipleSelection().observe(tableViewer), venvListViewModel.getSelectedVenvs());
+        dbc.bindValue(WidgetProperties.enabled().observe(refreshButton), BeanProperties
+                        .value(VenvListViewModel.class, "canRefresh", Boolean.class).observe(venvListViewModel));
         dbc.bindValue(WidgetProperties.enabled().observe(deleteButton), BeanProperties
                         .value(VenvListViewModel.class, "canDelete", Boolean.class).observe(venvListViewModel));
         dbc.bindValue(WidgetProperties.enabled().observe(applyButton), BeanProperties
                         .value(VenvListViewModel.class, "canApply", Boolean.class).observe(venvListViewModel));
+
+        refreshButton.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                venvListViewModel.onRefreshVenvListAsync();
+            }
+        });
 
         applyButton.addSelectionListener(new SelectionAdapter() {
             @Override
