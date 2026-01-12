@@ -26,6 +26,7 @@ public class VenvListViewModel {
     private boolean isFetching = false;
     private boolean canDelete = false;
     private boolean canApply = false;
+    private boolean canRefresh = true;
 
     private final VenvDetectionService detectionService;
     private final VenvConfigurationService configService;
@@ -98,6 +99,22 @@ public class VenvListViewModel {
     }
 
     /**
+     * Returns whether refresh is currently allowed.
+     *
+     * @return whether refresh is currently allowed
+     */
+    public boolean isCanRefresh() {
+        return canRefresh;
+    }
+
+    private void setCanRefresh(boolean canRefresh) {
+        if (this.canRefresh == canRefresh) {
+            return;
+        }
+        pcs.firePropertyChange("canRefresh", this.canRefresh, this.canRefresh = canRefresh);
+    }
+
+    /**
      * Adds a property change listener.
      *
      * @param listener the listener
@@ -119,6 +136,7 @@ public class VenvListViewModel {
         this.isFetching = isFetching;
         updateCanDelete();
         updateCanApply();
+        updateCanRefresh();
     }
 
     private void updateCanDelete() {
@@ -134,6 +152,10 @@ public class VenvListViewModel {
         final var selected = selectedVenvs.get(0);
         final var projectPath = selected.getProjectPath();
         setCanApply(projectPath != null && !projectPath.isEmpty());
+    }
+
+    private void updateCanRefresh() {
+        setCanRefresh(!isFetching);
     }
 
     /**
