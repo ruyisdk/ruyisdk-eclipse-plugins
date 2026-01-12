@@ -10,7 +10,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -427,14 +430,21 @@ public class RuyiCli {
         return first;
     }
 
-    private static String readAll(Process p) throws IOException {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-            final var sb = new StringBuilder();
-            String l;
-            while ((l = br.readLine()) != null) {
-                sb.append(l).append('\n');
-            }
-            return sb.toString();
+    private static String readAll(Process p) throws InterruptedException {
+        // Read in background using CompletableFuture
+        final var outputFuture =
+                        CompletableFuture.supplyAsync(() -> p.inputReader().lines().collect(Collectors.joining("\n")));
+
+        // Wait for process with timeout
+        if (!p.waitFor(5, TimeUnit.SECONDS)) {
+            p.destroyForcibly();
+        }
+
+        try {
+            // Give a bit of time for output collection after process exits
+            return outputFuture.get(1, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            return "";
         }
     }
 
@@ -463,7 +473,7 @@ public class RuyiCli {
             pb.redirectErrorStream(true);
             final var p = pb.start();
             final var rawOutput = readAll(p);
-            final var exit = p.waitFor();
+            final var exit = p.exitValue();
             // Build a readable command string (quote args containing spaces)
             final var cmdStrBuilder = new StringBuilder();
             for (int i = 0; i < cmd.size(); i++) {
