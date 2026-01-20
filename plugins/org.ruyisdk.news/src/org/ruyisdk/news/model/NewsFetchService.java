@@ -15,11 +15,6 @@ import org.ruyisdk.ruyi.util.RuyiLogger;
 public class NewsFetchService {
     private static final RuyiLogger LOGGER = Activator.getLogger();
 
-    /** Fetches news details asynchronously. */
-    public void fetchNewsDetailsAsync(String id, Consumer<String> callback) {
-        fetchNewsDetailsAsync(id, callback, null);
-    }
-
     /** Fetches news details asynchronously with an optional error callback. */
     public void fetchNewsDetailsAsync(String id, Consumer<String> callback, Consumer<String> errorCallback) {
         Job fetchJob = new Job("Fetching News Details") {
@@ -29,9 +24,10 @@ public class NewsFetchService {
                 String result = "";
                 try {
                     RuyiCli.NewsReadResult read = RuyiCli.readNewsItem(id);
-                    if (read != null) {
-                        result = read.getContent() == null ? "" : read.getContent();
+                    if (read == null) {
+                        throw new Exception("timed out");
                     }
+                    result = read.getContent() == null ? "" : read.getContent();
                     LOGGER.logInfo("Fetched news details: id=" + id + ", length=" + result.length());
                 } catch (Exception e) {
                     String msg = e.getMessage() == null ? "Failed to read news details" : e.getMessage();
@@ -39,7 +35,7 @@ public class NewsFetchService {
                     if (errorCallback != null) {
                         errorCallback.accept(msg);
                     }
-                    result = "";
+                    return Status.CANCEL_STATUS;
                 }
                 callback.accept(result);
                 return Status.OK_STATUS;

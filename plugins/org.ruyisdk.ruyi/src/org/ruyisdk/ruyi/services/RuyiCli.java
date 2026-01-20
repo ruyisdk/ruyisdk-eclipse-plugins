@@ -17,12 +17,15 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
+import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
  * Simple DTOs returned by the CLI wrapper to avoid cross-plugin model coupling.
  */
 public class RuyiCli {
+    private static final RuyiLogger LOGGER = Activator.getLogger();
     /** Profile information returned by the ruyi CLI. */
     public static class ProfileInfo {
         private final String name;
@@ -283,7 +286,7 @@ public class RuyiCli {
                 return null;
             }
             final var args = Arrays.asList("--porcelain", "news", "read", "--quiet", idOrOrd);
-            final var result = runRuyi(args);
+            final var result = runRuyi(args, 3);
             return parseNewsReadFromString(result.getOutput());
         } catch (Exception e) {
             return null;
@@ -430,28 +433,36 @@ public class RuyiCli {
         return first;
     }
 
-    private static String readAll(Process p) throws InterruptedException {
+    private static String readAll(Process p, int timeout) throws InterruptedException {
+        if (timeout < 0) {
+        	timeout = Integer.MAX_VALUE;
+        }
+
         // Read in background using CompletableFuture
         final var outputFuture =
                         CompletableFuture.supplyAsync(() -> p.inputReader().lines().collect(Collectors.joining("\n")));
 
         // Wait for process with timeout
-        if (!p.waitFor(5, TimeUnit.SECONDS)) {
+        if (!p.waitFor(timeout, TimeUnit.SECONDS)) {
             p.destroyForcibly();
         }
 
         try {
-            // Give a bit of time for output collection after process exits
-            return outputFuture.get(1, TimeUnit.SECONDS);
+            // TODO: Why does the reader stuck here??????
+            return outputFuture.get(timeout, TimeUnit.SECONDS);
         } catch (Exception e) {
             return "";
         }
     }
+    
+    private static RunResult runRuyi(List<String> args) {
+		return runRuyi(args, -1);
+	}
 
     // Centralized process invocation for ruyi. Uses only the canonical
     // installation directory provided by RuyiFileUtils.getInstallPath(). If
     // no install path is available this returns exit -1 with a message.
-    private static RunResult runRuyi(List<String> args) {
+    private static RunResult runRuyi(List<String> args, int timeout) {
         String install = null;
         try {
             install = RuyiFileUtils.getInstallPath();
@@ -472,7 +483,7 @@ public class RuyiCli {
             final var pb = new ProcessBuilder(cmd);
             pb.redirectErrorStream(true);
             final var p = pb.start();
-            final var rawOutput = readAll(p);
+            final var rawOutput = readAll(p, timeout);
             final var exit = p.exitValue();
             // Build a readable command string (quote args containing spaces)
             final var cmdStrBuilder = new StringBuilder();
