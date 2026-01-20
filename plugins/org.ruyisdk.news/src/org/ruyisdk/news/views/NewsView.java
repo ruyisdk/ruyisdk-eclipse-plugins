@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -48,7 +49,7 @@ public class NewsView extends ViewPart {
     private Button unreadCheckBox;
 
     private TableViewer tableViewer;
-    private Text detailTextBox;
+    private Browser detailBrowser;
 
     private Button updateButton;
     private Label updateInfoLabel;
@@ -158,11 +159,11 @@ public class NewsView extends ViewPart {
             tableViewer.setInput(newsListViewModel.getNewsList());
         }
 
-        detailTextBox = new Text(middleComposite, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
+        detailBrowser = new Browser(middleComposite, SWT.BORDER);
         {
             final var gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
             gridData.heightHint = 100;
-            detailTextBox.setLayoutData(gridData);
+            detailBrowser.setLayoutData(gridData);
         }
 
         updateButton = new Button(bottomComposite, SWT.PUSH);
@@ -228,8 +229,15 @@ public class NewsView extends ViewPart {
                     toggleDetailControls(false);
                 }
             });
-            dbc.bindValue(WidgetProperties.text().observe(detailTextBox), BeanProperties
-                            .value(NewsItem.class, "details", String.class).observeDetail(selectionObservable));
+
+            final var detailsHtmlObservable = BeanProperties.value(NewsItem.class, "detailsHtml", String.class)
+                            .observeDetail(selectionObservable);
+            detailsHtmlObservable.addValueChangeListener(e -> {
+                final var html = e.diff.getNewValue();
+                if (!detailBrowser.isDisposed()) {
+                    detailBrowser.setText(html != null ? html : "");
+                }
+            });
         }
 
         {
@@ -253,8 +261,8 @@ public class NewsView extends ViewPart {
         hideDetailsButton.setEnabled(isShow);
 
         // do not use setVisible() here.
-        ((GridData) detailTextBox.getLayoutData()).exclude = !isShow;
-        detailTextBox.requestLayout();
+        ((GridData) detailBrowser.getLayoutData()).exclude = !isShow;
+        detailBrowser.requestLayout();
     }
 
     static class NewsListViewerFilter extends ViewerFilter {

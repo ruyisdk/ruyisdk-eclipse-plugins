@@ -3,6 +3,7 @@ package org.ruyisdk.news.viewmodel;
 import org.ruyisdk.news.Activator;
 import org.ruyisdk.news.model.NewsFetchService;
 import org.ruyisdk.news.model.NewsItem;
+import org.ruyisdk.news.util.MarkdownRenderer;
 import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
@@ -45,13 +46,21 @@ public class NewsDetailsViewModel {
         LOGGER.logInfo("News details requested: id=" + selected.getId());
 
         selected.setUnread(false);
-        selected.setDetails("<fetching news details>");
+        selected.setDetailsHtml(MarkdownRenderer.renderToHtml("*fetching news details...*"));
         isFetching = true;
 
         service.fetchNewsDetailsAsync(selected.getId(), result -> {
             isFetching = false;
-            selected.setDetails(result == null ? "" : result);
+            final var markdown = result == null ? "" : result;
+            selected.setDetails(markdown);
+            selected.setDetailsHtml(MarkdownRenderer.renderToHtml(markdown));
             selected.setDetailsFetched(true);
+        }, result -> {
+            isFetching = false;
+            final var errorMarkdown = "*failed to fetch news details: " + result + "*";
+            selected.setDetails(errorMarkdown);
+            selected.setDetailsHtml(MarkdownRenderer.renderToHtml(errorMarkdown));
+            selected.setDetailsFetched(false);
         });
     }
 }
