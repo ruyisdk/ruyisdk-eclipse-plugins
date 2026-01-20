@@ -26,6 +26,7 @@ import org.ruyisdk.ruyi.util.RuyiLogger;
  */
 public class RuyiCli {
     private static final RuyiLogger LOGGER = Activator.getLogger();
+
     /** Profile information returned by the ruyi CLI. */
     public static class ProfileInfo {
         private final String name;
@@ -435,7 +436,7 @@ public class RuyiCli {
 
     private static String readAll(Process p, int timeout) throws InterruptedException {
         if (timeout < 0) {
-        	timeout = Integer.MAX_VALUE;
+            timeout = Integer.MAX_VALUE;
         }
 
         // Read in background using CompletableFuture
@@ -454,10 +455,10 @@ public class RuyiCli {
             return "";
         }
     }
-    
+
     private static RunResult runRuyi(List<String> args) {
-		return runRuyi(args, -1);
-	}
+        return runRuyi(args, -1);
+    }
 
     // Centralized process invocation for ruyi. Uses only the canonical
     // installation directory provided by RuyiFileUtils.getInstallPath(). If

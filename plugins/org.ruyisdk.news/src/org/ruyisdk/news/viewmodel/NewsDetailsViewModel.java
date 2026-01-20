@@ -56,11 +56,11 @@ public class NewsDetailsViewModel {
             selected.setDetailsHtml(MarkdownRenderer.renderToHtml(markdown));
             selected.setDetailsFetched(true);
         }, result -> {
-			isFetching = false;
-			final var errorMarkdown = "*failed to fetch news details: " + result + "*";
-			selected.setDetails(errorMarkdown);
-			selected.setDetailsHtml(MarkdownRenderer.renderToHtml(errorMarkdown));
-			selected.setDetailsFetched(false);
-		});
+            isFetching = false;
+            final var errorMarkdown = "*failed to fetch news details: " + result + "*";
+            selected.setDetails(errorMarkdown);
+            selected.setDetailsHtml(MarkdownRenderer.renderToHtml(errorMarkdown));
+            selected.setDetailsFetched(false);
+        });
     }
 }
