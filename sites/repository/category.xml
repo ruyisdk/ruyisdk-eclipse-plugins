@@ -4,9 +4,9 @@
       Update site for RuyiSDK Eclipse IDE plugins
    </description>
 
-   <feature url="features/org.ruyisdk.feature_0.1.0.qualifier.jar"
+   <feature url="features/org.ruyisdk.feature_0.1.1.qualifier.jar"
             id="org.ruyisdk.feature"
-            version="0.1.0.qualifier">
+            version="0.1.1.qualifier">
       <category name="ruyisdk"/>
    </feature>
 
