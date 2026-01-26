@@ -32,7 +32,7 @@ public class VenvListViewModel {
     private boolean busy = false;
     private String tableAreaMessage = "uninitialized.";
 
-    private boolean disposed = false;
+    private volatile boolean disposed = false;
     private final WorkspaceProjectsMonitor.Listener workspaceProjectsListener;
 
     private final WorkspaceProjectsMonitor workspaceProjectsMonitor;
