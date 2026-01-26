@@ -1,12 +1,9 @@
 package org.ruyisdk.venv.views;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.typed.BeanProperties;
+import org.eclipse.core.databinding.observable.value.ComputedValue;
 import org.eclipse.core.databinding.property.Properties;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ObservableMapLabelProvider;
@@ -43,11 +40,13 @@ public class VenvView extends ViewPart {
 
     private Composite container;
     private Composite header;
+    private Composite tableArea;
     private Composite tableComposite;
     private Composite buttonBar;
 
     private Button absPathCheckBox;
     private TableViewer tableViewer;
+    private Label tableAreaMessageLabel;
     private Button refreshButton;
     private Button applyButton;
     private Button deleteButton;
@@ -62,6 +61,9 @@ public class VenvView extends ViewPart {
         addControls();
         registerEvents();
 
+        // initial UI state
+        updateTableAreaState(false);
+
         // initial data load
         venvListViewModel.onRefreshVenvListAsync();
     }
@@ -74,13 +76,22 @@ public class VenvView extends ViewPart {
         header.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         header.setLayout(new GridLayout(2, false));
 
-        tableComposite = new Composite(container, SWT.NONE);
+        tableArea = new Composite(container, SWT.NONE);
+        tableArea.setLayoutData(new GridData(GridData.FILL_BOTH));
+        {
+            final var gridLayout = new GridLayout(1, false);
+            gridLayout.marginWidth = 0;
+            gridLayout.marginHeight = 0;
+            tableArea.setLayout(gridLayout);
+        }
+
+        tableComposite = new Composite(tableArea, SWT.NONE);
         tableComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 
         buttonBar = new Composite(container, SWT.NONE);
         buttonBar.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         {
-            var gridLayout = new GridLayout(4, false);
+            final var gridLayout = new GridLayout(4, false);
             gridLayout.marginWidth = 0;
             buttonBar.setLayout(gridLayout);
         }
@@ -134,12 +145,15 @@ public class VenvView extends ViewPart {
             tableViewer.setInput(venvListViewModel.getVenvList());
         }
 
+        tableAreaMessageLabel = new Label(tableArea, SWT.WRAP);
+        tableAreaMessageLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+
         refreshButton = new Button(buttonBar, SWT.PUSH);
         refreshButton.setText("Refresh List");
         refreshButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 
         applyButton = new Button(buttonBar, SWT.PUSH);
-        applyButton.setText("Apply to Project");
+        applyButton.setText("Apply to Project...");
         applyButton.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 
         deleteButton = new Button(buttonBar, SWT.PUSH);
@@ -155,18 +169,41 @@ public class VenvView extends ViewPart {
         dbc = new DataBindingContext();
 
         dbc.bindList(ViewerProperties.multipleSelection().observe(tableViewer), venvListViewModel.getSelectedVenvs());
-        dbc.bindValue(WidgetProperties.enabled().observe(refreshButton), BeanProperties
-                        .value(VenvListViewModel.class, "canRefresh", Boolean.class).observe(venvListViewModel));
         dbc.bindValue(WidgetProperties.enabled().observe(deleteButton), BeanProperties
                         .value(VenvListViewModel.class, "canDelete", Boolean.class).observe(venvListViewModel));
         dbc.bindValue(WidgetProperties.enabled().observe(applyButton), BeanProperties
                         .value(VenvListViewModel.class, "canApply", Boolean.class).observe(venvListViewModel));
+
+        final var busyStatusObservable =
+                        BeanProperties.value(VenvListViewModel.class, "busy", Boolean.class).observe(venvListViewModel);
+        final var idleStatusObservable = new ComputedValue<Boolean>() {
+            @Override
+            protected Boolean calculate() {
+                return !Boolean.TRUE.equals(busyStatusObservable.getValue());
+            }
+        };
+
+        dbc.bindValue(WidgetProperties.enabled().observe(refreshButton), idleStatusObservable);
 
         refreshButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 venvListViewModel.onRefreshVenvListAsync();
             }
+        });
+
+        final var tableAreaMessageValue = BeanProperties
+                        .value(VenvListViewModel.class, "tableAreaMessage", String.class).observe(venvListViewModel);
+
+        dbc.bindValue(WidgetProperties.text().observe(tableAreaMessageLabel), tableAreaMessageValue);
+
+        tableAreaMessageValue.addValueChangeListener(e -> {
+            if (tableAreaMessageLabel == null || tableAreaMessageLabel.isDisposed()) {
+                return;
+            }
+
+            final var messageText = (String) e.diff.getNewValue();
+            updateTableAreaState(messageText == null || messageText.isEmpty());
         });
 
         applyButton.addSelectionListener(new SelectionAdapter() {
@@ -212,11 +249,13 @@ public class VenvView extends ViewPart {
             }
         });
 
+        dbc.bindValue(WidgetProperties.enabled().observe(newButton), idleStatusObservable);
+
         newButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 final var wizardViewModel = new VenvWizardViewModel(Activator.getDefault().getDetectionService());
-                wizardViewModel.setProjectRootPaths(getOpenProjectRootPaths());
+                wizardViewModel.setProjectRootPaths(venvListViewModel.getOpenProjectRootPaths());
                 final var dialog = new WizardDialog(container.getShell(), new VenvWizard(wizardViewModel));
                 if (dialog.open() == WizardDialog.OK) {
                     venvListViewModel.onRefreshVenvListAsync();
@@ -225,11 +264,35 @@ public class VenvView extends ViewPart {
         });
     }
 
+    private void updateTableAreaState(boolean showTable) {
+        if (tableArea == null || tableArea.isDisposed() || tableComposite == null || tableComposite.isDisposed()
+                        || tableAreaMessageLabel == null || tableAreaMessageLabel.isDisposed()) {
+            return;
+        }
+
+        ((GridData) tableComposite.getLayoutData()).exclude = !showTable;
+        tableComposite.setVisible(showTable);
+
+        ((GridData) tableAreaMessageLabel.getLayoutData()).exclude = showTable;
+        tableAreaMessageLabel.setVisible(!showTable);
+
+        if (showTable) {
+            tableComposite.requestLayout();
+        } else {
+            // refresh the label will center the message properly
+            tableAreaMessageLabel.requestLayout();
+        }
+    }
+
     @Override
     public void dispose() {
         if (dbc != null) {
             dbc.dispose();
             dbc = null;
+        }
+        if (venvListViewModel != null) {
+            venvListViewModel.dispose();
+            venvListViewModel = null;
         }
         super.dispose();
     }
@@ -238,22 +301,4 @@ public class VenvView extends ViewPart {
     @Override
     public void setFocus() {}
 
-
-    private static List<String> getOpenProjectRootPaths() {
-        final var root = ResourcesPlugin.getWorkspace().getRoot();
-        final var projects = root.getProjects();
-        final var result = new ArrayList<String>();
-        for (final var project : projects) {
-            if (project == null || !project.isOpen()) {
-                continue;
-            }
-            final var location = project.getLocation();
-            if (location == null) {
-                continue;
-            }
-            result.add(location.toOSString());
-        }
-        Collections.sort(result);
-        return result;
-    }
 }

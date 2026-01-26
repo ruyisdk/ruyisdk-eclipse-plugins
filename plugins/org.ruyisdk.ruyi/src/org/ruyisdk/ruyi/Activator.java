@@ -8,6 +8,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.ruyisdk.ruyi.core.RuyiCore;
+import org.ruyisdk.ruyi.core.workspace.WorkspaceProjectsMonitor;
 import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
@@ -66,6 +67,7 @@ public class Activator extends AbstractUIPlugin {
         } catch (Exception e) {
             LOGGER.logError("Error during plugin deactivation", e);
         } finally {
+            WorkspaceProjectsMonitor.getInstance().dispose();
             plugin = null;
             super.stop(context);
         }
