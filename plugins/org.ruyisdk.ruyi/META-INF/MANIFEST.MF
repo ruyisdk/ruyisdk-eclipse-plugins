@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ruyi
 Bundle-SymbolicName: org.ruyisdk.ruyi;singleton:=true
-Bundle-Version: 0.1.1.qualifier
+Bundle-Version: 0.1.2.qualifier
 Bundle-Activator: org.ruyisdk.ruyi.Activator
 Bundle-ClassPath: .
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.31.100",
