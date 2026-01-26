@@ -16,7 +16,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -29,27 +28,6 @@ import org.ruyisdk.venv.Activator;
 public class VenvDetectionService {
     private static final String VENV_CONFIG_FILE_NAME = "ruyi-venv.toml";
     private static final RuyiLogger LOGGER = Activator.getLogger();
-
-    private static List<Path> getOpenProjectPaths() {
-        final var out = new ArrayList<Path>();
-        try {
-            final var root = ResourcesPlugin.getWorkspace().getRoot();
-            for (var project : root.getProjects()) {
-                if (project == null || !project.isOpen()) {
-                    continue;
-                }
-                final var loc = project.getLocation();
-                if (loc == null) {
-                    continue;
-                }
-                out.add(Path.of(loc.toOSString()));
-            }
-        } catch (Exception e) {
-            // ignore workspace discovery failures
-        }
-        out.removeIf(Objects::isNull);
-        return out;
-    }
 
     /** Returns unique venv directory paths from the given venv list. */
     public List<String> getVenvDirectoryPathsFromVenvs(List<Venv> venvs) {
@@ -251,22 +229,29 @@ public class VenvDetectionService {
         return out;
     }
 
-    /** Detects project venvs asynchronously and passes them to the callback. */
-    public void detectProjectVenvsAsync(Consumer<List<Venv>> callback) {
+    /**
+     * Detects project venvs asynchronously for the provided project roots and passes them to the
+     * callback.
+     */
+    public void detectProjectVenvsAsync(List<String> projectRootPaths, Consumer<List<Venv>> callback) {
         final var detectJob = new Job("Detecting virtual environments") {
             @Override
             protected IStatus run(IProgressMonitor monitor) {
                 LOGGER.logInfo("Detecting project venvs (async)");
+
                 List<Venv> result;
                 try {
-                    final var projectPaths = getOpenProjectPaths();
+                    final var projectPaths = toPathList(projectRootPaths);
                     result = detectProjectVenvs(projectPaths);
                 } catch (Exception e) {
                     LOGGER.logError("Failed to detect project venvs", e);
                     result = List.of();
                 }
                 LOGGER.logInfo("Project venv detection finished: count=" + result.size());
-                callback.accept(result);
+
+                if (callback != null) {
+                    callback.accept(result);
+                }
                 return Status.OK_STATUS;
             }
         };

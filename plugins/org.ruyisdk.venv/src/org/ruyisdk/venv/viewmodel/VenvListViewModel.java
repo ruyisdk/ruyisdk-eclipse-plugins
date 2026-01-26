@@ -5,9 +5,10 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import org.eclipse.core.databinding.observable.list.IListChangeListener;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.ruyisdk.ruyi.core.workspace.WorkspaceProjectsMonitor;
+import org.ruyisdk.ruyi.core.workspace.WorkspaceProjectsMonitor.EventKind;
 import org.ruyisdk.ruyi.util.RuyiLogger;
 import org.ruyisdk.venv.Activator;
 import org.ruyisdk.venv.model.Venv;
@@ -23,11 +24,18 @@ public class VenvListViewModel {
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
-    private boolean isFetching = false;
+    private boolean fetching = false;
     private boolean canDelete = false;
     private boolean canApply = false;
-    private boolean canRefresh = true;
+    private boolean hasOpenProjects = false;
+    private boolean refreshScheduled = false;
+    private boolean busy = false;
+    private String tableAreaMessage = "uninitialized.";
 
+    private volatile boolean disposed = false;
+    private final WorkspaceProjectsMonitor.Listener workspaceProjectsListener;
+
+    private final WorkspaceProjectsMonitor workspaceProjectsMonitor;
     private final VenvDetectionService detectionService;
     private final VenvConfigurationService configService;
     private final IObservableList<Venv> observableVenvList = new WritableList<>(new ArrayList<>(), Venv.class);
@@ -42,9 +50,43 @@ public class VenvListViewModel {
     public VenvListViewModel(VenvDetectionService detectionService, VenvConfigurationService configService) {
         this.detectionService = detectionService;
         this.configService = configService;
-        selectedVenvs.addListChangeListener((IListChangeListener<Venv>) event -> {
-            updateCanDelete();
-            updateCanApply();
+        this.workspaceProjectsMonitor = WorkspaceProjectsMonitor.getInstance();
+
+        updateHasOpenProjects();
+        updateDerivedState();
+
+        workspaceProjectsListener = new WorkspaceProjectsMonitor.Listener() {
+            @Override
+            public void onWorkspaceProjectsEvent(WorkspaceProjectsMonitor.Event event) {
+                if (event == null || disposed) {
+                    return;
+                }
+                observableVenvList.getRealm().asyncExec(() -> {
+                    if (disposed) {
+                        return;
+                    }
+                    if (event.getKind() == EventKind.PROJECTS_CHANGED) {
+                        setHasOpenProjects(event.hasOpenProjects());
+                        observableVenvList.clear();
+                        selectedVenvs.clear();
+                        setRefreshScheduled(event.hasOpenProjects());
+                        updateDerivedState();
+                        return;
+                    } else if (event.getKind() == EventKind.DEBOUNCE_TRIGGERED) {
+                        onRefreshVenvListAsync();
+                        return;
+                    }
+                });
+            }
+        };
+        this.workspaceProjectsMonitor.addListener(workspaceProjectsListener);
+
+        selectedVenvs.addListChangeListener(e -> {
+            updateActionStates();
+        });
+
+        observableVenvList.addListChangeListener(e -> {
+            updateDerivedState();
         });
     }
 
@@ -99,22 +141,6 @@ public class VenvListViewModel {
     }
 
     /**
-     * Returns whether refresh is currently allowed.
-     *
-     * @return whether refresh is currently allowed
-     */
-    public boolean isCanRefresh() {
-        return canRefresh;
-    }
-
-    private void setCanRefresh(boolean canRefresh) {
-        if (this.canRefresh == canRefresh) {
-            return;
-        }
-        pcs.firePropertyChange("canRefresh", this.canRefresh, this.canRefresh = canRefresh);
-    }
-
-    /**
      * Adds a property change listener.
      *
      * @param listener the listener
@@ -133,19 +159,53 @@ public class VenvListViewModel {
     }
 
     private void setFetching(boolean isFetching) {
-        this.isFetching = isFetching;
-        updateCanDelete();
-        updateCanApply();
-        updateCanRefresh();
+        if (this.fetching == isFetching) {
+            return;
+        }
+        this.fetching = isFetching;
+        if (this.fetching) {
+            setRefreshScheduled(false);
+        }
+        updateDerivedState();
     }
 
-    private void updateCanDelete() {
-        setCanDelete(!isFetching && !getSelectedVenvDirectoryPaths().isEmpty());
+    private void setHasOpenProjects(boolean hasOpenProjects) {
+        if (this.hasOpenProjects == hasOpenProjects) {
+            return;
+        }
+        this.hasOpenProjects = hasOpenProjects;
     }
 
-    private void updateCanApply() {
+    private void setRefreshScheduled(boolean refreshScheduled) {
+        if (this.refreshScheduled == refreshScheduled) {
+            return;
+        }
+        this.refreshScheduled = refreshScheduled;
+    }
+
+    public boolean isBusy() {
+        return busy;
+    }
+
+    private void setBusy(boolean busy) {
+        if (this.busy == busy) {
+            return;
+        }
+        pcs.firePropertyChange("busy", this.busy, this.busy = busy);
+    }
+
+    private void updateDerivedState() {
+        final var busyNow = fetching || refreshScheduled;
+        setBusy(busyNow);
+        updateTableAreaPresentation();
+        updateActionStates();
+    }
+
+    private void updateActionStates() {
+        setCanDelete(!busy && !getSelectedVenvDirectoryPaths().isEmpty());
+
         // Can apply if exactly one venv is selected and it has a project path
-        if (isFetching || selectedVenvs.size() != 1) {
+        if (busy || selectedVenvs.size() != 1) {
             setCanApply(false);
             return;
         }
@@ -154,26 +214,35 @@ public class VenvListViewModel {
         setCanApply(projectPath != null && !projectPath.isEmpty());
     }
 
-    private void updateCanRefresh() {
-        setCanRefresh(!isFetching);
-    }
-
     /**
      * Triggers an asynchronous refresh of the detected venv list.
      */
     public void onRefreshVenvListAsync() {
-        if (isFetching) {
+        if (fetching) {
+            return;
+        }
+
+        updateHasOpenProjects();
+        if (!hasOpenProjects) {
+            observableVenvList.getRealm().asyncExec(() -> {
+                observableVenvList.clear();
+                selectedVenvs.clear();
+                setRefreshScheduled(false);
+                updateDerivedState();
+            });
             return;
         }
 
         LOGGER.logInfo("Refreshing venv list");
 
         setFetching(true);
-        detectionService.detectProjectVenvsAsync(result -> {
+        final var projectRootPaths = workspaceProjectsMonitor.getOpenProjectRootPaths();
+        detectionService.detectProjectVenvsAsync(projectRootPaths, result -> {
             observableVenvList.getRealm().asyncExec(() -> {
                 observableVenvList.clear();
                 observableVenvList.addAll(result);
                 LOGGER.logInfo("Venv list refreshed; count=" + result.size());
+                updateHasOpenProjects();
                 setFetching(false);
             });
         });
@@ -194,7 +263,7 @@ public class VenvListViewModel {
      * @param callback callback invoked with an error, or {@code null} on success
      */
     public void onDeleteSelectedVenvDirectories(Consumer<Exception> callback) {
-        if (isFetching) {
+        if (busy) {
             return;
         }
 
@@ -228,7 +297,7 @@ public class VenvListViewModel {
      * @param callback callback invoked with the result
      */
     public void onApplySelectedVenvConfig(Consumer<VenvConfigurationService.ApplyResult> callback) {
-        if (isFetching) {
+        if (busy) {
             if (callback != null) {
                 callback.accept(new VenvConfigurationService.ApplyResult(false, "Operation in progress"));
             }
@@ -258,5 +327,63 @@ public class VenvListViewModel {
                 }
             });
         });
+    }
+
+    private void setTableAreaMessage(String tableAreaMessage) {
+        final var newValue = tableAreaMessage == null ? "" : tableAreaMessage;
+        if (newValue.equals(this.tableAreaMessage)) {
+            return;
+        }
+        pcs.firePropertyChange("tableAreaMessage", this.tableAreaMessage, this.tableAreaMessage = newValue);
+    }
+
+    private void updateTableAreaPresentation() {
+        if (!hasOpenProjects) {
+            setTableAreaMessage("No open projects.");
+            return;
+        }
+
+        if (busy) {
+            setTableAreaMessage("Detecting virtual environments...");
+            return;
+        }
+
+        if (observableVenvList.isEmpty()) {
+            setTableAreaMessage("No venv detected in open projects.");
+            return;
+        }
+
+        // Setting empty message to show the table
+        setTableAreaMessage("");
+    }
+
+    private void updateHasOpenProjects() {
+        setHasOpenProjects(workspaceProjectsMonitor.hasOpenProjects());
+    }
+
+    /**
+     * Returns root paths for currently-open projects.
+     *
+     * @return open project root paths
+     */
+    public List<String> getOpenProjectRootPaths() {
+        return workspaceProjectsMonitor.getOpenProjectRootPaths();
+    }
+
+    /**
+     * Returns the hint text shown in the table area when the table is hidden.
+     *
+     * @return the hint text
+     */
+    public String getTableAreaMessage() {
+        return tableAreaMessage;
+    }
+
+    /**
+     * Disposes resources held by this view model.
+     */
+    public void dispose() {
+        disposed = true;
+        workspaceProjectsMonitor.removeListener(workspaceProjectsListener);
     }
 }
