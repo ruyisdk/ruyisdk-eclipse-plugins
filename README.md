@@ -1,5 +1,16 @@
 # RuyiSDK Eclipse Plugins
 
+<!-- based on: https://marketplace.eclipse.org/content/ruyisdk#external-install-button -->
+<a href="https://marketplace.eclipse.org/marketplace-client-intro?mpc_install=7323110" class="drag" title="Drag to your running Eclipse* workspace. *Requires Eclipse Marketplace Client">
+<img style="width:80px;" typeof="foaf:Image" class="img-responsive" src="https://marketplace.eclipse.org/modules/custom/eclipsefdn/eclipsefdn_marketplace/images/btn-install.svg" alt="Drag to your running Eclipse* workspace. *Requires Eclipse Marketplace Client" />
+</a>
+
+**RuyiSDK Eclipse Plugins** provide basic RISC-V development support for Eclipse IDE on Linux. These plugins leverage the [Ruyi package manager](https://github.com/ruyisdk/ruyi) to streamline toolchain installation and updates, offer RISC-V virtual environment management, and include a series of functions for basic C/C++ development.
+
+Don't miss our VSCode extension: https://github.com/ruyisdk/ruyisdk-vscode-extension
+
+These Eclipse plugins are built under the Eclipse Public License 2.0.
+
 ## 目录结构说明
 
 ```
