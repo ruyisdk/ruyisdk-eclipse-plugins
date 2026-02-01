@@ -6,9 +6,9 @@ Bundle-Version: 0.1.2.qualifier
 Bundle-Activator: org.ruyisdk.devices.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.jface;bundle-version="3.35.0",
+ org.eclipse.jface,
  org.ruyisdk.core,
- com.google.gson;bundle-version="2.12.1"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+ com.google.gson
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.ruyisdk.devices
 Bundle-ActivationPolicy: lazy

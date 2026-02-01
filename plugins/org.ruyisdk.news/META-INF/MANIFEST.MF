@@ -6,7 +6,7 @@ Bundle-Version: 0.1.2.qualifier
 Automatic-Module-Name: org.ruyisdk.news
 Bundle-Activator: org.ruyisdk.news.Activator
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.databinding,
  org.eclipse.ui,

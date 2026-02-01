@@ -6,15 +6,15 @@ Bundle-Version: 0.1.2.qualifier
 Automatic-Module-Name: org.ruyisdk.core
 Bundle-Activator: org.ruyisdk.core.Activator
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: org.ruyisdk.core.basedir,
  org.ruyisdk.core.config,
  org.ruyisdk.core.console,
  org.ruyisdk.core.ruyi.model
-Require-Bundle: org.eclipse.ui;bundle-version="3.206.100",
- org.eclipse.jface;bundle-version="3.35.0",
- org.eclipse.ui.console;bundle-version="3.14.100",
- org.eclipse.core.runtime;bundle-version="3.31.100",
- org.eclipse.ui.workbench;bundle-version="3.133.0"
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.jface,
+ org.eclipse.ui.console,
+ org.eclipse.core.runtime,
+ org.eclipse.ui.workbench
 Bundle-ClassPath: .,
  icons/
