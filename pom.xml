@@ -56,6 +56,12 @@
                 <requireMavenVersion>
                   <version>[3.9.0,4.0.0)</version>
                 </requireMavenVersion>
+                <requireJavaVersion>
+                  <version>[21,)</version>
+                </requireJavaVersion>
+                <requireOS>
+                  <family>unix</family>
+                </requireOS>
               </rules>
             </configuration>
           </execution>
