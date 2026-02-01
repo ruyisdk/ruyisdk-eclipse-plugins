@@ -77,7 +77,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        java_version: [17, 21, 25]
+        java_version: [21, 25]
     env:
       # https://github.com/eclipse-packaging/packages/blob/2024-12_R/packages/org.eclipse.epp.package.embedcpp/META-INF/MANIFEST.MF#L7
       java_version_for_release: 21

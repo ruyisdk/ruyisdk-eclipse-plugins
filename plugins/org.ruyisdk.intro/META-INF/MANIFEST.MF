@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.swt,
  org.eclipse.ui.intro
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.ruyisdk.intro
 Bundle-ClassPath: .,
  html/,
