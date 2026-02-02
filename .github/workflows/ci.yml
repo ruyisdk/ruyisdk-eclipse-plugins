@@ -85,12 +85,12 @@ jobs:
       output_file_list: ${{ steps.packaging.outputs.output_file_list }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.1
         with:
           fetch-depth: 0
 
       - name: Set up JDK ${{ matrix.java_version }}
-        uses: actions/setup-java@v5.0.0
+        uses: actions/setup-java@v5.2.0
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.java_version }}
@@ -120,7 +120,7 @@ jobs:
 
       - name: Upload Artifact for Release
         if: ${{ steps.packaging.outcome == 'success' }}
-        uses: actions/upload-artifact@v5.0.0
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: ${{ env.output_file_name }}
           path: ${{ steps.packaging.outputs.output_file_path }}
@@ -141,10 +141,10 @@ jobs:
       released_file_name: ${{ needs.config.outputs.released_file_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.1
 
       - name: Download the Artifact
-        uses: actions/download-artifact@v6.0.0
+        uses: actions/download-artifact@v7.0.0
         with:
           name: ${{ env.output_file_name }}
 
@@ -224,11 +224,11 @@ jobs:
       datetime: ${{ needs.config.outputs.datetime }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.1
 
       - name: Download the Artifact
         id: download
-        uses: actions/download-artifact@v6.0.0
+        uses: actions/download-artifact@v7.0.0
         with:
           name: ${{ env.output_file_name }}
 
