@@ -129,6 +129,7 @@ jobs:
 
   publish_releases:
     name: Publish Releases
+    if: ${{ needs.config.outputs.make_continuous_release == 'true' || needs.config.outputs.make_versioning_release == 'true' }}
     needs:
       - config
       - build_and_upload
