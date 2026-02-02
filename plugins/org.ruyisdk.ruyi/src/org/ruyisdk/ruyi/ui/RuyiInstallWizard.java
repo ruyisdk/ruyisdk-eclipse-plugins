@@ -304,6 +304,7 @@ public class RuyiInstallWizard extends Wizard {
             setTitle(mode == Mode.INSTALL ? "Installing Ruyi" : "Upgrading Ruyi");
             setDescription(mode == Mode.INSTALL ? "Please wait while Ruyi is being installed"
                             : "Upgrading to the latest version...");
+            setPageComplete(false);
         }
 
         @Override
@@ -337,7 +338,7 @@ public class RuyiInstallWizard extends Wizard {
 
             progressComp.appendLog("Starting " + (mode == Mode.INSTALL ? "installation" : "upgrade") + "...");
 
-            Job.create("Ruyi " + mode.name(), monitor -> {
+            final var installationJob = Job.create("Ruyi " + mode.name(), monitor -> {
                 try {
                     installManager.install(monitor, new InstallationListener() {
                         @Override
@@ -365,7 +366,8 @@ public class RuyiInstallWizard extends Wizard {
                     });
                     return StatusUtil.createErrorStatus(mode + " failed", e);
                 }
-            }).schedule();
+            });
+            installationJob.schedule();
         }
 
         private void updateProgress(int percent, String message) {
