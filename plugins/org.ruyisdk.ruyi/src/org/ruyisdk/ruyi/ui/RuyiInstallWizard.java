@@ -368,9 +368,6 @@ public class RuyiInstallWizard extends Wizard {
                 }
             });
             installationJob.schedule();
-            if (installationJob.getResult() == Status.OK_STATUS) {
-                setPageComplete(true);
-            }
         }
 
         private void updateProgress(int percent, String message) {
