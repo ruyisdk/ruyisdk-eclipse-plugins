@@ -22,24 +22,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  config:
-    name: Configuration
+  config_and_check:
+    name: Configuration and Check
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    timeout-minutes: 2
     env:
       # e.g. "ruyisdk-eclipse-plugins-0.1.0.zip". no "v" prefixes.
       released_file_name_template: "ruyisdk-eclipse-plugins-%VERSION_NUMBER%.zip"
     outputs:
-      datetime: ${{ steps.the_work.outputs.datetime }}
+      datetime: ${{ steps.info_extraction.outputs.datetime }}
       # if main branch updates, publish continuous releases
-      make_continuous_release: ${{ steps.the_work.outputs.is_continuous }}
+      make_continuous_release: ${{ steps.info_extraction.outputs.is_continuous }}
       # if tag added, publish versioning releases
-      make_versioning_release: ${{ steps.the_work.outputs.is_versioning }}
-      version_number: ${{ steps.the_work.outputs.ver_num }}
-      released_file_name: ${{ steps.the_work.outputs.ver_file_name }}
+      make_versioning_release: ${{ steps.info_extraction.outputs.is_versioning }}
+      version_number: ${{ steps.info_extraction.outputs.ver_num }}
+      released_file_name: ${{ steps.info_extraction.outputs.ver_file_name }}
     steps:
-      - name: The Work
-        id: the_work
+      - name: Extract information
+        id: info_extraction
         run: |
           set -exu
 
@@ -66,12 +66,75 @@ jobs:
 
           echo "ver_file_name=$ver_file_name" >> "$GITHUB_OUTPUT"
 
+      - name: Checkout to Prepare the Environment for GitHub CLI
+        if: ${{ steps.info_extraction.outputs.is_versioning == 'true' }}
+        uses: actions/checkout@v6.0.1
+        with:
+          fetch-depth: 1
+
+      - name: Set up JDK 21
+        if: ${{ steps.info_extraction.outputs.is_versioning == 'true' }}
+        uses: actions/setup-java@v5.2.0
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: 'maven'
+
+      - name: Check version numbers for versioning release
+        if: ${{ steps.info_extraction.outputs.is_versioning == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ver_num: ${{ steps.info_extraction.outputs.ver_num }}
+        run: |
+          set -ex
+          set -o pipefail
+
+          echo "::notice:: Now, remove the existing release of the tag '$ver_num' in 60 seconds if this workflow run is triggered by creating releases on GitHub Web UI."
+          sleep 60
+
+          # "0.1.0-SNAPSHOT"
+          current_ver="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+          # "0.1.0"
+          current_ver_num="${current_ver%-SNAPSHOT}"
+
+          # "v0.1.0", or empty string if no releases (not tags) have been made
+          latest_ver="$( \
+            gh release list \
+              --json 'tagName' \
+              --exclude-drafts \
+              --exclude-pre-releases | \
+            jq --raw-output '.[].tagName' | \
+            sort --reverse --version-sort | \
+            head -n1 \
+          )"
+          # "0.1.0"
+          if [[ -z "$latest_ver" ]]; then
+            latest_ver_num='0.0.0'
+          else
+            latest_ver_num="${latest_ver#v}"
+          fi
+
+          # check locally
+          if [[ "$ver_num" != "$current_ver_num" ]]; then
+            echo "::error:: Version '$ver_num' does not match the version '$current_ver' in pom.xml."
+            exit 1
+          fi
+
+          # check remotely
+          if printf '%s\n%s' "$current_ver_num" "$latest_ver_num" | \
+              sort --reverse --version-sort | \
+              head -n1 | \
+              grep -q "$latest_ver_num"; then
+            echo "::error:: Version '$current_ver' is not newer than the latest published version '$latest_ver'."
+            exit 1
+          fi
+
   build_and_upload:
     name: Build and Upload
     if: ${{ needs.dco.result == 'success' }}
     needs:
       - dco
-      - config
+      - config_and_check
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
@@ -129,9 +192,9 @@ jobs:
 
   publish_releases:
     name: Publish Releases
-    if: ${{ needs.config.outputs.make_continuous_release == 'true' || needs.config.outputs.make_versioning_release == 'true' }}
+    if: ${{ needs.config_and_check.outputs.make_continuous_release == 'true' || needs.config_and_check.outputs.make_versioning_release == 'true' }}
     needs:
-      - config
+      - config_and_check
       - build_and_upload
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -139,7 +202,7 @@ jobs:
       contents: write
     env:
       output_file_list: ${{ needs.build_and_upload.outputs.output_file_list }}
-      released_file_name: ${{ needs.config.outputs.released_file_name }}
+      released_file_name: ${{ needs.config_and_check.outputs.released_file_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
@@ -159,7 +222,7 @@ jobs:
           done
 
       - name: Delete Old Continuous Releases
-        if: ${{ needs.config.outputs.make_continuous_release == 'true' }}
+        if: ${{ needs.config_and_check.outputs.make_continuous_release == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -176,27 +239,27 @@ jobs:
           fi
 
       - name: Publish a Continuous Release
-        if: ${{ needs.config.outputs.make_continuous_release == 'true' }}
+        if: ${{ needs.config_and_check.outputs.make_continuous_release == 'true' }}
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090  # v2.4.1
         with:
           name: Continuous
           tag_name: continuous
           make_latest: false
-          prerelease: false
+          prerelease: true
           generate_release_notes: true
           body_path: ${{ github.workspace }}/.github/resources/release/release_note_continuous.md
           files: |
             ${{ env.output_file_name }}
 
       - name: Rename versioning released files
-        if: ${{ needs.config.outputs.make_versioning_release == 'true' }}
+        if: ${{ needs.config_and_check.outputs.make_versioning_release == 'true' }}
         run: |
           set -ex
 
           mv '${{ env.output_file_name }}' '${{ env.released_file_name }}'
 
       - name: Publish a Versioning Release
-        if: ${{ needs.config.outputs.make_versioning_release == 'true' }}
+        if: ${{ needs.config_and_check.outputs.make_versioning_release == 'true' }}
         uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090  # v2.4.1
         with:
           make_latest: true
@@ -206,11 +269,11 @@ jobs:
           files: |
             ${{ env.released_file_name }}
 
-  continuously_publish_github_pages:
-    name: Publish GitHub Pages for Continuous Release
-    if: ${{ needs.config.outputs.make_continuous_release == 'true' }}
+  publish_github_pages:
+    name: Publish GitHub Pages for Versioning Release
+    if: ${{ needs.config_and_check.outputs.make_versioning_release == 'true' }}
     needs:
-      - config
+      - config_and_check
       - build_and_upload
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -222,10 +285,12 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     env:
       output_file_list: ${{ needs.build_and_upload.outputs.output_file_list }}
-      datetime: ${{ needs.config.outputs.datetime }}
+      datetime: ${{ needs.config_and_check.outputs.datetime }}
     steps:
-      - name: Checkout
+      - name: Checkout to Prepare the Environment for Resources Used by GitHub Pages
         uses: actions/checkout@v6.0.1
+        with:
+          fetch-depth: 1
 
       - name: Download the Artifact
         id: download
@@ -258,3 +323,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4.0.5
+
+      - name: The notification about updating version number on Eclipse Marketplace
+        run: |
+          echo '::notice:: Go update the version number on https://marketplace.eclipse.org/content/ruyisdk/edit immediately!!!'
