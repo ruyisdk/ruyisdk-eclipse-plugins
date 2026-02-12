@@ -16,6 +16,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -141,9 +144,8 @@ public class VenvDetectionService {
         try {
             final var result = RuyiCli.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName,
                             emulatorVersion);
-            if (result != null) {
-                LOGGER.logInfo("Venv creation finished: path=" + path + ", exit=" + result.getExitCode());
-            }
+            refreshWorkspaceProjects(null);
+            LOGGER.logInfo("Venv creation finished: path=" + path + ", exit=" + result.getExitCode());
             return result;
         } catch (Exception e) {
             LOGGER.logError("Failed to create venv: path=" + path, e);
@@ -268,15 +270,17 @@ public class VenvDetectionService {
                 try {
                     final var venvDirectories = toPathList(venvDirectoryPaths);
                     if (venvDirectories != null) {
-                        for (Path dir : venvDirectories) {
+                        for (final var dir : venvDirectories) {
                             LOGGER.logInfo("Deleting venv directory: path=" + dir);
                             deleteDirectoryRecursively(dir);
                         }
+
+                        refreshWorkspaceProjects(monitor);
                     }
                     if (callback != null) {
                         callback.accept(null);
                     }
-                    LOGGER.logInfo("Venv directory deletion finished");
+                    LOGGER.logInfo("Venv directories deletion finished");
                     return Status.OK_STATUS;
                 } catch (Exception e) {
                     LOGGER.logError("Failed to delete venv directories", e);
@@ -428,5 +432,15 @@ public class VenvDetectionService {
                 return FileVisitResult.CONTINUE;
             }
         });
+    }
+
+    private static void refreshWorkspaceProjects(IProgressMonitor monitor) {
+        for (final var project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
+            try {
+                project.refreshLocal(IResource.DEPTH_ONE, monitor);
+            } catch (CoreException e) {
+                LOGGER.logError("Failed to refresh project: " + project.getName(), e);
+            }
+        }
     }
 }
