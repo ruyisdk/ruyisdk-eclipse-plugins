@@ -1,0 +1,15 @@
+{
+  "projects": [
+    "./plugins/org.ruyisdk.core",
+    "./plugins/org.ruyisdk.devices",
+    "./plugins/org.ruyisdk.intro",
+    "./plugins/org.ruyisdk.news",
+    "./plugins/org.ruyisdk.packages",
+    "./plugins/org.ruyisdk.projectcreator",
+    "./plugins/org.ruyisdk.ruyi",
+    "./plugins/org.ruyisdk.ui",
+    "./features/org.ruyisdk.feature",
+    "./tests/org.ruyisdk.ruyi.tests"
+  ],
+  "targetPlatform": "./target.target"
+}
