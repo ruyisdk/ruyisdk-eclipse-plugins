@@ -23,14 +23,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.services.RuyiCli;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 import org.ruyisdk.venv.Activator;
 
 /** Service facade for listing and managing Ruyi virtual environments. */
 public class VenvDetectionService {
     private static final String VENV_CONFIG_FILE_NAME = "ruyi-venv.toml";
-    private static final RuyiLogger LOGGER = Activator.getLogger();
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     /** Returns unique venv directory paths from the given venv list. */
     public List<String> getVenvDirectoryPathsFromVenvs(List<Venv> venvs) {

@@ -18,15 +18,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
  * Monitors Eclipse workspace open-project changes and provides a debounced change signal.
  */
 public final class WorkspaceProjectsMonitor {
 
-    private static final RuyiLogger LOGGER = Activator.getLogger();
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     private static final int AUTO_REFRESH_DELAY_MS = 750;
 

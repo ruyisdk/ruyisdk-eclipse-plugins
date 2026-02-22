@@ -5,24 +5,24 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.ruyisdk.core.ruyi.model.CheckResult;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.jobs.CheckRuyiJob;
 import org.ruyisdk.ruyi.services.RuyiProperties;
 import org.ruyisdk.ruyi.ui.RuyiInstallWizard;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
  * Ruyi核心控制类.
  */
 public class RuyiCore {
     private volatile boolean isChecking;
-    private final RuyiLogger logger;
+    private final PluginLogger logger;
 
     /**
      * Constructs the Ruyi core.
      *
      * @param logger the logger
      */
-    public RuyiCore(RuyiLogger logger) {
+    public RuyiCore(PluginLogger logger) {
         this.logger = logger;
     }
 

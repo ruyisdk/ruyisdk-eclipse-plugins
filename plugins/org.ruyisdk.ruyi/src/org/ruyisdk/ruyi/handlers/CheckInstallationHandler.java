@@ -3,15 +3,15 @@ package org.ruyisdk.ruyi.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.core.RuyiCore;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
  * Handler for check installation command.
  */
 public class CheckInstallationHandler extends AbstractHandler {
-    private static final RuyiLogger LOGGER = Activator.getLogger();
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     private RuyiCore ruyiCore; // 核心服务
 

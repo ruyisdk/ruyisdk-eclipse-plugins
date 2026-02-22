@@ -4,7 +4,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.ruyisdk.ruyi.util.RuyiLogger;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.venv.model.VenvConfigurationService;
 import org.ruyisdk.venv.model.VenvDetectionService;
 
@@ -21,8 +21,8 @@ public class Activator extends AbstractUIPlugin {
     private static VenvDetectionService detectionService;
     private static VenvConfigurationService configService;
 
-    private static final RuyiLogger LOGGER =
-                    new RuyiLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
+    private static final PluginLogger LOGGER =
+                    new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
     /** Returns the venv service. */
     public VenvDetectionService getDetectionService() {
@@ -64,7 +64,7 @@ public class Activator extends AbstractUIPlugin {
      * <p>
      * This is safe to call during early class loading (e.g., before {@link #start(BundleContext)}).
      */
-    public static RuyiLogger getLogger() {
+    public static PluginLogger getLogger() {
         return LOGGER;
     }
 

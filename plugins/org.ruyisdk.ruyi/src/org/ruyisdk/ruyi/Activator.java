@@ -7,9 +7,9 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.core.RuyiCore;
 import org.ruyisdk.ruyi.core.workspace.WorkspaceProjectsMonitor;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
  * Activator for the Ruyi plugin.
@@ -20,8 +20,8 @@ public class Activator extends AbstractUIPlugin {
     private static Activator plugin; // 共享实例
     private RuyiCore ruyiCore; // 核心服务
 
-    private static final RuyiLogger LOGGER =
-                    new RuyiLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
+    private static final PluginLogger LOGGER =
+                    new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
     /**
      * Starts the plugin.
@@ -97,7 +97,7 @@ public class Activator extends AbstractUIPlugin {
      * <p>
      * This is safe to call during early class loading (e.g., before {@link #start(BundleContext)}).
      */
-    public static RuyiLogger getLogger() {
+    public static PluginLogger getLogger() {
         return LOGGER;
     }
 

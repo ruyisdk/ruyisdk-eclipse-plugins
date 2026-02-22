@@ -4,6 +4,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
 
 /**
@@ -11,7 +12,7 @@ import org.ruyisdk.ruyi.Activator;
  */
 public class StatusUtil {
 
-    private static final RuyiLogger LOGGER = Activator.getLogger();
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     /**
      * Shows an info dialog.

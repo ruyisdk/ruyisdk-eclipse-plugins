@@ -21,18 +21,18 @@ import org.ruyisdk.core.ruyi.model.RepoConfig;
 import org.ruyisdk.core.ruyi.model.RuyiReleaseInfo;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
 import org.ruyisdk.core.ruyi.model.SystemInfo;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.services.RuyiProperties.TelemetryStatus;
 import org.ruyisdk.ruyi.ui.RuyiInstallWizard.InstallationListener;
 import org.ruyisdk.ruyi.util.PathUtils;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 import org.ruyisdk.ruyi.util.RuyiNetworkUtils;
 
 /**
  * Manager for Ruyi installation operations.
  */
 public class RuyiInstallManager {
-    private final RuyiLogger logger;
+    private final PluginLogger logger;
 
     private static final Path DEFAULT_INSTALL_PATH = RuyiFileUtils.getDefaultInstallPath(); // 经过处理的绝对路径path
     // System.getProperty("user.home") + File.separator + ".ruyi";
@@ -53,7 +53,7 @@ public class RuyiInstallManager {
      *
      * @param logger logger instance
      */
-    public RuyiInstallManager(RuyiLogger logger) {
+    public RuyiInstallManager(PluginLogger logger) {
         this.logger = logger;
         this.installPath = DEFAULT_INSTALL_PATH.toString();
         this.telemetryStatus = TelemetryStatus.ON;

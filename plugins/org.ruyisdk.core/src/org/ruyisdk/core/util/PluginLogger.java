@@ -1,14 +1,14 @@
-package org.ruyisdk.ruyi.util;
+package org.ruyisdk.core.util;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.ruyisdk.ruyi.Activator;
+import org.ruyisdk.core.Activator;
 
 /**
- * Logger utility for Ruyi plugin.
+ * Logger utility.
  */
-public class RuyiLogger {
+public class PluginLogger {
     private final ILog eclipseLog;
     private final String pluginId;
 
@@ -17,7 +17,7 @@ public class RuyiLogger {
      *
      * @param eclipseLog the Eclipse log
      */
-    public RuyiLogger(ILog eclipseLog) {
+    public PluginLogger(ILog eclipseLog) {
         this(eclipseLog, Activator.PLUGIN_ID);
     }
 
@@ -27,7 +27,7 @@ public class RuyiLogger {
      * @param eclipseLog the Eclipse log
      * @param pluginId the plugin ID used for {@link IStatus} entries
      */
-    public RuyiLogger(ILog eclipseLog, String pluginId) {
+    public PluginLogger(ILog eclipseLog, String pluginId) {
         this.eclipseLog = eclipseLog;
         this.pluginId = pluginId == null ? Activator.PLUGIN_ID : pluginId;
     }
