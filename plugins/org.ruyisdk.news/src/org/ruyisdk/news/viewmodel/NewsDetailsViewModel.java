@@ -1,17 +1,17 @@
 package org.ruyisdk.news.viewmodel;
 
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.news.Activator;
 import org.ruyisdk.news.model.NewsFetchService;
 import org.ruyisdk.news.model.NewsItem;
 import org.ruyisdk.news.util.MarkdownRenderer;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
  * View model for fetching and exposing selected news details.
  */
 public class NewsDetailsViewModel {
 
-    private static final RuyiLogger LOGGER = Activator.getLogger();
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     private NewsFetchService service;
 

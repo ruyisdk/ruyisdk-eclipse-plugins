@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.ruyisdk.core.ruyi.model.RepoConfig;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.preferences.AutomaticCheckPreference;
 import org.ruyisdk.ruyi.preferences.RepoConfigPreference;
@@ -37,14 +38,13 @@ import org.ruyisdk.ruyi.preferences.TelemetryPreference;
 import org.ruyisdk.ruyi.services.RuyiInstallManager;
 import org.ruyisdk.ruyi.services.RuyiProperties;
 import org.ruyisdk.ruyi.services.RuyiProperties.TelemetryStatus;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 import org.ruyisdk.ruyi.util.StatusUtil;
 
 /**
  * Wizard for Ruyi installation and upgrade.
  */
 public class RuyiInstallWizard extends Wizard {
-    private static final RuyiLogger LOGGER = Activator.getLogger();
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     /**
      * Wizard operation mode.

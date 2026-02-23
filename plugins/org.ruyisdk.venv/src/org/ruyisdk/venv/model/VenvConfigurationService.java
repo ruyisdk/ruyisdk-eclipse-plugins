@@ -18,14 +18,14 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.FrameworkUtil;
-import org.ruyisdk.ruyi.util.RuyiLogger;
+import org.ruyisdk.core.util.PluginLogger;
 
 /** Service for applying venv configuration to Eclipse CDT projects. */
 public class VenvConfigurationService {
 
     private static final String PLUGIN_ID = "org.ruyisdk.venv";
-    private static final RuyiLogger LOGGER =
-                    new RuyiLogger(Platform.getLog(FrameworkUtil.getBundle(VenvConfigurationService.class)), PLUGIN_ID);
+    private static final PluginLogger LOGGER = new PluginLogger(
+                    Platform.getLog(FrameworkUtil.getBundle(VenvConfigurationService.class)), PLUGIN_ID);
     private static final String ENV_RUYI_VENV = "RUYI_VENV";
 
     /** Result of applying venv configuration to a project. */

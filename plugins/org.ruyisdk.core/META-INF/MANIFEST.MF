@@ -10,7 +10,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-21
 Export-Package: org.ruyisdk.core.basedir,
  org.ruyisdk.core.config,
  org.ruyisdk.core.console,
- org.ruyisdk.core.ruyi.model
+ org.ruyisdk.core.ruyi.model,
+ org.ruyisdk.core.util
 Require-Bundle: org.eclipse.ui,
  org.eclipse.jface,
  org.eclipse.ui.console,

@@ -7,13 +7,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.news.Activator;
 import org.ruyisdk.ruyi.services.RuyiCli;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /** Service for fetching news data via the Ruyi CLI. */
 public class NewsFetchService {
-    private static final RuyiLogger LOGGER = Activator.getLogger();
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     /** Fetches news details asynchronously with an optional error callback. */
     public void fetchNewsDetailsAsync(String id, Consumer<String> callback, Consumer<String> errorCallback) {

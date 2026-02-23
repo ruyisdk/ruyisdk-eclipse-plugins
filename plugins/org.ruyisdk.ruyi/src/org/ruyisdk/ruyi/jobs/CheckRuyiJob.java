@@ -6,15 +6,15 @@ import org.ruyisdk.core.ruyi.model.CheckResult;
 import org.ruyisdk.core.ruyi.model.RuyiReleaseInfo;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
 import org.ruyisdk.core.ruyi.model.SystemInfo;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.services.RuyiManager;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 
 /**
  * Job for checking Ruyi environment.
  */
 public class CheckRuyiJob {
-    private static final RuyiLogger LOGGER = Activator.getLogger();
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     /**
      * Runs Ruyi environment check.

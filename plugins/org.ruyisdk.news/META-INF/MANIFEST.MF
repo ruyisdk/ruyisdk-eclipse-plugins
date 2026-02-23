@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface.databinding,
  org.eclipse.core.databinding.beans,
  org.eclipse.core.databinding.property,
- org.ruyisdk.ruyi
+ org.ruyisdk.ruyi,
+ org.ruyisdk.core
 Import-Package: org.commonmark,
  org.commonmark.ext.gfm.tables,
  org.commonmark.node,

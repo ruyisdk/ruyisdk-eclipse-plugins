@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.core.workspace.WorkspaceProjectsMonitor;
 import org.ruyisdk.ruyi.core.workspace.WorkspaceProjectsMonitor.EventKind;
-import org.ruyisdk.ruyi.util.RuyiLogger;
 import org.ruyisdk.venv.Activator;
 import org.ruyisdk.venv.model.Venv;
 import org.ruyisdk.venv.model.VenvConfigurationService;
@@ -20,7 +20,7 @@ import org.ruyisdk.venv.model.VenvDetectionService;
  */
 public class VenvListViewModel {
 
-    private static final RuyiLogger LOGGER = Activator.getLogger();
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
