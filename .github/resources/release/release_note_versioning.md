@@ -9,16 +9,24 @@
 
 ## Installation Methods
 
-### Online Installation
+### Online: Eclipse Marketplace (Recommended)
 
-Recommended method. Please refer to https://ruyisdk.github.io/ruyisdk-eclipse-plugins/
+1. Launch the IDE, open the "Help" menu at the top menu bar, and click "Eclipse Marketplace...".
+1. Enter "ruyisdk" in the search box and click the "Go" button to find this plugin.
+1. After confirming that the name, version, and author are correct, click the "Install" button to begin installation.
+
+### Online: Update Site
+
+Please refer to https://ruyisdk.github.io/ruyisdk-eclipse-plugins/ .
 
 ### Offline Installation
 
-1. Download `ruyisdk-eclipse-plugins.site.zip`, no need to extract it
-1. Install "RuyiSDK IDE Feature" from a "Software Site" with the following information
-    - Name: `RuyiSDK Updates (Archive)`
-    - Location: No need to fill it in by hand, instead click the "Archive..." button, and find the zip file from the previous step in the opened window
+1. Download `ruyisdk-eclipse-plugins-X.Y.Z.zip`, no need to extract it.
+1. Launch the IDE, open the "Help" menu at the top menu bar, and click "Install New Software...".
+1. In the opened window, click the "Add..." button to open the "Add Repository" dialog.
+1. Click the "Archive..." button and locate the downloaded zip file.
+1. Go back to the "Install" window, and choose the newly added site from the "Work with" dropdown box.
+1. After the information is loaded, expand "RuyiSDK IDE" and check "RuyiSDK IDE Feature", then click the "Next >" button to start the installation.
 
 ## Need Help?
 
@@ -35,7 +43,7 @@ If you have any questions:
 
 ## See Also
 
-- RuyiSDK VSCode plugin: [GitHub](https://github.com/ruyisdk/ruyisdk-vscode-extension) and Visual Studio Marketplace <!-- TODO: https://marketplace.visualstudio.com/items?itemName= -->
+- RuyiSDK VS Code extension: [GitHub](https://github.com/ruyisdk/ruyisdk-vscode-extension) and [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=RuyiSDK.ruyisdk-vscode-extension)
 - RuyiSDK official website: https://ruyisdk.org/
 - Eclipse Help Documentation
     - [Adding a New Software Site](https://help.eclipse.org/topic/org.eclipse.platform.doc.user/tasks/tasks-127.htm)
@@ -56,16 +64,24 @@ If you have any questions:
 
 ## 安装方法
 
-### 在线安装
+### 在线安装: Eclipse 市场 (推荐)
 
-推荐使用本方法安装。请参阅 https://ruyisdk.github.io/ruyisdk-eclipse-plugins/
+1. 启动 IDE，打开顶部菜单栏的 "Help" ，单击 "Eclipse Marketplace..."。
+1. 在搜索框中输入 "ruyisdk" 并单击 "Go" 按钮找到本插件。
+1. 确认名称、版本和作者无误后，单击 "Install" 按钮开始安装。
+
+### 在线安装: 更新站点
+
+请参阅 https://ruyisdk.github.io/ruyisdk-eclipse-plugins/ 。
 
 ### 离线安装
 
-1. 下载 `ruyisdk-eclipse-plugins.site.zip`，不需要解压缩
-1. 按照 "在线安装" 的步骤操作，并将填写的信息修改为如下内容
-    - Name: `RuyiSDK Updates (Archive)`
-    - Location: 不需要手动填写，而是单击 "Archive..." 按钮，在打开的窗口中找到上一步的 zip 文件
+1. 下载 `ruyisdk-eclipse-plugins-X.Y.Z.zip`，不需要解压缩。
+1. 启动 IDE，打开顶部菜单栏的 "Help" ，单击 "Install New Software..."。
+1. 在打开的窗口中单击 "Add..." 按钮打开 "Add Repository" 对话框。
+1. 单击 "Archive..." 按钮，在打开的窗口中找到刚才下载的 zip 文件。
+1. 回到 "Install" 窗口，在 "Work with" 下拉框中选择刚添加的站点。
+1. 待信息载入完毕后，展开 "RuyiSDK IDE" 并勾选 "RuyiSDK IDE Feature" 后单击 "Next >" 按钮开始安装。
 
 ## 需要帮助？
 
@@ -82,7 +98,7 @@ If you have any questions:
 
 ## 另请参阅
 
-- RuyiSDK VSCode 插件: [GitHub](https://github.com/ruyisdk/ruyisdk-vscode-extension)、Visual Studio 市场 <!-- TODO: https://marketplace.visualstudio.com/items?itemName= -->
+- RuyiSDK VS Code 扩展: [GitHub](https://github.com/ruyisdk/ruyisdk-vscode-extension)、[Visual Studio 市场](https://marketplace.visualstudio.com/items?itemName=RuyiSDK.ruyisdk-vscode-extension)
 - RuyiSDK 官方网站: https://ruyisdk.org/
 - Eclipse 帮助文档
     - [Adding a New Software Site](https://help.eclipse.org/topic/org.eclipse.platform.doc.user/tasks/tasks-127.htm)
