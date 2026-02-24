@@ -2,7 +2,6 @@
 
 ## Requirements
 
-- Ubuntu 25.10 or newer.
 - Java 21.
 - Maven 3.9.9 or newer. You may need to add mirror sites to speedup download.
 - Git 2.23 or newer.
