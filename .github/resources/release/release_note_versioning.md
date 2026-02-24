@@ -21,7 +21,7 @@ Please refer to https://ruyisdk.github.io/ruyisdk-eclipse-plugins/ .
 
 ### Offline Installation
 
-1. Download `ruyisdk-eclipse-plugins-X.Y.Z.zip`, no need to extract it
+1. Download `ruyisdk-eclipse-plugins-X.Y.Z.zip`, no need to extract it.
 1. Launch the IDE, open the "Help" menu at the top menu bar, and click "Install New Software...".
 1. In the opened window, click the "Add..." button to open the "Add Repository" dialog.
 1. Click the "Archive..." button and locate the downloaded zip file.
@@ -66,7 +66,7 @@ If you have any questions:
 
 ### 在线安装: Eclipse 市场 (推荐)
 
-1. 启动 IDE，打开顶部菜单栏的 "Help" ，单击 "Install Marketplace..."。
+1. 启动 IDE，打开顶部菜单栏的 "Help" ，单击 "Eclipse Marketplace..."。
 1. 在搜索框中输入 "ruyisdk" 并单击 "Go" 按钮找到本插件。
 1. 确认名称、版本和作者无误后，单击 "Install" 按钮开始安装。
 
@@ -76,7 +76,7 @@ If you have any questions:
 
 ### 离线安装
 
-1. 下载 `ruyisdk-eclipse-plugins-X.Y.Z.zip`，不需要解压缩
+1. 下载 `ruyisdk-eclipse-plugins-X.Y.Z.zip`，不需要解压缩。
 1. 启动 IDE，打开顶部菜单栏的 "Help" ，单击 "Install New Software..."。
 1. 在打开的窗口中单击 "Add..." 按钮打开 "Add Repository" 对话框。
 1. 单击 "Archive..." 按钮，在打开的窗口中找到刚才下载的 zip 文件。

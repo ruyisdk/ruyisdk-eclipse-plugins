@@ -2,7 +2,7 @@
 
 ## Summary (简介)
 
-**RuyiSDK Eclipse Plugins** provide basic RISC-V C/C++ development support for Eclipse IDE on Linux. These plugins leverage the [Ruyi package manager](https://github.com/ruyisdk/ruyi) to streamline toolchain installation and updates, and offer intuitive UI for managing RISC-V virtual environment.
+**RuyiSDK Eclipse Plugins** provide basic RISC-V C/C++ development support for Eclipse IDE on Linux. These plugins leverage the [Ruyi package manager](https://github.com/ruyisdk/ruyi) to streamline toolchain installation and updates, and offer an intuitive UI for managing RISC-V virtual environments.
 
 Don't miss our VS Code extension: https://github.com/ruyisdk/ruyisdk-vscode-extension
 
@@ -41,7 +41,7 @@ Don't miss our VS Code extension: https://github.com/ruyisdk/ruyisdk-vscode-exte
 
 <br>
 
-1. 启动 IDE，打开顶部菜单栏的 "Help" ，单击 "Install Marketplace..."。
+1. 启动 IDE，打开顶部菜单栏的 "Help" ，单击 "Eclipse Marketplace..."。
 1. 在搜索框中输入 "ruyisdk" 并单击 "Go" 按钮找到本插件。
 1. 确认名称、版本和作者无误后，单击 "Install" 按钮开始安装。
 
