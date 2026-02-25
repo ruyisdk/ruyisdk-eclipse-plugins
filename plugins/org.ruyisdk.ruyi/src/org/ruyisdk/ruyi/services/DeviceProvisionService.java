@@ -40,7 +40,7 @@ public class DeviceProvisionService {
                         "org.eclipse.tm.terminal.connector.process.launcher.process");
         properties.put(ITerminalsConnectorConstants.PROP_TITLE, "Ruyi Device Provision");
         properties.put(ITerminalsConnectorConstants.PROP_FORCE_NEW, Boolean.FALSE);
-        properties.put(ITerminalsConnectorConstants.PROP_PROCESS_PATH, "bash");
+        properties.put(ITerminalsConnectorConstants.PROP_PROCESS_PATH, "sh");
         properties.put(ITerminalsConnectorConstants.PROP_PROCESS_ARGS, cmdline.toString());
         properties.put(ITerminalsConnectorConstants.PROP_PROCESS_WORKING_DIR, System.getProperty("user.home"));
 
