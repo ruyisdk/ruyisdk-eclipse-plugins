@@ -93,7 +93,7 @@ jobs:
           sleep 60
 
           # "0.1.0-SNAPSHOT"
-          current_ver="$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+          current_ver="$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)"
           # "0.1.0"
           current_ver_num="${current_ver%-SNAPSHOT}"
 
@@ -163,7 +163,7 @@ jobs:
         run: |
           set -ex
 
-          mvn clean verify
+          ./mvnw clean verify
 
       - name: Package for Release
         if: ${{ env.java_version_for_release == matrix.java_version }}
