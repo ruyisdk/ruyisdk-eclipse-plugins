@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Text;
 import org.ruyisdk.core.config.Constants;
 import org.ruyisdk.core.ruyi.model.RepoConfig;
 import org.ruyisdk.ruyi.services.RuyiProperties;
-import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 /**
  * Preference component for repository configuration.
