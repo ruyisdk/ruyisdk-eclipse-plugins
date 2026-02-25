@@ -17,7 +17,7 @@ public class DeviceProvisionService {
      * @throws IOException if terminal launch fails
      */
     public void launchProvisionWizard() throws IOException {
-        final var ruyiExecutable = resolveRuyiExecutable();
+        final var ruyiExecutable = toSingleQuoted(resolveRuyiExecutable());
 
         final var terminalService = TerminalServiceFactory.getService();
         if (terminalService == null) {
@@ -29,8 +29,10 @@ public class DeviceProvisionService {
         cmdline.append("echo '------------';");
         cmdline.append("echo 'Docs: https://ruyisdk.org/en/docs/category/使用案例';");
         cmdline.append("echo 'Press \\\"Enter\\\" to re-launch ruyi after exiting it.';");
+        cmdline.append("echo;");
+        cmdline.append("echo 'Launching \\\"'").append(ruyiExecutable).append("'\\\"...';");
         cmdline.append("echo '------------';");
-        cmdline.append("exec '").append(ruyiExecutable).append("' device provision");
+        cmdline.append("exec ").append(ruyiExecutable).append(" device provision");
         cmdline.append("\"");
 
         final var properties = new HashMap<String, Object>();
@@ -58,5 +60,9 @@ public class DeviceProvisionService {
         }
 
         throw new IOException("ruyi not found");
+    }
+
+    private static String toSingleQuoted(String value) {
+        return "'" + value.replace("'", "'\\\"'\\\"'") + "'";
     }
 }
