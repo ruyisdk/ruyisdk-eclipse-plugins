@@ -50,16 +50,15 @@ public class DeviceProvisionService {
     private static String resolveRuyiExecutable() throws IOException {
         final var installPath = RuyiFileUtils.getInstallPath();
         if (installPath == null || installPath.isBlank()) {
-            throw new IOException("ruyi not found");
+            throw new IOException("ruyi installation directory not found");
         }
 
-        final var fullPath = installPath + File.separator + "ruyi";
-        final var executable = new File(fullPath);
-        if (executable.isFile() && executable.canExecute()) {
+        final var fullPath = Paths.get(installPath, "ruyi").toString();
+        if (RuyiFileUtils.isExecutable(fullPath)) {
             return fullPath;
         }
 
-        throw new IOException("ruyi not found");
+        throw new IOException("ruyi executable not found or is not executable at: " + fullPath);
     }
 
     private static String toSingleQuoted(String value) {
