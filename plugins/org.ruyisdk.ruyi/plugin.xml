@@ -25,6 +25,11 @@
 			name="Check Ruyi Installation"
 			description="Check the current Ruyi installation status">
 		</command>
+		<command
+			id="org.ruyisdk.ruyi.commands.flashDeviceProvision"
+			name="Flash (Device Provision)"
+			description="Launch the Ruyi Device Provisioning Wizard (ruyi device provision) to flash an OS image">
+		</command>
 	</extension>
 
 	<!-- 3. 命令处理器（必须） -->
@@ -32,6 +37,10 @@
 		<handler
 			class="org.ruyisdk.ruyi.handlers.CheckInstallationHandler"
 			commandId="org.ruyisdk.ruyi.commands.checkInstallation">
+		</handler>
+		<handler
+			class="org.ruyisdk.ruyi.handlers.FlashDeviceProvisionHandler"
+			commandId="org.ruyisdk.ruyi.commands.flashDeviceProvision">
 		</handler>
 	</extension>
 
@@ -44,6 +53,11 @@
 					commandId="org.ruyisdk.ruyi.commands.checkInstallation"
 					label="Ruyi Installation"
 					tooltip="Verify Ruyi installation">
+				</command>
+				<command
+					commandId="org.ruyisdk.ruyi.commands.flashDeviceProvision"
+					label="Flash (Device Provision)"
+					tooltip="Run ruyi device provision in the built-in terminal">
 				</command>
 			</menu>
 		</menuContribution>
