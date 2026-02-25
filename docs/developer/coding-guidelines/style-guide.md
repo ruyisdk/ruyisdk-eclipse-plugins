@@ -74,6 +74,7 @@
 - 左大括号不换行。
 - 注释使用 `//` 或 `/** ... */` 格式，避免使用 `/* ... */`（除非特殊场景）。
 - 空行用于分隔逻辑块，避免连续空行。
+- 不允许未使用的 import，提交前应清理无用导入。
 - import导入语句应分为以下三个明确的组，每组之间用空行分隔,导入语句的顺序和规则如下:
     - 标准库导入：来自 `java.` 和 `javax.` 包的导入语句;
     - 第三方库导入：非标准库的第三方包导入语句,如 `eclipse.` 包的导入语句;
@@ -111,6 +112,7 @@
 |Javadoc|RequireEmptyLineBeforeBlockTagGroup|inherit|ignore|Javadoc标签前空行|
 |MissingJavadocType|scope|protected|public|Javadoc注释检查范围|
 ||skipAnnotations|Generated|Generated,Override|Javadoc注释检查跳过|
+||UnusedImports|disabled|enabled|禁止未使用的 import|
 
 - 对 Code Templates 调整如下:
 - `First sentence of Javadoc is missing an ending period.`

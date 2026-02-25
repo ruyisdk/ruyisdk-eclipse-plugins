@@ -5,15 +5,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Locale;
 import java.util.Properties;
 import org.ruyisdk.core.basedir.XdgDirs;
 import org.ruyisdk.core.config.Constants;
-import org.ruyisdk.core.config.Constants.AppInfo;
-import org.ruyisdk.core.config.Constants.ConfigFile;
-import org.ruyisdk.core.config.Constants.Ruyi;
 import org.ruyisdk.core.console.RuyiSdkConsole;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
 

@@ -19,7 +19,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 import org.ruyisdk.projectcreator.Activator;
-import org.ruyisdk.projectcreator.launch.LaunchConstants;
 
 /**
  * Launch shortcut for building projects.

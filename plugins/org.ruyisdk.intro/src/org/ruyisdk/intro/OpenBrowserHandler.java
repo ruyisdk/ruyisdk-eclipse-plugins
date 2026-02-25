@@ -2,7 +2,6 @@ package org.ruyisdk.intro;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Locale;
 import org.eclipse.core.commands.AbstractHandler;
