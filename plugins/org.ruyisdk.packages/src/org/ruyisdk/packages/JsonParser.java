@@ -22,11 +22,10 @@ public class JsonParser {
      * Parses JSON data into a tree structure.
      *
      * @param jsonData JSON string data
-     * @param downloadedFiles set of downloaded files
      * @param hardwareType hardware type for root node
      * @return parsed tree node
      */
-    public static TreeNode parseJson(String jsonData, java.util.Set<String> downloadedFiles, String hardwareType) {
+    public static TreeNode parseJson(String jsonData, String hardwareType) {
         try (JsonReader reader = Json.createReader(new StringReader(jsonData))) {
             JsonStructure jsonStructure = reader.read();
             // use hardwareType as root node name
