@@ -53,7 +53,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
 
         // 1. Ensure Ruyi virtual environment exists
         try {
-            ensureRuyiVenv(project, monitor);
+            ensureRuyiVenv(project);
         } catch (IOException | InterruptedException e) {
             String errorMsg = "Failed to create Ruyi virtual environment: " + e.getMessage();
             logToFile(project, errorMsg);
@@ -210,8 +210,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
         }
     }
 
-    private void ensureRuyiVenv(IProject project, IProgressMonitor monitor)
-                    throws IOException, InterruptedException, CoreException {
+    private void ensureRuyiVenv(IProject project) throws IOException, InterruptedException, CoreException {
         File projectLocation = project.getLocation().toFile();
         File venvDir = new File(projectLocation, RUYI_VENV_DIR);
 

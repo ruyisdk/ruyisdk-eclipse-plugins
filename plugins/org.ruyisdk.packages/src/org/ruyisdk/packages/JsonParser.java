@@ -32,12 +32,12 @@ public class JsonParser {
             // use hardwareType as root node name
             TreeNode root = new TreeNode(hardwareType, null);
             if (jsonStructure instanceof JsonObject) {
-                parseJsonObject((JsonObject) jsonStructure, root, downloadedFiles);
+                parseJsonObject((JsonObject) jsonStructure, root);
             } else if (jsonStructure instanceof JsonArray) {
                 JsonArray jsonArray = (JsonArray) jsonStructure;
                 for (JsonValue value : jsonArray) {
                     if (value instanceof JsonObject) {
-                        parseJsonObject((JsonObject) value, root, downloadedFiles);
+                        parseJsonObject((JsonObject) value, root);
                     }
                 }
             }
@@ -48,7 +48,7 @@ public class JsonParser {
     }
 
 
-    private static void parseJsonObject(JsonObject rootObject, TreeNode root, java.util.Set<String> downloadedFiles) {
+    private static void parseJsonObject(JsonObject rootObject, TreeNode root) {
         if (!rootObject.containsKey("category") || !rootObject.containsKey("name")) {
             return;
         }

@@ -30,7 +30,7 @@ public class Activator extends AbstractUIPlugin {
         super.start(context);
         plugin = this;
         try {
-            Class<?> builderClass = getBundle().loadClass("org.ruyisdk.projectcreator.builder.MakefileBuilder");
+            getBundle().loadClass("org.ruyisdk.projectcreator.builder.MakefileBuilder");
             IWorkspace workspace = ResourcesPlugin.getWorkspace();
             buildListener = event -> {
                 switch (event.getType()) {

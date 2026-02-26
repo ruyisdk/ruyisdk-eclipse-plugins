@@ -289,8 +289,7 @@ public class PackageExplorerView extends ViewPart {
 
             new Thread(() -> {
                 try {
-                    String line;
-                    while ((line = bashReader.readLine()) != null) {
+                    while (bashReader.readLine() != null) {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
