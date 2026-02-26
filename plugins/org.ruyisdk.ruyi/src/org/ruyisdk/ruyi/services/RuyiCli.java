@@ -17,16 +17,12 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.ruyisdk.core.util.PluginLogger;
-import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 /**
  * Simple DTOs returned by the CLI wrapper to avoid cross-plugin model coupling.
  */
 public class RuyiCli {
-    private static final PluginLogger LOGGER = Activator.getLogger();
-
     /** Profile information returned by the ruyi CLI. */
     public static class ProfileInfo {
         private final String name;
