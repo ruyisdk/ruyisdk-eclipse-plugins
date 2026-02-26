@@ -1,10 +1,8 @@
 package org.ruyisdk.ruyi.services;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.FileStore;
@@ -13,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashSet;
-import java.util.Scanner;
 import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -24,7 +21,6 @@ import org.ruyisdk.core.ruyi.model.SystemInfo;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.services.RuyiProperties.TelemetryStatus;
 import org.ruyisdk.ruyi.ui.RuyiInstallWizard.InstallationListener;
-import org.ruyisdk.ruyi.util.PathUtils;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
 import org.ruyisdk.ruyi.util.RuyiNetworkUtils;
 
@@ -80,15 +76,6 @@ public class RuyiInstallManager {
             downloadRuyi(monitor, listener);
 
             // 阶段3: 完成安装
-            // // 文件预处理
-            // listener.logMessage("Rename ruyi file ...");
-            // prepareExecutable(Paths.get(installPath, latestRelease.getFilename()),
-            // Paths.get(installPath, "ruyi"),
-            // listener);
-
-            // 环境变量配置
-            // listener.logMessage("Setting up environment...");
-            // addToPathIfNeeded(installPath, listener);
             // 为ruyi设置可执行权限
             listener.logMessage("Setting executable permissions...");
             setExecutablePermissions(installPath, listener);
@@ -245,58 +232,6 @@ public class RuyiInstallManager {
                         lastException != null ? lastException.getMessage() : "未知错误"), lastException);
     }
 
-    private void prepareExecutable(Path source, Path target, InstallationListener listener) throws Exception {
-        // 1. 复制/重命名文件
-        listener.logMessage("Preparing executable...");
-        // Files.deleteIfExists(target); // 删除已存在的旧文件
-        // Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
-
-        // 2. 设置可执行权限 (Unix-like系统)
-        try {
-            if (!target.toFile().setExecutable(true)) {
-                throw new Exception("Failed to set executable permission");
-            }
-        } catch (SecurityException e) {
-            throw new Exception("Permission denied when setting executable flag", e);
-        }
-
-        listener.logMessage("Executable prepared: " + target);
-    }
-
-    private void addToPathIfNeeded(String path, InstallationListener listener) throws Exception {
-        Path ruyiExecutable = Paths.get(path, "ruyi");
-
-        // 1. 检查是否已配置
-        if (PathUtils.isPathConfigured(path) && Files.isExecutable(ruyiExecutable)) {
-            listener.logMessage("PATH already contains: " + path);
-            return;
-        }
-
-        // 2. 弹出图形化确认
-        if (!showConfirmationDialog("PATH Configuration", "需要添加安装目录到PATH变量并设置可执行权限")) {
-            throw new Exception("User declined configuration");
-        }
-
-        // 3. 准备配置命令（包含PATH设置和权限设置）
-        String command = String.format(
-                        "echo 'export PATH=\"%s:$PATH\"' >> ~/.bashrc && " + "chmod +x %s && " + "source ~/.bashrc",
-                        path, ruyiExecutable.toString());
-
-        // 4. 执行特权命令
-        executeWithPrivilege(command, listener);
-
-        // 5. 验证权限
-        if (!Files.isExecutable(ruyiExecutable)) {
-            // 详细错误诊断
-            String perms = Files.exists(ruyiExecutable)
-                            ? "Current permissions: " + Files.getPosixFilePermissions(ruyiExecutable)
-                            : "File does not exist";
-            throw new Exception(String.format("Permission verification failed for: %s\n%s", ruyiExecutable, perms));
-        }
-        // listener.logMessage("Successfully set executable permission for: " + ruyiExecutable);
-        listener.logMessage("验证成功: " + ruyiExecutable + " 已获得可执行权限");
-    }
-
     private void setExecutablePermissions(String path, InstallationListener listener) throws Exception {
         Path ruyipath = Paths.get(path, "ruyi");
         File file = new File(ruyipath.toString());
@@ -347,56 +282,6 @@ public class RuyiInstallManager {
         }
     }
 
-    private boolean showConfirmationDialog(String title, String message) {
-        try {
-            // 尝试使用zenity图形对话框
-            return new ProcessBuilder("zenity", "--question", "--title=" + title, "--text=" + message, "--width=300")
-                            .start().waitFor() == 0;
-        } catch (Exception e) {
-            // 回退到控制台确认
-            System.out.printf("%s (y/N): ", message);
-            return new Scanner(System.in).nextLine().equalsIgnoreCase("y");
-        }
-    }
-
-    private void executeWithPrivilege(String command, InstallationListener listener) throws Exception {
-        // String[] cmd = {
-        // "pkexec",
-        // "bash",
-        // "-c",
-        // String.format("su $SUDO_USER -c '%s'", command)
-        // };
-
-        // 先扩展所有~符号
-        String expandedCmd = command.replace("~", System.getProperty("user.home"));
-
-        String[] cmd = {"pkexec", "bash", "-c",
-                // 直接执行命令（不再通过su，因为pkexec已经提权）
-                expandedCmd};
-
-        try {
-            Process proc = new ProcessBuilder(cmd).redirectErrorStream(true).start();
-
-            // 读取输出
-            StringBuilder output = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(proc.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    output.append(line).append("\n");
-                    listener.logMessage(line);
-                }
-            }
-
-            int exitCode = proc.waitFor();
-            if (exitCode != 0) {
-                throw new Exception(String.format("Command failed (exit code %d): %s\nOutput: %s", exitCode, command,
-                                output.toString()));
-            }
-        } catch (IOException | InterruptedException e) {
-            throw new Exception("Failed to execute privileged command: " + e.getMessage(), e);
-        }
-    }
-
     private void validateInstallation(String ruyiPath, InstallationListener listener) throws Exception {
         listener.logMessage("Validating installation...");
 
@@ -427,15 +312,6 @@ public class RuyiInstallManager {
         listener.logMessage("ruyi telemetry set successful:" + RuyiCommand.getTelemetryStatus(ruyiPath));
 
         listener.logMessage("Config successful");
-    }
-
-
-    private void cleanFailedDownload(Path file, InstallationListener listener) {
-        try {
-            Files.deleteIfExists(file);
-        } catch (IOException e) {
-            listener.logMessage("Warning: Failed to clean up temporary file - " + e.getMessage());
-        }
     }
 
     // ========== 版本管理方法 ==========

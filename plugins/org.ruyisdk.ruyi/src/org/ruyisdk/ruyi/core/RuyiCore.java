@@ -2,7 +2,6 @@ package org.ruyisdk.ruyi.core;
 
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.ruyisdk.core.ruyi.model.CheckResult;
 import org.ruyisdk.core.util.PluginLogger;
@@ -78,17 +77,11 @@ public class RuyiCore {
         Display.getDefault().asyncExec(() -> {
             switch (result.getAction()) {
                 case INSTALL:
-                    // if (confirmAction("Install Ruyi", result.getMessage())) {
                     RuyiInstallWizard.openForInstall();
-                    // } else {
-                    // StatusUtil.showInfo("You can install Ruyi later from Preferences");
-                    // }
                     break;
 
                 case UPGRADE:
-                    // if (confirmAction("Upgrade Ruyi", result.getMessage())) {
                     RuyiInstallWizard.openForUpgrade(result.getCurrentVersion(), result.getLatestVersion());
-                    // }
                     break;
 
                 case NOTHING:
@@ -107,10 +100,5 @@ public class RuyiCore {
         // IPreferenceStore prefs = Activator.getDefault().getPreferenceStore();
         // return prefs.getBoolean(RuyiPreferenceConstants.P_CHECK_ON_STARTUP) &&
         // !prefs.getBoolean(RuyiPreferenceConstants.P_SKIP_VERSION_CHECK);
-    }
-
-    private boolean confirmAction(String title, String message) {
-        return MessageDialog.openQuestion(Display.getDefault().getActiveShell(), title,
-                        message + "\n\nWould you like to proceed?");
     }
 }

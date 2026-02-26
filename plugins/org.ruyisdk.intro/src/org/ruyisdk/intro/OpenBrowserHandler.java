@@ -2,13 +2,10 @@ package org.ruyisdk.intro;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.Locale;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 
 /**
  * Handler to open browser for various URLs.
@@ -72,35 +69,4 @@ public class OpenBrowserHandler extends AbstractHandler {
         }
     }
 
-    // Using the Eclipse browser mechanism (Window → Preferences → General → Web Browser)
-    private void openBrowserSupportUrl(String url) {
-        try {
-            IWorkbenchBrowserSupport browserSupport = PlatformUI.getWorkbench().getBrowserSupport();
-            browserSupport.getExternalBrowser().openURL(new URL(url));
-            System.out.println("Successfully opened: " + url);
-        } catch (Exception e) {
-            System.err.println("Failed to open browser: " + e.getMessage());
-        }
-    }
-
-    private void openUrlAbsolutely(String url) {
-        try {
-            String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-            ProcessBuilder pb = new ProcessBuilder();
-
-            if (os.contains("win")) {
-                pb.command("cmd", "/c", "start", "msedge", url); // Force Edge
-            } else if (os.contains("mac")) {
-                pb.command("open", "-a", "Safari", url); // Force Safari
-            } else {
-                pb.command("sh", "-c", "xdg-open '" + url + "' || sensible-browser '" + url + "'");
-            }
-
-            // Key configuration: inherit environment variables + redirect error stream
-            pb.inheritIO().redirectErrorStream(true).start();
-
-        } catch (IOException e) {
-            System.err.println("System call method failed to open webpage: " + e.getMessage());
-        }
-    }
 }

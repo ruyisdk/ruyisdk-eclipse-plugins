@@ -41,7 +41,6 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
     private BoardSelectionPage boardSelectionPage;
     private ProjectSettingsPage projectSettingsPage;
-    private IWorkbench workbench;
 
     /**
      * Constructs new project wizard.
@@ -52,9 +51,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
     }
 
     @Override
-    public void init(IWorkbench workbench, IStructuredSelection selection) {
-        this.workbench = workbench;
-    }
+    public void init(IWorkbench workbench, IStructuredSelection selection) {}
 
     @Override
     public void addPages() {

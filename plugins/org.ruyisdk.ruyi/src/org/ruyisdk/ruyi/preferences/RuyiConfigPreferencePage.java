@@ -1,14 +1,12 @@
 package org.ruyisdk.ruyi.preferences;
 
 import java.io.IOException;
-import java.util.Collections;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.ruyisdk.ruyi.Activator;
@@ -61,20 +59,6 @@ public class RuyiConfigPreferencePage extends FieldEditorPreferencePage implemen
         telemetryPreference = new TelemetryPreference(content);
         telemetryPreference.createSection();
 
-        // 布局调试
-        // printControlHierarchy(content, 0);
-
-    }
-
-    private void printControlHierarchy(Composite comp, int level) {
-        String indent = String.join("", Collections.nCopies(level, "  "));
-        System.out.println(indent + comp + " " + comp.getLayout());
-        for (Control c : comp.getChildren()) {
-            System.out.println(indent + " |- " + c + " " + c.getLayoutData());
-            if (c instanceof Composite) {
-                printControlHierarchy((Composite) c, level + 1);
-            }
-        }
     }
 
     // 1. 恢复默认值逻辑

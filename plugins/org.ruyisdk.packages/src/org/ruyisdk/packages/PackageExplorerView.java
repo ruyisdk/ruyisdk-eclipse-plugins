@@ -235,35 +235,6 @@ public class PackageExplorerView extends ViewPart {
         }
     }
 
-    private java.util.Set<String> getDownloadedFiles() {
-        java.util.Set<String> files = new java.util.HashSet<>();
-
-        // distfiles
-        String cacheHome = System.getenv("XDG_CACHE_HOME");
-        String distfilesDir = (cacheHome != null && !cacheHome.isEmpty()) ? cacheHome + "/ruyi/distfiles"
-                        : System.getProperty("user.home") + "/.cache/ruyi/distfiles";
-        addFilesFromDir(files, distfilesDir);
-        // blobs
-        String dataHome = System.getenv("XDG_DATA_HOME");
-        String blobsDir = (dataHome != null && !dataHome.isEmpty()) ? dataHome + "/ruyi/blobs"
-                        : System.getProperty("user.home") + "/.local/share/ruyi/blobs";
-        addFilesFromDir(files, blobsDir);
-
-        return files;
-    }
-
-    // Helper method: Add all file names in the directory to the set
-    private void addFilesFromDir(java.util.Set<String> files, String dirPath) {
-        try (java.nio.file.DirectoryStream<java.nio.file.Path> stream =
-                        java.nio.file.Files.newDirectoryStream(java.nio.file.Paths.get(dirPath))) {
-            for (java.nio.file.Path entry : stream) {
-                files.add(entry.getFileName().toString());
-            }
-        } catch (Exception e) {
-            // Ignore if the directory does not exist or is not accessible
-        }
-    }
-
     @Override
     public void setFocus() {
         viewer.getControl().setFocus();
@@ -289,8 +260,7 @@ public class PackageExplorerView extends ViewPart {
 
             new Thread(() -> {
                 try {
-                    String line;
-                    while ((line = bashReader.readLine()) != null) {
+                    while (bashReader.readLine() != null) {
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -362,7 +332,7 @@ public class PackageExplorerView extends ViewPart {
 
                 Display.getDefault().asyncExec(() -> {
                     try {
-                        TreeNode root = JsonParser.parseJson(jsonData, getDownloadedFiles(), chosenType);
+                        TreeNode root = JsonParser.parseJson(jsonData, chosenType);
                         viewer.setInput(root);
                         viewer.expandAll();
                         markDownloadedNodes(root);

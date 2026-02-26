@@ -24,6 +24,7 @@
     <tycho.version>5.0.2</tycho.version>
     <checkstyle.version>13.1.0</checkstyle.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+    <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
     <formatter-maven-plugin.version>2.29.0</formatter-maven-plugin.version>
     <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
 
@@ -148,6 +149,31 @@
             <id>checkstyle-validate</id>
             <phase>validate</phase>
             <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- PMD for static analysis checks (including unused code detection) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>${maven-pmd-plugin.version}</version>
+        <configuration>
+          <failOnViolation>true</failOnViolation>
+          <printFailingErrors>true</printFailingErrors>
+          <linkXRef>false</linkXRef>
+          <rulesets>
+            <ruleset>${maven.multiModuleProjectDirectory}/docs/developer/coding-guidelines/pmd-unused-ruleset.xml</ruleset>
+          </rulesets>
+        </configuration>
+        <executions>
+          <execution>
+            <id>pmd-unused-check</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>pmd</goal>
               <goal>check</goal>
             </goals>
           </execution>
