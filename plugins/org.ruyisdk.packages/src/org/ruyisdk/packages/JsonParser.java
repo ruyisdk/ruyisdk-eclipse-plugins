@@ -1,7 +1,5 @@
 package org.ruyisdk.packages;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +9,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
-import org.ruyisdk.ruyi.util.RuyiFileUtils;
+import org.ruyisdk.ruyi.services.RuyiCli;
 
 /**
  * JSON parser for package tree data.
@@ -71,8 +69,8 @@ public class JsonParser {
 
                 boolean isDownloaded = versionObject.getBoolean("is_installed", false);
 
-                String installCommand = RuyiFileUtils.getInstallPath() + "/ruyi install '" + name + "(" + semver + ")'";
-                TreeNode versionNode = new TreeNode(semver + remark, null, installCommand);
+                final var packageRef = name + "(" + semver + ")";
+                final var versionNode = new TreeNode(semver + remark, null, packageRef);
                 versionNode.setLeaf(true);
                 versionNode.setDownloaded(isDownloaded);
                 packageNode.addChild(versionNode);
@@ -168,27 +166,10 @@ public class JsonParser {
             return null;
         }
 
-        String ruyiPath = RuyiFileUtils.getInstallPath() + "/ruyi";
         String entity = boardName.startsWith("device:") ? boardName : "device:" + boardName;
-        String command = ruyiPath + " --porcelain list --related-to-entity " + entity;
 
         try {
-            ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
-            pb.environment().put("RUYI_EXPERIMENTAL", "true");
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-
-            // Read the command's output stream
-            StringBuilder jsonStream = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    jsonStream.append(line);
-                }
-            }
-            process.waitFor();
-
-            String rawJson = jsonStream.toString();
+            final var rawJson = RuyiCli.listRelatedToEntity(entity).replace("\n", "").replace("\r", "");
             if (rawJson.trim().isEmpty()) {
                 return null; // No output from ruyi
             }

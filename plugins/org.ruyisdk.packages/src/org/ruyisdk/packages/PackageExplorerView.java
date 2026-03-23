@@ -1,12 +1,9 @@
 package org.ruyisdk.packages;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -32,16 +29,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.IConsoleConstants;
 import org.eclipse.ui.part.ViewPart;
 import org.ruyisdk.packages.JsonParser;
-import org.ruyisdk.ruyi.util.RuyiFileUtils;
+import org.ruyisdk.ruyi.services.RuyiCli;
 
 /**
  * View for exploring packages.
  */
 public class PackageExplorerView extends ViewPart {
     private CheckboxTreeViewer viewer;
-    private Process bashProcess;
-    private BufferedWriter bashWriter;
-    private BufferedReader bashReader;
     private String chosenType;
 
     @Override
@@ -126,7 +120,7 @@ public class PackageExplorerView extends ViewPart {
                             "Are you sure you want to download the selected files?");
             if (confirmed) {
                 for (TreeNode node : selectedNodes) {
-                    executeInstallCommand(node.getInstallCommand());
+                    modifyPackage(node.getPackageRef(), false);
                 }
             }
         });
@@ -177,9 +171,6 @@ public class PackageExplorerView extends ViewPart {
         // Create and register the context menu
         createContextMenu();
 
-        // Start a persistent Bash session and enable experimental mode
-        startBashSession();
-
         Display.getDefault().asyncExec(() -> {
             try {
                 IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
@@ -220,13 +211,7 @@ public class PackageExplorerView extends ViewPart {
                                                         + node.getName() + "'?");
 
                         if (confirmed) {
-                            String ruyiPath = RuyiFileUtils.getInstallPath() + "/ruyi";
-                            String installCommand = node.getInstallCommand();
-                            // Extract package name from a command like ".../ruyi provision -v -f <package-name>"
-                            String packageName = installCommand.substring(installCommand.lastIndexOf(" ") + 1);
-                            String uninstallCommand = ruyiPath + " uninstall " + packageName + " -y";
-                            System.err.println("Executing uninstall command: " + uninstallCommand);
-                            executeInstallCommand(uninstallCommand);
+                            modifyPackage(node.getPackageRef(), true);
                         }
                     }
                 };
@@ -242,93 +227,33 @@ public class PackageExplorerView extends ViewPart {
 
     @Override
     public void dispose() {
-        closeBashSession();
         super.dispose();
     }
 
-    private void startBashSession() {
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-i");
-            processBuilder.redirectErrorStream(true);
-            bashProcess = processBuilder.start();
-
-            bashWriter = new BufferedWriter(new OutputStreamWriter(bashProcess.getOutputStream()));
-            bashReader = new BufferedReader(new InputStreamReader(bashProcess.getInputStream()));
-
-            bashWriter.write("export RUYI_EXPERIMENTAL=true\n");
-            bashWriter.flush();
-
-            new Thread(() -> {
-                try {
-                    while (bashReader.readLine() != null) {
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        } catch (IOException e) {
-            e.printStackTrace();
-            MessageDialog.openError(Display.getDefault().getActiveShell(), "Error",
-                            "Cannot start Bash session: " + e.getMessage());
-        }
-    }
-
-    private void closeBashSession() {
-        try {
-            if (bashWriter != null) {
-                bashWriter.write("exit\n");
-                bashWriter.flush();
-                bashWriter.close();
-            }
-            if (bashReader != null) {
-                bashReader.close();
-            }
-            if (bashProcess != null) {
-                bashProcess.destroy();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void executeCommandInBackground(String command) {
+    private void loadPackagesAsync() {
         new Thread(() -> {
             try {
-                List<String> cmdList = new ArrayList<>();
-                cmdList.add("bash");
-                cmdList.add("-c");
-                cmdList.add(command);
+                final var entity = "device:" + chosenType;
+                final var output = RuyiCli.listRelatedToEntity(entity);
 
-                ProcessBuilder pb = new ProcessBuilder(cmdList);
-                pb.environment().put("RUYI_EXPERIMENTAL", "true");
-                pb.redirectErrorStream(true);
-                Process process = pb.start();
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                 StringBuilder outputBuilder = new StringBuilder();
                 outputBuilder.append("[");
                 boolean first = true;
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.contains("RUYI_DONE")) {
-                        break;
-                    }
-                    line = line.trim();
+                final var lines = output.split("\\R");
+                for (final var line : lines) {
+                    final var trimmedLine = line.trim();
                     // Only concatenate packet data and filter logs
-                    if (!line.isEmpty() && line.startsWith("{") && !line.contains("\"ty\":\"log-v1\"")) {
+                    if (!trimmedLine.isEmpty() && trimmedLine.startsWith("{")
+                                    && !trimmedLine.contains("\"ty\":\"log-v1\"")) {
                         if (!first) {
                             outputBuilder.append(",");
                         }
-                        outputBuilder.append(line);
+                        outputBuilder.append(trimmedLine);
                         first = false;
                     }
                 }
                 outputBuilder.append("]");
                 String jsonData = outputBuilder.toString();
-
-
-                process.waitFor();
-                reader.close();
 
                 Display.getDefault().asyncExec(() -> {
                     try {
@@ -341,7 +266,7 @@ public class PackageExplorerView extends ViewPart {
                                         "Failed to parse JSON data: " + e.getMessage());
                     }
                 });
-            } catch (IOException | InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 Display.getDefault().asyncExec(() -> {
                     MessageDialog.openError(Display.getDefault().getActiveShell(), "Error",
@@ -364,21 +289,23 @@ public class PackageExplorerView extends ViewPart {
         }
     }
 
-    private void executeInstallCommand(String installCommand) {
+    private void modifyPackage(String packageRef, boolean uninstall) {
         Display.getDefault().asyncExec(() -> {
-            OutputLiveDialog dialog = new OutputLiveDialog(Display.getDefault().getActiveShell(), installCommand);
+            final var dialog = new OutputLiveDialog(Display.getDefault().getActiveShell(), packageRef, uninstall);
             dialog.open();
         });
     }
 
     // Real-time output dialog
     class OutputLiveDialog extends Dialog {
-        private String installCommand;
+        private String packageRef;
+        private boolean uninstall;
         private Text text;
 
-        public OutputLiveDialog(Shell parentShell, String installCommand) {
+        public OutputLiveDialog(Shell parentShell, String packageRef, boolean uninstall) {
             super(parentShell);
-            this.installCommand = installCommand;
+            this.packageRef = packageRef;
+            this.uninstall = uninstall;
         }
 
         @Override
@@ -387,7 +314,7 @@ public class PackageExplorerView extends ViewPart {
             container.setLayout(new GridLayout(1, false));
             text = new Text(container, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY | SWT.WRAP);
             text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-            text.setText("Executing command:\n" + installCommand + "\n\nOutput:\n");
+            text.setText((uninstall ? "Uninstalling" : "Installing") + " \"" + packageRef + "\"\n\nOutput:\n");
             startCommand();
             return container;
         }
@@ -395,44 +322,23 @@ public class PackageExplorerView extends ViewPart {
         private void startCommand() {
             new Thread(() -> {
                 try {
-                    List<String> cmdList = new ArrayList<>();
-                    cmdList.add("bash");
-                    cmdList.add("-c");
-                    cmdList.add(installCommand + " && echo RUYI_DONE");
-
-                    ProcessBuilder pb = new ProcessBuilder(cmdList);
-                    pb.redirectErrorStream(true);
-
-                    // Ensure that HOME and XDG_CACHE_HOME environment variables are consistent
-                    String home = System.getProperty("user.home");
-                    pb.environment().put("HOME", home);
-                    String xdgCacheHome = System.getenv("XDG_CACHE_HOME");
-                    if (xdgCacheHome != null && !xdgCacheHome.isEmpty()) {
-                        pb.environment().put("XDG_CACHE_HOME", xdgCacheHome);
-                    }
-
-                    Process process = pb.start();
-
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        final String outputLine = line + "\n";
+                    final Consumer<String> lineCallback = line -> {
                         Display.getDefault().asyncExec(() -> {
                             if (text != null && !text.isDisposed()) {
-                                text.append(outputLine);
+                                text.append(line + "\n");
                             }
                         });
-                        if (line.contains("RUYI_DONE")) {
-                            Display.getDefault().asyncExec(() -> refreshList());
-                            break;
-                        }
+                    };
+                    if (uninstall) {
+                        RuyiCli.uninstallPackageStreaming(packageRef, true, lineCallback, null);
+                    } else {
+                        RuyiCli.installPackageStreaming(packageRef, lineCallback, null);
                     }
-                    reader.close();
-                    process.waitFor();
-                } catch (IOException | InterruptedException e) {
+                    Display.getDefault().asyncExec(() -> refreshList());
+                } catch (Exception e) {
                     Display.getDefault().asyncExec(() -> {
                         if (text != null && !text.isDisposed()) {
-                            text.append("Failed to execute the installation command: " + e.getMessage() + "\n");
+                            text.append("Failed to execute the command: " + e.getMessage() + "\n");
                         }
                     });
                 }
@@ -485,31 +391,15 @@ public class PackageExplorerView extends ViewPart {
         if (chosenType == null || chosenType.isEmpty()) {
             return;
         }
-        String ruyiPath = RuyiFileUtils.getInstallPath() + "/ruyi";
-        String command = ruyiPath + " --porcelain list --related-to-entity device:" + chosenType + " ; echo RUYI_DONE";
-        executeCommandInBackground(command);
+        loadPackagesAsync();
     }
 
     private String[] fetchHardwareEntities() {
         List<String> entityIds = new ArrayList<>();
-        String ruyiPath = RuyiFileUtils.getInstallPath() + "/ruyi";
-        String command = "RUYI_EXPERIMENTAL=x " + ruyiPath + " --porcelain entity list -t device";
 
         try {
-            ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                StringBuilder outputBuilder = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    outputBuilder.append(line.trim());
-                }
-                process.waitFor();
-                // Call JsonParser to parse all entity_id
-                entityIds = JsonParser.parseAllEntityIdsInOneLine(outputBuilder.toString());
-            }
+            final var output = RuyiCli.listEntitiesByType("device").replace("\n", "").replace("\r", "");
+            entityIds = JsonParser.parseAllEntityIdsInOneLine(output);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,10 +1,8 @@
 package org.ruyisdk.ruyi.util;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import org.ruyisdk.core.config.Constants;
 import org.ruyisdk.ruyi.services.RuyiProperties;
 
@@ -55,72 +53,50 @@ public class RuyiFileUtils {
     }
 
     /**
-     * Ensures directory exists.
+     * Finds the installation path that contains an executable {@code ruyi} binary.
      *
-     * @param path directory path
-     * @return true if created
-     * @throws IOException if creation fails
+     * <p>
+     * Lookup order is:
+     * <ol>
+     * <li>configured install path from properties</li>
+     * <li>default install path</li>
+     * </ol>
+     *
+     * @return resolved install path, or empty string if not found
      */
-    public static boolean ensureDirectoryExists(String path) throws IOException {
-        Path dirPath = Paths.get(path);
-        if (!Files.exists(dirPath)) {
-            Files.createDirectories(dirPath);
-            return true;
+    public static String findInstallPathWithRuyi() {
+        final var configuredPath = normalizePath(RuyiProperties.getInstallPath());
+        if (!configuredPath.isEmpty() && hasExecutableRuyi(configuredPath)) {
+            return configuredPath;
         }
-        return Files.isDirectory(dirPath);
+
+        final var defaultPath = getDefaultInstallPath().toString();
+        if (hasExecutableRuyi(defaultPath)) {
+            return defaultPath;
+        }
+        return "";
     }
 
-    /**
-     * Checks if file is executable.
-     *
-     * @param filePath file path
-     * @return true if executable
-     */
-    public static boolean isExecutable(String filePath) {
-        Path path = Paths.get(filePath);
+    private static String normalizePath(String path) {
+        if (path == null) {
+            return "";
+        }
+        String normalized = path.trim();
+        if (normalized.isEmpty()) {
+            return "";
+        }
+        if (normalized.startsWith("~")) {
+            normalized = normalized.replaceFirst("^~", System.getProperty("user.home"));
+        }
+        final var nioPath = Paths.get(normalized);
+        return nioPath.toAbsolutePath().normalize().toString();
+    }
+
+    private static boolean hasExecutableRuyi(String installPath) {
+        if (installPath == null || installPath.isBlank()) {
+            return false;
+        }
+        final var path = Paths.get(Paths.get(installPath, "ruyi").toString());
         return Files.exists(path) && Files.isExecutable(path);
-    }
-
-    /**
-     * Reads file content.
-     *
-     * @param filePath file path
-     * @return file content
-     * @throws IOException if read fails
-     */
-    public static String readFileContent(String filePath) throws IOException {
-        return new String(Files.readAllBytes(Paths.get(filePath)));
-    }
-
-    /**
-     * Writes content to file.
-     *
-     * @param filePath file path
-     * @param content content to write
-     * @throws IOException if write fails
-     */
-    public static void writeFileContent(String filePath, String content) throws IOException {
-        Files.write(Paths.get(filePath), content.getBytes(), StandardOpenOption.CREATE,
-                        StandardOpenOption.TRUNCATE_EXISTING);
-    }
-
-    /**
-     * Deletes path recursively.
-     *
-     * @param path path to delete
-     * @return true if deleted
-     * @throws IOException if delete fails
-     */
-    public static boolean deleteRecursively(Path path) throws IOException {
-        if (Files.isDirectory(path)) {
-            Files.list(path).forEach(p -> {
-                try {
-                    deleteRecursively(p);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
-        return Files.deleteIfExists(path);
     }
 }

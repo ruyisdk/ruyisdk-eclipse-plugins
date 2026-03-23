@@ -47,17 +47,16 @@ public class VenvWizard extends Wizard {
             }
             pmd.run(true, true, monitor -> {
                 monitor.beginTask("Updating package index...", 100);
-                final var result = viewModel.updateIndex();
-                if (result == null) {
-                    throw new InvocationTargetException(new Exception("Update returned no result"));
-                }
-                if (result.getExitCode() != 0) {
-                    throw new InvocationTargetException(new Exception(result.getOutput()));
+                try {
+                    viewModel.updateIndex();
+                } catch (Exception e) {
+                    throw new InvocationTargetException(e);
                 }
                 monitor.worked(100);
             });
         } catch (InvocationTargetException e) {
-            final var detail = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+            final var cause = e.getCause();
+            final var detail = cause != null ? cause.getMessage() : e.getMessage();
             displaySelectableError("Package Index Update Failed", "Failed to update package index; wizard will abort.",
                             detail == null ? "" : detail);
             return;
@@ -80,32 +79,19 @@ public class VenvWizard extends Wizard {
     @Override
     public boolean performFinish() {
         final IRunnableWithProgress operation = monitor -> {
-            monitor.subTask("install toolchain");
-            {
-                final var result = viewModel.installToolchain();
-                if (result.getExitCode() != 0) {
-                    throw new InvocationTargetException(
-                                    new Exception("Failed to install toolchain:\n" + result.getOutput()));
-                }
-            }
+            try {
+                monitor.subTask("install toolchain");
+                viewModel.installToolchain();
 
-            if (viewModel.isEmulatorEnabled()) {
-                monitor.subTask("install emulator");
-                final var result = viewModel.installEmulator();
-                if (result.getExitCode() != 0) {
-                    throw new InvocationTargetException(
-                                    new Exception("Failed to install emulator:\n" + result.getOutput()));
+                if (viewModel.isEmulatorEnabled()) {
+                    monitor.subTask("install emulator");
+                    viewModel.installEmulator();
                 }
-            }
 
-            monitor.subTask("create venv");
-            {
-                final var result = viewModel.createVenv();
-                if (result.getExitCode() != 0) {
-                    final var errorMessage =
-                                    "Failed to create venv, exit=" + result.getExitCode() + "\n" + result.getOutput();
-                    throw new InvocationTargetException(new Exception(errorMessage));
-                }
+                monitor.subTask("create venv");
+                viewModel.createVenv();
+            } catch (Exception e) {
+                throw new InvocationTargetException(e);
             }
         };
 
@@ -113,12 +99,10 @@ public class VenvWizard extends Wizard {
             getContainer().run(true, true, operation);
             return true;
         } catch (InvocationTargetException e) {
-            var detail = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-            if (detail == null) {
-                detail = "";
-            }
+            final var cause = e.getCause();
+            final var detail = cause != null ? cause.getMessage() : e.getMessage();
             final var msg = "Unable to complete virtual environment setup — see details below.";
-            displaySelectableError("Virtual Environment Setup Failed", msg, detail);
+            displaySelectableError("Virtual Environment Setup Failed", msg, detail == null ? "" : detail);
             return false;
         } catch (InterruptedException e) {
             MessageDialog.openError(getShell(), "Cancelled", "Operation was cancelled");

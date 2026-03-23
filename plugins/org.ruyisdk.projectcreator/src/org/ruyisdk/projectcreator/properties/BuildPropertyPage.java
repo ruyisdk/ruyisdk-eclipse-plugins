@@ -126,9 +126,7 @@ public class BuildPropertyPage extends PropertyPage implements IWorkbenchPropert
                 }
             }
 
-            String ruyiPath = getRuyiInstallPath() + "/ruyi";
-
-            return String.format("%s venv -t %s %s ./%s", ruyiPath, toolchain, profile, "ruyiVenv");
+            return String.format("ruyi venv -t %s %s ./%s", toolchain, profile, "ruyiVenv");
 
         } catch (CoreException e) {
             e.printStackTrace();
@@ -136,14 +134,4 @@ public class BuildPropertyPage extends PropertyPage implements IWorkbenchPropert
         }
     }
 
-    private String getRuyiInstallPath() {
-        try {
-            Class<?> clazz = Class.forName("org.ruyisdk.ruyi.util.RuyiFileUtils");
-            java.lang.reflect.Method method = clazz.getMethod("getInstallPath");
-            return (String) method.invoke(null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return System.getProperty("user.home") + "/.ruyi";
-        }
-    }
 }
