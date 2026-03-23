@@ -36,14 +36,5 @@ public class RuyiCliSmokeTest {
                 System.out.println(" - " + e.getName() + " versions=" + e.getVersions());
             }
         }
-
-        List<RuyiCli.VenvInfo> vs = RuyiCli.listVenvs();
-        System.out.println("Venvs: " + (vs == null ? "null" : vs.size()));
-        if (vs != null) {
-            for (RuyiCli.VenvInfo v : vs) {
-                System.out.println(" - " + v.getPath() + " profile=" + v.getProfile() + " sysroot=" + v.getSysroot()
-                                + " activated=" + v.getActivated());
-            }
-        }
     }
 }

@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
-import org.ruyisdk.ruyi.services.RuyiCli;
 import org.ruyisdk.venv.model.Emulator;
 import org.ruyisdk.venv.model.Profile;
 import org.ruyisdk.venv.model.Toolchain;
@@ -179,76 +178,66 @@ public class VenvWizardViewModel {
         }
     }
 
-    // TODO: no returning RuyiCli.RunResult
     /** Updates the CLI index and refreshes view model data. */
-    public RuyiCli.RunResult updateIndex() {
-        final var result = service.updateIndex();
+    public void updateIndex() throws Exception {
+        service.updateIndex();
         refreshListsBestEffort();
         recomputeDerivedState();
         pcs.firePropertyChange("dataRefreshed", null, Boolean.TRUE);
-        return result;
     }
 
-    // TODO: no returning RuyiCli.RunResult
-    private RuyiCli.RunResult installToolchain(String name, String version) {
-        return service.installPackage(name, version);
+    private void installToolchain(String name, String version) throws Exception {
+        service.installPackage(name, version);
     }
 
-    // TODO: no returning RuyiCli.RunResult
     /** Installs the currently-selected toolchain package. */
-    public RuyiCli.RunResult installToolchain() {
+    public void installToolchain() throws Exception {
         if (selectedToolchainIndex < 0 || selectedToolchainIndex >= toolchains.size()
                         || selectedToolchainVersionIndex < 0) {
-            return new RuyiCli.RunResult(-1, "No toolchain selected");
+            throw new IllegalArgumentException("No toolchain selected");
         }
         final var name = toolchains.get(selectedToolchainIndex).getName();
         final var version = toolchains.get(selectedToolchainIndex).getVersions().get(selectedToolchainVersionIndex);
-        return installToolchain(name, version);
+        installToolchain(name, version);
     }
 
-    // TODO: no returning RuyiCli.RunResult
-    private RuyiCli.RunResult installEmulator(String name, String version) {
-        return service.installPackage(name, version);
+    private void installEmulator(String name, String version) throws Exception {
+        service.installPackage(name, version);
     }
 
-    // TODO: no returning RuyiCli.RunResult
     /** Installs the currently-selected emulator package when enabled. */
-    public RuyiCli.RunResult installEmulator() {
+    public void installEmulator() throws Exception {
         if (!emulatorEnabled) {
-            return new RuyiCli.RunResult(0, "Emulator disabled");
+            throw new IllegalArgumentException("Emulator disabled");
         }
         if (selectedEmulatorIndex < 0 || selectedEmulatorIndex >= emulators.size()
                         || selectedEmulatorVersionIndex < 0) {
-            return new RuyiCli.RunResult(-1, "Emulator enabled but not selected");
+            throw new IllegalArgumentException("Emulator enabled but not selected");
         }
         final var name = emulators.get(selectedEmulatorIndex).getName();
         final var version = emulators.get(selectedEmulatorIndex).getVersions().get(selectedEmulatorVersionIndex);
-        return installEmulator(name, version);
+        installEmulator(name, version);
     }
 
-    // TODO: pass all arguments to service as-is
-    // TODO: no returning RuyiCli.RunResult
-    private RuyiCli.RunResult createVenv(String path, String toolchainName, String toolchainVersion, String profile,
-                    String emulatorName, String emulatorVersion) {
-        return service.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
+    private void createVenv(String path, String toolchainName, String toolchainVersion, String profile,
+                    String emulatorName, String emulatorVersion) throws Exception {
+        service.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
     }
 
-    // TODO: eliminate path-related and validation things
-    // TODO: no returning RuyiCli.RunResult
     /** Creates a virtual environment using the current wizard selections. */
-    public RuyiCli.RunResult createVenv() {
+    public void createVenv() throws Exception {
         final var parent = this.venvLocation;
         if (parent == null || parent.isBlank()) {
-            return new RuyiCli.RunResult(-1, "Venv parent path is empty");
+            throw new IllegalArgumentException("Venv parent path is empty");
         }
         final var name = this.venvName;
         if (name == null || name.isBlank()) {
-            return new RuyiCli.RunResult(-1, "Venv name is empty");
+            throw new IllegalArgumentException("Venv name is empty");
         }
 
         if (selectedToolchainIndex < 0 || selectedToolchainIndex >= toolchains.size()
                         || selectedToolchainVersionIndex < 0) {
-            return new RuyiCli.RunResult(-1, "No toolchain selected");
+            throw new IllegalArgumentException("No toolchain selected");
         }
         final var toolchainName = toolchains.get(selectedToolchainIndex).getName();
         final var toolchainVersion =
@@ -264,7 +253,7 @@ public class VenvWizardViewModel {
         if (emulatorEnabled) {
             if (selectedEmulatorIndex < 0 || selectedEmulatorIndex >= emulators.size()
                             || selectedEmulatorVersionIndex < 0) {
-                return new RuyiCli.RunResult(-1, "Emulator enabled but not selected");
+                throw new IllegalArgumentException("Emulator enabled but not selected");
             }
             emulatorName = emulators.get(selectedEmulatorIndex).getName();
             emulatorVersion = emulators.get(selectedEmulatorIndex).getVersions().get(selectedEmulatorVersionIndex);
@@ -272,7 +261,7 @@ public class VenvWizardViewModel {
 
         final var target = new File(parent, name);
         final var path = target.getPath();
-        return createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
+        createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
     }
 
     /** Returns available profiles. */

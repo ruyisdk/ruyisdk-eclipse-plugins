@@ -21,8 +21,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.ruyisdk.core.ruyi.model.RepoConfig;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
-import org.ruyisdk.core.util.PluginLogger;
-import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.preferences.RepoConfigPreference;
 import org.ruyisdk.ruyi.preferences.RuyiInstallPathPreference;
 import org.ruyisdk.ruyi.preferences.TelemetryPreference;
@@ -35,8 +33,6 @@ import org.ruyisdk.ruyi.util.StatusUtil;
  * Wizard for Ruyi installation and upgrade.
  */
 public class RuyiInstallWizard extends Wizard {
-    private static final PluginLogger LOGGER = Activator.getLogger();
-
     /**
      * Wizard operation mode.
      */
@@ -285,13 +281,10 @@ public class RuyiInstallWizard extends Wizard {
     private class InstallationPage extends WizardPage {
         private final Mode mode;
         private InstallProgressComposite progressComp;
-        private RuyiInstallManager installManager;
 
         public InstallationPage(Mode mode) {
             super("installationPage");
             this.mode = mode;
-            // this.installManager = Activator.getDefault().getRuyiCore().getInstallManager();
-            this.installManager = new RuyiInstallManager(LOGGER);
             setTitle(mode == Mode.INSTALL ? "Installing Ruyi" : "Upgrading Ruyi");
             setDescription(mode == Mode.INSTALL ? "Please wait while Ruyi is being installed"
                             : "Upgrading to the latest version...");
@@ -321,17 +314,16 @@ public class RuyiInstallWizard extends Wizard {
             ConfigurationPage configPage = (ConfigurationPage) getWizard().getPage("configurationPage");
             configPage.saveConfig();
 
-            // installManager.setInstalledVersion(currentVersion.toString());
-            // installManager.setLatestVersion(newVersion.toString());
-
-            installManager.setInstallPath(configPage.getInstallPath());
-            installManager.setRepoUrls(configPage.getSelectedRepos());
+            // prepare for worker thread
+            final var installPath = configPage.getInstallPath();
+            final var selectedRepos = configPage.getSelectedRepos();
+            final var telemetryStatus = configPage.getTelemetryStatus();
 
             progressComp.appendLog("Starting " + (mode == Mode.INSTALL ? "installation" : "upgrade") + "...");
 
             final var installationJob = Job.create("Ruyi " + mode.name(), monitor -> {
                 try {
-                    installManager.install(monitor, new InstallationListener() {
+                    final var listener = new InstallationListener() {
                         @Override
                         public void progressChanged(int percent, String message) {
                             updateProgress(percent, message);
@@ -341,7 +333,8 @@ public class RuyiInstallWizard extends Wizard {
                         public void logMessage(String message) {
                             appendLog(message);
                         }
-                    });
+                    };
+                    RuyiInstallManager.install(installPath, selectedRepos, telemetryStatus, monitor, listener);
 
                     Display.getDefault().asyncExec(() -> {
                         progressComp.appendLog("Operation completed successfully!");

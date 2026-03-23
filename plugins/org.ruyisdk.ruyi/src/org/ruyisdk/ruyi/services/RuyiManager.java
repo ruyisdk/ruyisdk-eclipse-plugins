@@ -1,12 +1,8 @@
 package org.ruyisdk.ruyi.services;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import org.ruyisdk.core.ruyi.model.RuyiReleaseInfo;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
 import org.ruyisdk.core.ruyi.model.SystemInfo;
-import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 /**
  * Manager for Ruyi operations.
@@ -19,14 +15,7 @@ public class RuyiManager {
      * @return true if installed
      */
     public static boolean isRuyiInstalled() {
-        try {
-            Process process = new ProcessBuilder(RuyiFileUtils.getInstallPath() + "/ruyi", "-V").start();
-            // Process process = Runtime.getRuntime().exec(RuyiFileUtils.getInstallPath()+"/ruyi -V");
-            return process.waitFor() == 0;
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return getInstalledVersion() != null;
     }
 
     /**
@@ -35,33 +24,7 @@ public class RuyiManager {
      * @return installed version or null
      */
     public static RuyiVersion getInstalledVersion() {
-        try {
-            Process process = new ProcessBuilder(RuyiFileUtils.getInstallPath() + "/ruyi", "-V").start();
-
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-
-                // 仅读取首行内容
-                String firstLine = reader.readLine();
-                if (firstLine == null) {
-                    return null;
-                }
-
-                // 精准截取版本号部分
-                String prefix = "Ruyi ";
-                if (firstLine.startsWith(prefix)) {
-                    // 截断字符串并清理首尾空格
-                    String versionStr = firstLine.substring(prefix.length()).trim();
-
-                    // 正则校验版本号格式（如0.31.0）
-                    if (versionStr.matches("^\\d+\\.\\d+\\.\\d+$")) {
-                        return RuyiVersion.parse(versionStr);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            // 可在此处添加日志输出
-        }
-        return null;
+        return RuyiCli.getInstalledVersion();
     }
 
     /**

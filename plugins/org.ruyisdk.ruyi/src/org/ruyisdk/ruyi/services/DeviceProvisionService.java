@@ -1,11 +1,9 @@
 package org.ruyisdk.ruyi.services;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
 import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
-import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 /**
  * Service for launching interactive device provisioning in Eclipse terminal view.
@@ -17,7 +15,7 @@ public class DeviceProvisionService {
      * @throws IOException if terminal launch fails
      */
     public void launchProvisionWizard() throws IOException {
-        final var ruyiExecutable = toSingleQuoted(resolveRuyiExecutable());
+        final var ruyiExecutable = toSingleQuoted(RuyiCli.getResolvedExecutablePath());
 
         final var terminalService = TerminalServiceFactory.getService();
         if (terminalService == null) {
@@ -45,20 +43,6 @@ public class DeviceProvisionService {
         properties.put(ITerminalsConnectorConstants.PROP_PROCESS_WORKING_DIR, System.getProperty("user.home"));
 
         terminalService.openConsole(properties, null);
-    }
-
-    private static String resolveRuyiExecutable() throws IOException {
-        final var installPath = RuyiFileUtils.getInstallPath();
-        if (installPath == null || installPath.isBlank()) {
-            throw new IOException("ruyi installation directory not found");
-        }
-
-        final var fullPath = Paths.get(installPath, "ruyi").toString();
-        if (RuyiFileUtils.isExecutable(fullPath)) {
-            return fullPath;
-        }
-
-        throw new IOException("ruyi executable not found or is not executable at: " + fullPath);
     }
 
     private static String toSingleQuoted(String value) {

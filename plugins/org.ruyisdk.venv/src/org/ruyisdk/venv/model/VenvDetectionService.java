@@ -1,5 +1,6 @@
 package org.ruyisdk.venv.model;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -96,61 +97,28 @@ public class VenvDetectionService {
         }
     }
 
-    private List<RuyiCli.VenvInfo> listVenvs() {
-        try {
-            return RuyiCli.listVenvs();
-        } catch (Exception e) {
-            LOGGER.logError("Failed to list virtual environments", e);
-            return new ArrayList<>();
-        }
-    }
-
     /** Updates the local package index via the Ruyi CLI. */
-    public RuyiCli.RunResult updateIndex() {
+    public void updateIndex() throws Exception {
         LOGGER.logInfo("Updating Ruyi package index");
-        try {
-            final var result = RuyiCli.update();
-            if (result != null) {
-                LOGGER.logInfo("Ruyi package index update finished: exit=" + result.getExitCode());
-            }
-            return result;
-        } catch (Exception e) {
-            LOGGER.logError("Failed to update Ruyi package index", e);
-            throw e;
-        }
+        RuyiCli.updatePackageIndex();
+        LOGGER.logInfo("Ruyi package index update finished successfully");
     }
 
     /** Installs a package via the Ruyi CLI. */
-    public RuyiCli.RunResult installPackage(String name, String version) {
+    public void installPackage(String name, String version) throws Exception {
         LOGGER.logInfo("Installing package: name=" + name + ", version=" + version);
-        try {
-            final var result = RuyiCli.installPackage(name, version);
-            if (result != null) {
-                LOGGER.logInfo("Package install finished: name=" + name + ", version=" + version + ", exit="
-                                + result.getExitCode());
-            }
-            return result;
-        } catch (Exception e) {
-            LOGGER.logError("Failed to install package: name=" + name + ", version=" + version, e);
-            throw e;
-        }
+        RuyiCli.installPackage(name, version);
+        LOGGER.logInfo("Package install finished: name=" + name + ", version=" + version);
     }
 
     /** Creates a new venv via the Ruyi CLI. */
-    public RuyiCli.RunResult createVenv(String path, String toolchainName, String toolchainVersion, String profile,
-                    String emulatorName, String emulatorVersion) {
+    public void createVenv(String path, String toolchainName, String toolchainVersion, String profile,
+                    String emulatorName, String emulatorVersion) throws Exception {
         LOGGER.logInfo("Creating venv: path=" + path + ", profile=" + profile + ", toolchain=" + toolchainName + ":"
                         + toolchainVersion + ", emulator=" + emulatorName + ":" + emulatorVersion);
-        try {
-            final var result = RuyiCli.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName,
-                            emulatorVersion);
-            refreshWorkspaceProjects(null);
-            LOGGER.logInfo("Venv creation finished: path=" + path + ", exit=" + result.getExitCode());
-            return result;
-        } catch (Exception e) {
-            LOGGER.logError("Failed to create venv: path=" + path, e);
-            throw e;
-        }
+        RuyiCli.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
+        refreshWorkspaceProjects(null);
+        LOGGER.logInfo("Venv creation finished: path=" + path);
     }
 
     private List<Venv> fetchVenvs() {
@@ -441,6 +409,77 @@ public class VenvDetectionService {
             } catch (CoreException e) {
                 LOGGER.logError("Failed to refresh project: " + project.getName(), e);
             }
+        }
+    }
+
+    private static List<VenvInfo> listVenvs() {
+        final var out = new ArrayList<VenvInfo>();
+        try {
+            final var home = System.getProperty("user.home");
+            if (home == null) {
+                return out;
+            }
+            final var homeDir = new File(home);
+            final var children = homeDir.listFiles();
+            if (children == null) {
+                return out;
+            }
+            for (final var dir : children) {
+                if (!dir.isDirectory()) {
+                    continue;
+                }
+                // common marker for venvs: bin/activate (POSIX) or Scripts/activate (Windows)
+                final var binActivate = new File(dir, "bin/activate");
+                final var scriptsActivate = new File(dir, "Scripts/activate");
+                if (binActivate.exists() || scriptsActivate.exists()) {
+                    final var path = dir.getAbsolutePath();
+                    final var profile = dir.getName();
+                    final var sysroot = new File(dir, "sysroot").getAbsolutePath();
+                    out.add(new VenvInfo(path, profile, sysroot));
+                }
+                // also consider directories named *-venv or ruyiVenv
+                if (dir.getName().toLowerCase().endsWith("-venv") || dir.getName().equalsIgnoreCase("ruyivenv")) {
+                    final var path = dir.getAbsolutePath();
+                    final var profile = dir.getName().replaceAll("-venv$", "");
+                    final var sysroot = new File(dir, "sysroot").getAbsolutePath();
+                    out.add(new VenvInfo(path, profile, sysroot));
+                }
+            }
+        } catch (Exception e) {
+            // ignore and return what we have
+        }
+        return out;
+    }
+
+    /** Virtual environment information returned by the ruyi CLI. */
+    private static class VenvInfo {
+        private final String path;
+        private final String profile;
+        private final String sysroot;
+
+        /**
+         * Creates an instance.
+         *
+         * @param path venv path
+         * @param profile associated profile name
+         * @param sysroot sysroot path
+         */
+        public VenvInfo(String path, String profile, String sysroot) {
+            this.path = path;
+            this.profile = profile;
+            this.sysroot = sysroot;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public String getProfile() {
+            return profile;
+        }
+
+        public String getSysroot() {
+            return sysroot;
         }
     }
 }

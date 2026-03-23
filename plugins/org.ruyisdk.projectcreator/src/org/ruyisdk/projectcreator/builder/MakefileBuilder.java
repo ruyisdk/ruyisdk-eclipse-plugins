@@ -22,7 +22,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.debug.core.DebugPlugin;
+import org.ruyisdk.packages.JsonParser;
 import org.ruyisdk.projectcreator.Activator;
+import org.ruyisdk.ruyi.services.RuyiCli;
+import org.ruyisdk.ruyi.services.RuyiCliException;
 
 /**
  * Builder for Makefile projects.
@@ -52,14 +56,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
         logToFile(project, "=== Build started at " + new Date() + " ===");
 
         // 1. Ensure Ruyi virtual environment exists
-        try {
-            ensureRuyiVenv(project);
-        } catch (IOException | InterruptedException e) {
-            String errorMsg = "Failed to create Ruyi virtual environment: " + e.getMessage();
-            logToFile(project, errorMsg);
-            e.printStackTrace();
-            throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, errorMsg, e));
-        }
+        ensureRuyiVenv(project);
 
         // 2. Get the build command (e.g., "make")
         String buildCommand = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY));
@@ -199,18 +196,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
         return null;
     }
 
-    private String getRuyiInstallPath() {
-        try {
-            Class<?> clazz = Class.forName("org.ruyisdk.ruyi.util.RuyiFileUtils");
-            java.lang.reflect.Method method = clazz.getMethod("getInstallPath");
-            return (String) method.invoke(null);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return System.getProperty("user.home") + "/.ruyi";
-        }
-    }
-
-    private void ensureRuyiVenv(IProject project) throws IOException, InterruptedException, CoreException {
+    private void ensureRuyiVenv(IProject project) throws CoreException {
         File projectLocation = project.getLocation().toFile();
         File venvDir = new File(projectLocation, RUYI_VENV_DIR);
 
@@ -223,17 +209,19 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
 
         String venvCommand =
                         project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, RUYI_VENV_CMD_PROPERTY));
+        final var useCustomCommand = !(venvCommand == null || venvCommand.trim().isEmpty());
+        String boardModel = null;
+        String toolchain = null;
+        List<String> ruyiArgs;
 
-        if (venvCommand == null || venvCommand.trim().isEmpty()) {
-
+        if (!useCustomCommand) {
             logToFile(project, "No custom venv command found, generating default command...");
-            String boardModel =
-                            project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
+            boardModel = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
             if (boardModel == null) {
                 throw new CoreException(
                                 new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Board model not set for project."));
             }
-            String toolchain = org.ruyisdk.packages.JsonParser.findInstalledToolchainForBoard(boardModel);
+            toolchain = JsonParser.findInstalledToolchainForBoard(boardModel);
             if (toolchain == null || toolchain.trim().isEmpty()) {
                 if ("milkv-duo".equals(boardModel)) {
                     toolchain = "gnu-milkv-milkv-duo-elf-bin";
@@ -248,32 +236,25 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
                     toolchain = toolchain.substring(0, versionIndex);
                 }
             }
-            String ruyiPath = getRuyiInstallPath() + "/ruyi";
-
-            venvCommand = String.format("%s venv -t %s %s ./%s", ruyiPath, toolchain, boardModel, RUYI_VENV_DIR);
+            ruyiArgs = List.of("venv", "-t", toolchain, boardModel, "./" + RUYI_VENV_DIR);
         } else {
             logToFile(project, "Using custom ruyi venv command from project properties.");
+            // Strip leading "ruyi" token if present since runExperimental prepends it.
+            List<String> tokens = List.of(DebugPlugin.parseArguments(venvCommand.trim()));
+            ruyiArgs = (!tokens.isEmpty() && "ruyi".equals(tokens.get(0))) ? tokens.subList(1, tokens.size()) : tokens;
         }
 
-        ProcessBuilder pb = new ProcessBuilder("bash", "-c", venvCommand);
-        System.err.println("Executing: " + venvCommand);
-        pb.directory(projectLocation);
-        pb.redirectErrorStream(true);
+        logToFile(project, "Executing: ruyi " + String.join(" ", ruyiArgs));
 
-        logToFile(project, "Executing: " + venvCommand);
-        Process process = pb.start();
+        try {
+            final var output = RuyiCli.runRuyiExperimental(ruyiArgs, projectLocation);
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                logToFile(project, "[ruyi venv] " + line);
+            if (output != null && !output.isBlank()) {
+                logToFile(project, "[ruyi venv] " + output);
             }
-        }
-
-        int exitCode = process.waitFor();
-        if (exitCode != 0) {
+        } catch (RuyiCliException e) {
             throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-                            "Failed to create Ruyi virtual environment. Exit code: " + exitCode));
+                            "Failed to create Ruyi virtual environment: " + e.getMessage(), e));
         }
     }
 

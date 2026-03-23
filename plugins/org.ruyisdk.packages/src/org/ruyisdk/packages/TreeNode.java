@@ -9,7 +9,7 @@ import java.util.List;
 public class TreeNode {
     private String name;
     private String details;
-    private String installCommand;
+    private String packageRef;
     private boolean selected; // Record whether the checkbox is selected
     private boolean isLeaf; // Mark whether it is the last node
     private List<TreeNode> children;
@@ -30,12 +30,12 @@ public class TreeNode {
      *
      * @param name node name
      * @param details node details
-     * @param installCommand install command
+     * @param packageRef package reference
      */
-    public TreeNode(String name, String details, String installCommand) {
+    public TreeNode(String name, String details, String packageRef) {
         this.name = name;
         this.details = details;
-        this.installCommand = installCommand;
+        this.packageRef = packageRef;
         this.children = new ArrayList<>();
         this.selected = false; // Default not selected
         this.isLeaf = false; // Default not a leaf node
@@ -60,12 +60,12 @@ public class TreeNode {
     }
 
     /**
-     * Gets the install command.
+     * Gets the package reference.
      *
-     * @return install command
+     * @return package reference
      */
-    public String getInstallCommand() {
-        return installCommand;
+    public String getPackageRef() {
+        return packageRef;
     }
 
     /**
