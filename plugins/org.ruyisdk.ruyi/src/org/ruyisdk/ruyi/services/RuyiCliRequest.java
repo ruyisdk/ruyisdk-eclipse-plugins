@@ -9,10 +9,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+/**
+ * An immutable, executable request to the Ruyi CLI.
+ *
+ * <p>
+ * Use {@link #builder()} to configure command, arguments, environment, and other options, then call
+ * {@link #execute()} to run the command and obtain a {@link RuyiExecResult}.
+ */
 public class RuyiCliRequest {
 
     private final String ruyiInstallDir;
@@ -37,10 +43,17 @@ public class RuyiCliRequest {
         this.timeoutSeconds = builder.timeoutSeconds;
     }
 
+    /** Creates a new {@link Builder} for constructing a request. */
     public static Builder builder() {
         return new Builder();
     }
 
+    /**
+     * Executes this request against the Ruyi CLI.
+     *
+     * @return the execution result
+     * @throws RuyiCliException if the command fails, times out, or is cancelled
+     */
     public RuyiExecResult execute() throws RuyiCliException {
         if (ruyiInstallDir == null || ruyiInstallDir.isBlank()) {
             throw RuyiCliException.ruyiNotFound();
@@ -117,21 +130,25 @@ public class RuyiCliRequest {
 
         private Builder() {}
 
+        /** Sets the directory where the ruyi binary is installed. */
         public Builder ruyiInstallDir(String value) {
             this.ruyiInstallDir = value;
             return this;
         }
 
+        /** Enables or disables porcelain (machine-readable) output. */
         public Builder porcelain(boolean value) {
             this.porcelain = value;
             return this;
         }
 
+        /** Sets the ruyi subcommand to execute. */
         public Builder command(String value) {
             this.command = value;
             return this;
         }
 
+        /** Appends additional command-line arguments. */
         public Builder args(List<String> value) {
             if (value == null) {
                 return this;
@@ -143,30 +160,36 @@ public class RuyiCliRequest {
             return this;
         }
 
+        /** Appends additional command-line arguments. */
         public Builder args(String... value) {
             return args(value == null ? null : Arrays.asList(value));
         }
 
+        /** Sets environment variables to pass to the ruyi process. */
         public Builder environment(Map<String, String> value) {
             this.environment = value == null ? null : new HashMap<>(value);
             return this;
         }
 
+        /** Sets the working directory for the ruyi process. */
         public Builder workingDirectory(File value) {
             this.workingDirectory = value;
             return this;
         }
 
+        /** Sets a callback invoked for each line of output. */
         public Builder lineCallback(Consumer<String> value) {
             this.lineCallback = value;
             return this;
         }
 
+        /** Sets the progress monitor for cancellation support. */
         public Builder monitor(IProgressMonitor value) {
             this.monitor = value;
             return this;
         }
 
+        /** Sets the timeout in seconds for the ruyi process. */
         public Builder timeoutSeconds(int value) {
             this.timeoutSeconds = value;
             return this;
@@ -271,6 +294,7 @@ public class RuyiCliRequest {
             return new EntityCommandBuilder(this);
         }
 
+        /** Builds an immutable {@link RuyiCliRequest} from this builder's configuration. */
         public RuyiCliRequest build() {
             return new RuyiCliRequest(this);
         }
@@ -616,41 +640,49 @@ public class RuyiCliRequest {
             parent.command("venv");
         }
 
+        /** Sets the profile to use for the venv. */
         public VenvCommandBuilder profile(String profile) {
             this.profile = profile;
             return this;
         }
 
+        /** Sets the destination directory for the venv. */
         public VenvCommandBuilder dest(String dest) {
             this.dest = dest;
             return this;
         }
 
+        /** Sets the display name for the venv. */
         public VenvCommandBuilder name(String name) {
             this.name = name;
             return this;
         }
 
+        /** Sets the toolchain package to use. */
         public VenvCommandBuilder toolchain(String toolchain) {
             this.toolchain = toolchain;
             return this;
         }
 
+        /** Sets the emulator package to use. */
         public VenvCommandBuilder emulator(String emulator) {
             this.emulator = emulator;
             return this;
         }
 
+        /** Enables or disables inclusion of a sysroot. */
         public VenvCommandBuilder withSysroot(boolean withSysroot) {
             this.withSysroot = withSysroot;
             return this;
         }
 
+        /** Sets the package from which to obtain the sysroot. */
         public VenvCommandBuilder sysrootFrom(String sysrootFrom) {
             this.sysrootFrom = sysrootFrom;
             return this;
         }
 
+        /** Sets the package from which to obtain extra commands. */
         public VenvCommandBuilder extraCommandsFrom(String extraCommandsFrom) {
             this.extraCommandsFrom = extraCommandsFrom;
             return this;
