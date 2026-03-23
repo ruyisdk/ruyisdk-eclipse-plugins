@@ -128,11 +128,12 @@ public class VenvDetectionService {
             profileQuirks.put(profileInfo.getName(), profileInfo.getQuirks());
         }
 
-        final var venvInfos = listVenvs();
+        final var detectedVenvs = detectVenvs();
         final var out = new ArrayList<Venv>();
-        for (final var venvInfo : venvInfos) {
-            final var quirks = profileQuirks.getOrDefault(venvInfo.getProfile(), "");
-            out.add(Venv.createStandalone(venvInfo.getPath(), venvInfo.getProfile(), venvInfo.getSysroot(), quirks));
+        for (final var detectedVenv : detectedVenvs) {
+            final var quirks = profileQuirks.getOrDefault(detectedVenv.getProfile(), "");
+            out.add(Venv.createStandalone(detectedVenv.getPath(), detectedVenv.getProfile(), detectedVenv.getSysroot(),
+                            quirks));
         }
         LOGGER.logInfo("Fetched venv list: count=" + out.size());
         return out;
@@ -412,8 +413,8 @@ public class VenvDetectionService {
         }
     }
 
-    private static List<VenvInfo> listVenvs() {
-        final var out = new ArrayList<VenvInfo>();
+    private static List<DetectedVenv> detectVenvs() {
+        final var out = new ArrayList<DetectedVenv>();
         try {
             final var home = System.getProperty("user.home");
             if (home == null) {
@@ -435,51 +436,19 @@ public class VenvDetectionService {
                     final var path = dir.getAbsolutePath();
                     final var profile = dir.getName();
                     final var sysroot = new File(dir, "sysroot").getAbsolutePath();
-                    out.add(new VenvInfo(path, profile, sysroot));
+                    out.add(new DetectedVenv(path, profile, sysroot));
                 }
                 // also consider directories named *-venv or ruyiVenv
                 if (dir.getName().toLowerCase().endsWith("-venv") || dir.getName().equalsIgnoreCase("ruyivenv")) {
                     final var path = dir.getAbsolutePath();
                     final var profile = dir.getName().replaceAll("-venv$", "");
                     final var sysroot = new File(dir, "sysroot").getAbsolutePath();
-                    out.add(new VenvInfo(path, profile, sysroot));
+                    out.add(new DetectedVenv(path, profile, sysroot));
                 }
             }
         } catch (Exception e) {
             // ignore and return what we have
         }
         return out;
-    }
-
-    /** Virtual environment information returned by the ruyi CLI. */
-    private static class VenvInfo {
-        private final String path;
-        private final String profile;
-        private final String sysroot;
-
-        /**
-         * Creates an instance.
-         *
-         * @param path venv path
-         * @param profile associated profile name
-         * @param sysroot sysroot path
-         */
-        public VenvInfo(String path, String profile, String sysroot) {
-            this.path = path;
-            this.profile = profile;
-            this.sysroot = sysroot;
-        }
-
-        public String getPath() {
-            return path;
-        }
-
-        public String getProfile() {
-            return profile;
-        }
-
-        public String getSysroot() {
-            return sysroot;
-        }
     }
 }
