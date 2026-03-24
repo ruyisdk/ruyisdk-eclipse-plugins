@@ -12,8 +12,12 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -21,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.ruyisdk.venv.model.Emulator;
 import org.ruyisdk.venv.model.Profile;
 import org.ruyisdk.venv.model.Toolchain;
@@ -134,22 +139,23 @@ public class WizardConfigPage extends WizardPage {
             profileTable.setHeaderVisible(true);
             profileTable.setLinesVisible(true);
 
+            final var nameColumn = new TableViewerColumn(profileTableViewer, SWT.LEFT);
             {
-                final var column = new TableViewerColumn(profileTableViewer, SWT.LEFT);
-                column.getColumn().setText("Name");
-                column.getColumn().setWidth(200);
-                column.setLabelProvider(new ColumnLabelProvider() {
+                nameColumn.getColumn().setText("Name");
+                nameColumn.getColumn().setWidth(200);
+                nameColumn.setLabelProvider(new ColumnLabelProvider() {
                     @Override
                     public String getText(Object element) {
                         return ((Profile) element).getName();
                     }
                 });
             }
+
+            final var quirksColumn = new TableViewerColumn(profileTableViewer, SWT.LEFT);
             {
-                final var column = new TableViewerColumn(profileTableViewer, SWT.LEFT);
-                column.getColumn().setText("Needed Quirks");
-                column.getColumn().setWidth(400);
-                column.setLabelProvider(new ColumnLabelProvider() {
+                quirksColumn.getColumn().setText("Needed Quirks");
+                quirksColumn.getColumn().setWidth(400);
+                quirksColumn.setLabelProvider(new ColumnLabelProvider() {
                     @Override
                     public String getText(Object element) {
                         final var q = ((Profile) element).getQuirks();
@@ -159,6 +165,58 @@ public class WizardConfigPage extends WizardPage {
             }
 
             profileTableViewer.setContentProvider(ArrayContentProvider.getInstance());
+
+            final var profileComparator = new ViewerComparator() {
+                private int sortColumnIndex;
+                private int sortDirection = SWT.UP;
+
+                public void setColumn(int column) {
+                    if (column == sortColumnIndex) {
+                        sortDirection = (sortDirection == SWT.UP) ? SWT.DOWN : SWT.UP;
+                    } else {
+                        sortColumnIndex = column;
+                        sortDirection = SWT.UP;
+                    }
+                }
+
+                public int getSortDirection() {
+                    return sortDirection;
+                }
+
+                @Override
+                public int compare(Viewer viewer, Object e1, Object e2) {
+                    final var p1 = (Profile) e1;
+                    final var p2 = (Profile) e2;
+                    int result;
+                    if (sortColumnIndex == 1) {
+                        final var q1 = p1.getQuirks() == null ? "" : p1.getQuirks();
+                        final var q2 = p2.getQuirks() == null ? "" : p2.getQuirks();
+                        result = q1.compareTo(q2);
+                    } else {
+                        result = p1.getName().compareTo(p2.getName());
+                    }
+                    return sortDirection == SWT.DOWN ? -result : result;
+                }
+            };
+            profileTableViewer.setComparator(profileComparator);
+
+            final SelectionAdapter sortListener = new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    final var clickedColumn = (TableColumn) e.widget;
+                    final var index = profileTable.indexOf(clickedColumn);
+                    profileComparator.setColumn(index);
+                    profileTable.setSortColumn(clickedColumn);
+                    profileTable.setSortDirection(profileComparator.getSortDirection());
+                    profileTableViewer.refresh();
+                }
+            };
+            nameColumn.getColumn().addSelectionListener(sortListener);
+            quirksColumn.getColumn().addSelectionListener(sortListener);
+
+            profileTable.setSortColumn(nameColumn.getColumn());
+            profileTable.setSortDirection(SWT.UP);
+
             profileTableViewer.setInput(viewModel.getProfiles());
         }
 
