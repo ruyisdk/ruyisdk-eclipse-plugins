@@ -202,7 +202,7 @@ public class WizardConfigPage extends WizardPage {
             };
             profileTableViewer.setComparator(profileComparator);
 
-            final SelectionAdapter sortListener = new SelectionAdapter() {
+            final var sortListener = new SelectionAdapter() {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
                     final var clickedColumn = (TableColumn) e.widget;
