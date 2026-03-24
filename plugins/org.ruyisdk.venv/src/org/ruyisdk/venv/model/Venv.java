@@ -2,6 +2,9 @@ package org.ruyisdk.venv.model;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /** Model representing a Ruyi virtual environment (venv). */
 public class Venv {
@@ -11,28 +14,28 @@ public class Venv {
     private String profile;
     private String sysroot;
     private String projectPath;
-    private String quirks;
+    private List<String> quirks;
     private String toolchainPath;
     private String toolchainPrefix;
 
-    private Venv(String path, String profile, String sysroot, String projectPath, String quirks) {
+    private Venv(String path, String profile, String sysroot, String projectPath, List<String> quirks) {
         this.path = path;
         this.profile = profile;
         this.sysroot = sysroot;
         this.projectPath = projectPath == null ? "" : projectPath;
-        this.quirks = quirks == null ? "" : quirks;
+        this.quirks = quirks == null ? new ArrayList<>() : new ArrayList<>(quirks);
         this.toolchainPath = "";
         this.toolchainPrefix = "";
     }
 
     /** Creates a venv model for a standalone venv with quirks. */
-    public static Venv createStandalone(String path, String profile, String sysroot, String quirks) {
+    public static Venv createStandalone(String path, String profile, String sysroot, List<String> quirks) {
         return new Venv(path, profile, sysroot, "", quirks);
     }
 
     /** Creates a venv model for a project venv. */
     public static Venv createForProject(String path, String profile, String sysroot, String projectPath) {
-        return new Venv(path, profile, sysroot, projectPath, "");
+        return new Venv(path, profile, sysroot, projectPath, List.of());
     }
 
     /** Returns the venv path. */
@@ -86,14 +89,15 @@ public class Venv {
         pcs.removePropertyChangeListener(listener);
     }
 
-    /** Returns the quirks string. */
-    public String getQuirks() {
-        return quirks;
+    /** Returns the quirks list. */
+    public List<String> getQuirks() {
+        return Collections.unmodifiableList(quirks);
     }
 
-    /** Updates the quirks string. */
-    public void setQuirks(String quirks) {
-        pcs.firePropertyChange("quirks", this.quirks, this.quirks = quirks);
+    /** Updates the quirks list. */
+    public void setQuirks(List<String> quirks) {
+        pcs.firePropertyChange("quirks", this.quirks,
+                        this.quirks = quirks == null ? new ArrayList<>() : new ArrayList<>(quirks));
     }
 
     /** Returns the toolchain bin directory path (derived from venv). */

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -123,7 +122,7 @@ public class VenvDetectionService {
 
     private List<Venv> fetchVenvs() {
         final var profileInfos = listProfiles();
-        final Map<String, String> profileQuirks = new HashMap<>();
+        final var profileQuirks = new HashMap<String, List<String>>();
         for (final var profileInfo : profileInfos) {
             profileQuirks.put(profileInfo.getName(), profileInfo.getQuirks());
         }
@@ -131,7 +130,7 @@ public class VenvDetectionService {
         final var detectedVenvs = detectVenvs();
         final var out = new ArrayList<Venv>();
         for (final var detectedVenv : detectedVenvs) {
-            final var quirks = profileQuirks.getOrDefault(detectedVenv.getProfile(), "");
+            final var quirks = profileQuirks.getOrDefault(detectedVenv.getProfile(), List.of());
             out.add(Venv.createStandalone(detectedVenv.getPath(), detectedVenv.getProfile(), detectedVenv.getSysroot(),
                             quirks));
         }

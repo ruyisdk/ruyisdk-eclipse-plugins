@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -27,25 +29,25 @@ public class RuyiCli {
     /** Profile information returned by the ruyi CLI. */
     public static class ProfileInfo {
         private final String name;
-        private final String quirks;
+        private final List<String> quirks;
 
         /**
          * Creates an instance.
          *
          * @param name profile name
-         * @param quirks profile quirks description
+         * @param quirks quirk identifiers needed by this profile
          */
-        public ProfileInfo(String name, String quirks) {
+        public ProfileInfo(String name, List<String> quirks) {
             this.name = name;
-            this.quirks = quirks;
+            this.quirks = quirks == null ? new ArrayList<>() : new ArrayList<>(quirks);
         }
 
         public String getName() {
             return name;
         }
 
-        public String getQuirks() {
-            return quirks;
+        public List<String> getQuirks() {
+            return Collections.unmodifiableList(quirks);
         }
     }
 
@@ -53,16 +55,21 @@ public class RuyiCli {
     public static class ToolchainInfo {
         private final String name;
         private final List<String> versions;
+        // "flavors" is the old name for "quirks":
+        // https://github.com/ruyisdk/ruyi/blob/ff18bb37e092d875e04ddcb3320c79798c4b2315/ruyi/ruyipkg/pkg_manifest.py#L88-L109
+        private final List<String> quirks;
 
         /**
          * Creates an instance.
          *
          * @param name toolchain package name
          * @param versions available toolchain versions
+         * @param quirks quirk (flavor) identifiers provided by this toolchain
          */
-        public ToolchainInfo(String name, List<String> versions) {
+        public ToolchainInfo(String name, List<String> versions, List<String> quirks) {
             this.name = name;
             this.versions = versions == null ? new ArrayList<>() : new ArrayList<>(versions);
+            this.quirks = quirks == null ? new ArrayList<>() : new ArrayList<>(quirks);
         }
 
         public String getName() {
@@ -71,6 +78,10 @@ public class RuyiCli {
 
         public List<String> getVersions() {
             return Collections.unmodifiableList(versions);
+        }
+
+        public List<String> getQuirks() {
+            return Collections.unmodifiableList(quirks);
         }
     }
 
@@ -78,16 +89,21 @@ public class RuyiCli {
     public static class EmulatorInfo {
         private final String name;
         private final List<String> versions;
+        // "flavors" is the old name for "quirks":
+        // https://github.com/ruyisdk/ruyi/blob/ff18bb37e092d875e04ddcb3320c79798c4b2315/ruyi/ruyipkg/pkg_manifest.py#L88-L109
+        private final List<String> quirks;
 
         /**
          * Creates an instance.
          *
          * @param name emulator package name
          * @param versions available emulator versions
+         * @param quirks quirk (flavor) identifiers provided by this emulator
          */
-        public EmulatorInfo(String name, List<String> versions) {
+        public EmulatorInfo(String name, List<String> versions, List<String> quirks) {
             this.name = name;
             this.versions = versions == null ? new ArrayList<>() : new ArrayList<>(versions);
+            this.quirks = quirks == null ? new ArrayList<>() : new ArrayList<>(quirks);
         }
 
         public String getName() {
@@ -96,6 +112,10 @@ public class RuyiCli {
 
         public List<String> getVersions() {
             return Collections.unmodifiableList(versions);
+        }
+
+        public List<String> getQuirks() {
+            return Collections.unmodifiableList(quirks);
         }
     }
 
@@ -197,24 +217,8 @@ public class RuyiCli {
                 return out;
             }
 
-            final var trimmed = output.trim();
-            if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
-                // try parse JSON array/object
-                try {
-                    final var arr = new JSONArray(trimmed);
-                    for (int i = 0; i < arr.length(); i++) {
-                        final var o = arr.getJSONObject(i);
-                        final var name = o.optString("name", o.optString("id", ""));
-                        final var quirks = o.optString("quirks", "");
-                        out.add(new ProfileInfo(name, quirks));
-                    }
-                    return out;
-                } catch (Exception e) {
-                    // fallthrough to plain parsing
-                }
-            }
-
             // plain text parsing: lines like "wch-qingke-v2a (needs quirks: {'wch'})"
+            // which quirks are in the form of a Python set literal.
             final var namePtn = Pattern.compile("^\\s*([^\\s(]+)", Pattern.CASE_INSENSITIVE);
             final var quirksPtn = Pattern.compile("needs quirks:\\s*\\{([^}]*)\\}", Pattern.CASE_INSENSITIVE);
             final var reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(output.getBytes())));
@@ -229,12 +233,18 @@ public class RuyiCli {
                 if (m.find()) {
                     name = m.group(1);
                 }
-                String quirks = "";
+                final var quirks = new ArrayList<String>();
                 final var q = quirksPtn.matcher(line);
                 if (q.find()) {
-                    quirks = q.group(1).trim();
+                    var raw = q.group(1).trim();
                     // normalize quotes and whitespace
-                    quirks = quirks.replaceAll("\\\'", "").replaceAll("\\\"", "");
+                    raw = raw.replaceAll("'", "").replaceAll("\"", "");
+                    for (final var s : raw.split(",")) {
+                        final var t = s.trim();
+                        if (!t.isEmpty()) {
+                            quirks.add(t);
+                        }
+                    }
                 }
                 if (name != null && !name.isEmpty()) {
                     out.add(new ProfileInfo(name, quirks));
@@ -823,9 +833,11 @@ public class RuyiCli {
                             }
                         }
                     }
+                    // Extract quirks (flavors) from the first version's metadata
+                    final var quirks = extractPackageQuirks(vers, "toolchain");
                     // only expose packages for which we actually know at least one version
                     if (!versions.isEmpty()) {
-                        out.add(new ToolchainInfo(pkgName, versions));
+                        out.add(new ToolchainInfo(pkgName, versions, quirks));
                     }
                 } catch (Exception e) {
                     // ignore malformed object and continue parsing others
@@ -899,8 +911,10 @@ public class RuyiCli {
                             }
                         }
                     }
+                    // Extract quirks (flavors) from the first version's metadata
+                    final var quirks = extractPackageQuirks(vers, "emulator");
                     if (!versions.isEmpty()) {
-                        out.add(new EmulatorInfo(pkgName, versions));
+                        out.add(new EmulatorInfo(pkgName, versions, quirks));
                     }
                 } catch (Exception e) {
                     // ignore malformed object and continue parsing others
@@ -910,5 +924,50 @@ public class RuyiCli {
             // defensive: never fail the caller due to parsing problems
         }
         return out;
+    }
+
+    /**
+     * Extracts quirks (flavors) from the first version entry that contains the given metadata key (e.g.
+     * "toolchain" or "emulator") inside the {@code pm} object.
+     */
+    private static List<String> extractPackageQuirks(JSONArray vers, String metadataKey) {
+        if (vers == null || vers.length() == 0) {
+            return List.of();
+        }
+        final var quirksSet = new LinkedHashSet<String>();
+        for (int vi = 0; vi < vers.length(); vi++) {
+            try {
+                final var v = vers.optJSONObject(vi);
+                if (v == null) {
+                    continue;
+                }
+                final var pm = v.optJSONObject("pm");
+                if (pm == null) {
+                    continue;
+                }
+                final var meta = pm.optJSONObject(metadataKey);
+                if (meta == null) {
+                    continue;
+                }
+                collectJsonArrayStrings(meta.optJSONArray("quirks"), quirksSet);
+                collectJsonArrayStrings(meta.optJSONArray("flavors"), quirksSet);
+                break; // all versions should have the same quirks, so use first version's metadata
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        return new ArrayList<>(quirksSet);
+    }
+
+    private static void collectJsonArrayStrings(JSONArray arr, Collection<String> target) {
+        if (arr == null) {
+            return;
+        }
+        for (int i = 0; i < arr.length(); i++) {
+            final var s = arr.optString(i, "").trim();
+            if (!s.isEmpty()) {
+                target.add(s);
+            }
+        }
     }
 }
