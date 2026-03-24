@@ -193,7 +193,9 @@ public class WizardConfigPage extends WizardPage {
                         final var q2 = p2.getQuirks() == null ? "" : p2.getQuirks();
                         result = q1.compareTo(q2);
                     } else {
-                        result = p1.getName().compareTo(p2.getName());
+                        final var n1 = p1.getName() == null ? "" : p1.getName();
+                        final var n2 = p2.getName() == null ? "" : p2.getName();
+                        result = n1.compareTo(n2);
                     }
                     return sortDirection == SWT.DOWN ? -result : result;
                 }
