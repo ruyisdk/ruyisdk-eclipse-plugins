@@ -167,14 +167,14 @@ public class WizardConfigPage extends WizardPage {
             profileTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 
             final var profileComparator = new ViewerComparator() {
-                private int sortColumnIndex;
+                private TableColumn sortColumn = nameColumn.getColumn();
                 private int sortDirection = SWT.UP;
 
-                public void setColumn(int column) {
-                    if (column == sortColumnIndex) {
+                public void setColumn(TableColumn column) {
+                    if (column == sortColumn) {
                         sortDirection = (sortDirection == SWT.UP) ? SWT.DOWN : SWT.UP;
                     } else {
-                        sortColumnIndex = column;
+                        sortColumn = column;
                         sortDirection = SWT.UP;
                     }
                 }
@@ -188,7 +188,7 @@ public class WizardConfigPage extends WizardPage {
                     final var p1 = (Profile) e1;
                     final var p2 = (Profile) e2;
                     int result;
-                    if (sortColumnIndex == 1) {
+                    if (sortColumn == quirksColumn.getColumn()) {
                         final var q1 = p1.getQuirks() == null ? "" : p1.getQuirks();
                         final var q2 = p2.getQuirks() == null ? "" : p2.getQuirks();
                         result = q1.compareTo(q2);
@@ -204,8 +204,7 @@ public class WizardConfigPage extends WizardPage {
                 @Override
                 public void widgetSelected(SelectionEvent e) {
                     final var clickedColumn = (TableColumn) e.widget;
-                    final var index = profileTable.indexOf(clickedColumn);
-                    profileComparator.setColumn(index);
+                    profileComparator.setColumn(clickedColumn);
                     profileTable.setSortColumn(clickedColumn);
                     profileTable.setSortDirection(profileComparator.getSortDirection());
                     profileTableViewer.refresh();
