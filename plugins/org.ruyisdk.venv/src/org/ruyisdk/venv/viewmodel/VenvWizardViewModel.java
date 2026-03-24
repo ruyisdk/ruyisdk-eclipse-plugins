@@ -5,7 +5,9 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.ruyisdk.venv.model.Emulator;
@@ -26,9 +28,11 @@ public class VenvWizardViewModel {
     private int selectedProfileIndex = -1;
 
     private final List<Toolchain> toolchains = new ArrayList<>();
+    private final List<Toolchain> allToolchains = new ArrayList<>();
     private int selectedToolchainIndex = -1;
     private int selectedToolchainVersionIndex = -1;
     private final List<Emulator> emulators = new ArrayList<>();
+    private final List<Emulator> allEmulators = new ArrayList<>();
     private int selectedEmulatorIndex = -1;
     private int selectedEmulatorVersionIndex = -1;
 
@@ -46,8 +50,6 @@ public class VenvWizardViewModel {
     /** Creates a new view model instance. */
     public VenvWizardViewModel(VenvDetectionService service) {
         this.service = service;
-        refreshListsBestEffort();
-        recomputeDerivedState();
     }
 
     private void recomputeDerivedState() {
@@ -111,7 +113,7 @@ public class VenvWizardViewModel {
             sb.append(profile.getName());
             final var quirks = profile.getQuirks();
             if (quirks != null && !quirks.isEmpty()) {
-                sb.append(" (quirks: ").append(quirks).append(")");
+                sb.append(" (quirks: ").append(String.join(", ", quirks)).append(")");
             }
         }
         sb.append('\n');
@@ -146,44 +148,86 @@ public class VenvWizardViewModel {
         return sb.toString();
     }
 
-    // TODO: remove try-catch
-    private void refreshListsBestEffort() {
-        try {
-            profiles.clear();
-            toolchains.clear();
-            emulators.clear();
+    private void refreshLists() throws Exception {
+        service.updateIndex();
 
-            final var profileInfos = service.listProfiles();
-            if (profileInfos != null) {
-                for (final var profileInfo : profileInfos) {
-                    profiles.add(new Profile(profileInfo.getName(), profileInfo.getQuirks()));
-                }
-            }
+        profiles.clear();
+        allToolchains.clear();
+        allEmulators.clear();
+        toolchains.clear();
+        emulators.clear();
 
-            final var toolchainInfos = service.listToolchains();
-            if (toolchainInfos != null) {
-                for (final var toolchainInfo : toolchainInfos) {
-                    toolchains.add(new Toolchain(toolchainInfo.getName(), toolchainInfo.getVersions()));
-                }
+        final var profileInfos = service.listProfiles();
+        if (profileInfos != null) {
+            for (final var profileInfo : profileInfos) {
+                profiles.add(new Profile(profileInfo.getName(), profileInfo.getQuirks()));
             }
+        }
 
-            final var emulatorInfos = service.listEmulators();
-            if (emulatorInfos != null) {
-                for (final var emulatorInfo : emulatorInfos) {
-                    emulators.add(new Emulator(emulatorInfo.getName(), emulatorInfo.getVersions()));
-                }
+        final var toolchainInfos = service.listToolchains();
+        if (toolchainInfos != null) {
+            for (final var toolchainInfo : toolchainInfos) {
+                allToolchains.add(new Toolchain(toolchainInfo.getName(), toolchainInfo.getVersions(),
+                                toolchainInfo.getQuirks()));
             }
-        } catch (Exception ex) {
-            // ignore errors; leave lists as-is
+        }
+
+        final var emulatorInfos = service.listEmulators();
+        if (emulatorInfos != null) {
+            for (final var emulatorInfo : emulatorInfos) {
+                allEmulators.add(new Emulator(emulatorInfo.getName(), emulatorInfo.getVersions(),
+                                emulatorInfo.getQuirks()));
+            }
         }
     }
 
-    /** Updates the CLI index and refreshes view model data. */
-    public void updateIndex() throws Exception {
-        service.updateIndex();
-        refreshListsBestEffort();
+    /**
+     * Filters toolchains and emulators to match the selected profile's quirks. When no profile is
+     * selected, all packages are shown.
+     */
+    private void filterPackagesBySelectedProfile() {
+        if (selectedProfileIndex < 0 || selectedProfileIndex >= profiles.size()) {
+            toolchains.clear();
+            toolchains.addAll(allToolchains);
+            emulators.clear();
+            emulators.addAll(allEmulators);
+        } else {
+            final var profileQuirks = profiles.get(selectedProfileIndex).getQuirks();
+
+            toolchains.clear();
+            for (final var tc : allToolchains) {
+                if (quirksMatch(profileQuirks, tc.getQuirks())) {
+                    toolchains.add(tc);
+                }
+            }
+
+            emulators.clear();
+            for (final var em : allEmulators) {
+                if (quirksMatch(profileQuirks, em.getQuirks())) {
+                    emulators.add(em);
+                }
+            }
+        }
+
+        // Reset selections since the lists changed
+        setSelectedToolchainIndex(-1);
+        setSelectedEmulatorIndex(-1);
+    }
+
+    private static boolean quirksMatch(List<String> profileQuirks, List<String> packageQuirks) {
+        final var neededByProfile = profileQuirks == null ? Set.<String>of() : new HashSet<>(profileQuirks);
+        final var providedByPackage = packageQuirks == null ? Set.<String>of() : new HashSet<>(packageQuirks);
+        if (neededByProfile.isEmpty()) {
+            return providedByPackage.isEmpty();
+        }
+        return providedByPackage.containsAll(neededByProfile);
+    }
+
+    /** Updates the CLI index and refreshes all view model data. */
+    public void refreshAll() throws Exception {
+        refreshLists();
+        filterPackagesBySelectedProfile();
         recomputeDerivedState();
-        pcs.firePropertyChange("dataRefreshed", null, Boolean.TRUE);
     }
 
     private void installToolchain(String name, String version) throws Exception {
@@ -279,6 +323,7 @@ public class VenvWizardViewModel {
         final var old = this.selectedProfileIndex;
         this.selectedProfileIndex = index;
         pcs.firePropertyChange("selectedProfileIndex", old, this.selectedProfileIndex);
+        filterPackagesBySelectedProfile();
         recomputeDerivedState();
     }
 

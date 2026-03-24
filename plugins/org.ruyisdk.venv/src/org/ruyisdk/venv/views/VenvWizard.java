@@ -48,7 +48,7 @@ public class VenvWizard extends Wizard {
             pmd.run(true, true, monitor -> {
                 monitor.beginTask("Updating package index...", 100);
                 try {
-                    viewModel.updateIndex();
+                    viewModel.refreshAll();
                 } catch (Exception e) {
                     throw new InvocationTargetException(e);
                 }

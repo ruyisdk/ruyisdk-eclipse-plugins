@@ -10,17 +10,22 @@ import java.util.List;
 public class Emulator {
     private String name;
     private List<String> versions = new ArrayList<>();
+    private List<String> quirks = new ArrayList<>();
 
     /**
-     * Creates an emulator.
+     * Creates an emulator with quirks.
      *
      * @param name the emulator name
      * @param versions the available versions
+     * @param quirks quirk (flavor) identifiers
      */
-    public Emulator(String name, List<String> versions) {
+    public Emulator(String name, List<String> versions, List<String> quirks) {
         this.name = name;
         if (versions != null) {
             this.versions.addAll(versions);
+        }
+        if (quirks != null) {
+            this.quirks.addAll(quirks);
         }
     }
 
@@ -60,6 +65,27 @@ public class Emulator {
         this.versions = new ArrayList<>();
         if (versions != null) {
             this.versions.addAll(versions);
+        }
+    }
+
+    /**
+     * Returns the quirks (flavors) provided by this emulator.
+     *
+     * @return quirks list
+     */
+    public List<String> getQuirks() {
+        return Collections.unmodifiableList(quirks);
+    }
+
+    /**
+     * Sets the quirks (flavors) provided by this emulator.
+     *
+     * @param quirks quirks list
+     */
+    public void setQuirks(List<String> quirks) {
+        this.quirks = new ArrayList<>();
+        if (quirks != null) {
+            this.quirks.addAll(quirks);
         }
     }
 }

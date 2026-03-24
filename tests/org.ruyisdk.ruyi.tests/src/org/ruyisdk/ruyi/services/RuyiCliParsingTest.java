@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -160,5 +161,174 @@ public class RuyiCliParsingTest {
         } finally {
             Locale.setDefault(old);
         }
+    }
+
+    @Test
+    public void parseToolchainsExtractsQuirksFromMetadata() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"toolchain","name":"tc-a","vers":[{"semver":"1.0.0","pm":{"toolchain":{"quirks":["xthead"]}}}]}
+                        """;
+
+        List<RuyiCli.ToolchainInfo> tcs = RuyiCli.parseToolchainsFromString(sample);
+        assertEquals(1, tcs.size());
+        assertEquals(List.of("xthead"), tcs.get(0).getQuirks());
+    }
+
+    @Test
+    public void parseToolchainsExtractsFlavorsAsFallback() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"toolchain","name":"tc-old","vers":[{"semver":"1.0.0","pm":{"toolchain":{"flavors":["wch"]}}}]}
+                        """;
+
+        List<RuyiCli.ToolchainInfo> tcs = RuyiCli.parseToolchainsFromString(sample);
+        assertEquals(1, tcs.size());
+        assertEquals(List.of("wch"), tcs.get(0).getQuirks());
+    }
+
+    @Test
+    public void parseToolchainsMergesQuirksAndFlavors() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"toolchain","name":"tc-merged","vers":[{"semver":"1.0.0","pm":{"toolchain":{"quirks":["xthead"],"flavors":["wch"]}}}]}
+                        """;
+
+        List<RuyiCli.ToolchainInfo> tcs = RuyiCli.parseToolchainsFromString(sample);
+        assertEquals(1, tcs.size());
+        assertEquals(List.of("xthead", "wch"), tcs.get(0).getQuirks());
+    }
+
+    @Test
+    public void parseToolchainsDeduplicatesQuirksAndFlavors() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"toolchain","name":"tc-dup","vers":[{"semver":"1.0.0","pm":{"toolchain":{"quirks":["xthead","wch"],"flavors":["xthead"]}}}]}
+                        """;
+
+        List<RuyiCli.ToolchainInfo> tcs = RuyiCli.parseToolchainsFromString(sample);
+        assertEquals(1, tcs.size());
+        assertEquals(List.of("xthead", "wch"), tcs.get(0).getQuirks());
+    }
+
+    @Test
+    public void parseToolchainsNoQuirksWhenNoPmMetadata() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"toolchain","name":"tc-plain","vers":[{"semver":"1.0.0"}]}
+                        """;
+
+        List<RuyiCli.ToolchainInfo> tcs = RuyiCli.parseToolchainsFromString(sample);
+        assertEquals(1, tcs.size());
+        assertTrue(tcs.get(0).getQuirks().isEmpty());
+    }
+
+    @Test
+    public void parseToolchainsUsesFirstVersionForQuirks() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"toolchain","name":"tc-multi","vers":[{"semver":"1.0.0","pm":{"toolchain":{"quirks":["first"]}}},{"semver":"2.0.0","pm":{"toolchain":{"quirks":["second"]}}}]}
+                        """;
+
+        List<RuyiCli.ToolchainInfo> tcs = RuyiCli.parseToolchainsFromString(sample);
+        assertEquals(1, tcs.size());
+        assertEquals(List.of("first"), tcs.get(0).getQuirks());
+    }
+
+    @Test
+    public void parseEmulatorsExtractsQuirksFromMetadata() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"emulator","name":"emu-a","vers":[{"semver":"1.0.0","pm":{"emulator":{"quirks":["wch"]}}}]}
+                        """;
+
+        List<RuyiCli.EmulatorInfo> ems = RuyiCli.parseEmulatorsFromString(sample);
+        assertEquals(1, ems.size());
+        assertEquals(List.of("wch"), ems.get(0).getQuirks());
+    }
+
+    @Test
+    public void parseEmulatorsExtractsFlavorsAsFallback() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"emulator","name":"emu-old","vers":[{"semver":"1.0.0","pm":{"emulator":{"flavors":["xthead"]}}}]}
+                        """;
+
+        List<RuyiCli.EmulatorInfo> ems = RuyiCli.parseEmulatorsFromString(sample);
+        assertEquals(1, ems.size());
+        assertEquals(List.of("xthead"), ems.get(0).getQuirks());
+    }
+
+    @Test
+    public void parseEmulatorsNoQuirksWhenNoPmMetadata() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"emulator","name":"emu-plain","vers":[{"semver":"1.0.0"}]}
+                        """;
+
+        List<RuyiCli.EmulatorInfo> ems = RuyiCli.parseEmulatorsFromString(sample);
+        assertEquals(1, ems.size());
+        assertTrue(ems.get(0).getQuirks().isEmpty());
+    }
+
+    @Test
+    public void profileInfoStoresQuirksList() {
+        var pi = new RuyiCli.ProfileInfo("test-profile", List.of("wch", "xthead"));
+        assertEquals("test-profile", pi.getName());
+        assertEquals(List.of("wch", "xthead"), pi.getQuirks());
+    }
+
+    @Test
+    public void profileInfoNullQuirksBecomesEmpty() {
+        var pi = new RuyiCli.ProfileInfo("null-quirks", null);
+        assertNotNull(pi.getQuirks());
+        assertTrue(pi.getQuirks().isEmpty());
+    }
+
+    @Test
+    public void profileInfoQuirksListIsUnmodifiable() {
+        var pi = new RuyiCli.ProfileInfo("immutable", List.of("a"));
+        boolean threw = false;
+        try {
+            pi.getQuirks().add("b");
+        } catch (UnsupportedOperationException e) {
+            threw = true;
+        }
+        assertTrue(threw);
+    }
+
+    @Test
+    public void profileInfoEmptyQuirksForNoQuirksProfile() {
+        var pi = new RuyiCli.ProfileInfo("plain-profile", Collections.emptyList());
+        assertTrue(pi.getQuirks().isEmpty());
+    }
+
+    @Test
+    public void toolchainInfoQuirksListIsUnmodifiable() {
+        var ti = new RuyiCli.ToolchainInfo("tc", List.of("1.0"), List.of("q"));
+        boolean threw = false;
+        try {
+            ti.getQuirks().add("x");
+        } catch (UnsupportedOperationException e) {
+            threw = true;
+        }
+        assertTrue(threw);
+    }
+
+    @Test
+    public void toolchainInfoNullQuirksBecomesEmpty() {
+        var ti = new RuyiCli.ToolchainInfo("tc", List.of("1.0"), null);
+        assertNotNull(ti.getQuirks());
+        assertTrue(ti.getQuirks().isEmpty());
+    }
+
+    @Test
+    public void emulatorInfoQuirksListIsUnmodifiable() {
+        var ei = new RuyiCli.EmulatorInfo("emu", List.of("1.0"), List.of("q"));
+        boolean threw = false;
+        try {
+            ei.getQuirks().add("x");
+        } catch (UnsupportedOperationException e) {
+            threw = true;
+        }
+        assertTrue(threw);
+    }
+
+    @Test
+    public void emulatorInfoNullQuirksBecomesEmpty() {
+        var ei = new RuyiCli.EmulatorInfo("emu", List.of("1.0"), null);
+        assertNotNull(ei.getQuirks());
+        assertTrue(ei.getQuirks().isEmpty());
     }
 }

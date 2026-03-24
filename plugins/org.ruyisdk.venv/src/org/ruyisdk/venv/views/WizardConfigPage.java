@@ -159,7 +159,7 @@ public class WizardConfigPage extends WizardPage {
                     @Override
                     public String getText(Object element) {
                         final var q = ((Profile) element).getQuirks();
-                        return q == null ? "" : q;
+                        return q == null || q.isEmpty() ? "" : String.join(", ", q);
                     }
                 });
             }
@@ -189,8 +189,8 @@ public class WizardConfigPage extends WizardPage {
                     final var p2 = (Profile) e2;
                     int result;
                     if (sortColumn == quirksColumn.getColumn()) {
-                        final var q1 = p1.getQuirks() == null ? "" : p1.getQuirks();
-                        final var q2 = p2.getQuirks() == null ? "" : p2.getQuirks();
+                        final var q1 = p1.getQuirks() == null ? "" : String.join(", ", p1.getQuirks());
+                        final var q2 = p2.getQuirks() == null ? "" : String.join(", ", p2.getQuirks());
                         result = q1.compareTo(q2);
                     } else {
                         final var n1 = p1.getName() == null ? "" : p1.getName();
@@ -329,11 +329,12 @@ public class WizardConfigPage extends WizardPage {
             }
         });
 
+        final var profileIndexObservable = BeanProperties
+                        .value(VenvWizardViewModel.class, "selectedProfileIndex", Integer.class).observe(viewModel);
+
         // profiles
         {
             final var profileSelection = ViewerProperties.singleSelection(Profile.class).observe(profileTableViewer);
-            final var profileIndexObservable = BeanProperties
-                            .value(VenvWizardViewModel.class, "selectedProfileIndex", Integer.class).observe(viewModel);
             final var profileToIndex = new UpdateValueStrategy<Profile, Integer>();
             profileToIndex.setConverter(new Converter<Profile, Integer>(Profile.class, Integer.class) {
                 @Override
@@ -514,6 +515,12 @@ public class WizardConfigPage extends WizardPage {
             dbc.bindValue(emulatorVersionSelection, emulatorVersionIndexObservable, emulatorVersionToIndex,
                             indexToEmulatorVersion);
         }
+
+        // filter toolchains and emulators by quirks when profile changes
+        profileIndexObservable.addValueChangeListener(e -> {
+            toolchainNamesViewer.setInput(viewModel.getToolchains());
+            emulatorNamesViewer.setInput(viewModel.getEmulators());
+        });
 
         // sysroot
         {
