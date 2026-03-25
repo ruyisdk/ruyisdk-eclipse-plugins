@@ -3,9 +3,10 @@
 ## Requirements
 
 - Java 21.
-- Maven 3.9.9 or newer. You may need to add mirror sites to speedup download.
+- Maven 3.9.9 or newer, but not Maven 4. You may need to add mirror sites to speed up downloads.
 - Git 2.23 or newer.
 - The latest Eclipse SDK from https://download.eclipse.org/eclipse/downloads/ .
+- Install "M2E - Complete Development Kit" from m2eclipse for Maven integration in Eclipse. See https://projects.eclipse.org/projects/technology.m2e .
 
 ## Steps
 
