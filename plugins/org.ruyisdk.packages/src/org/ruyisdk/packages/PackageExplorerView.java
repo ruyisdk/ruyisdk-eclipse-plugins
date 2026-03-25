@@ -232,16 +232,28 @@ public class PackageExplorerView extends ViewPart {
     }
 
     private void loadPackagesAsync() {
-        Job.create("Loading packages", monitor -> {
+        final var job = Job.create("Loading packages", monitor -> {
+            if (monitor.isCanceled()) {
+                return;
+            }
             try {
                 final var entity = "device:" + chosenType;
+                if (monitor.isCanceled()) {
+                    return;
+                }
                 final var output = RuyiCli.listRelatedToEntity(entity);
+                if (monitor.isCanceled()) {
+                    return;
+                }
 
                 StringBuilder outputBuilder = new StringBuilder();
                 outputBuilder.append("[");
                 boolean first = true;
                 final var lines = output.split("\\R");
                 for (final var line : lines) {
+                    if (monitor.isCanceled()) {
+                        return;
+                    }
                     final var trimmedLine = line.trim();
                     // Only concatenate packet data and filter logs
                     if (!trimmedLine.isEmpty() && trimmedLine.startsWith("{")
@@ -274,7 +286,10 @@ public class PackageExplorerView extends ViewPart {
                                     "Failed to execute command: " + e.getMessage());
                 });
             }
-        }).schedule();
+        });
+        job.setUser(true);
+        job.setPriority(Job.LONG);
+        job.schedule();
     }
 
     // Recursively mark downloaded nodes
@@ -321,9 +336,15 @@ public class PackageExplorerView extends ViewPart {
         }
 
         private void startCommand() {
-            Job.create((uninstall ? "Uninstalling" : "Installing") + " " + packageRef, monitor -> {
+            final var job = Job.create((uninstall ? "Uninstalling" : "Installing") + " " + packageRef, monitor -> {
+                if (monitor.isCanceled()) {
+                    return;
+                }
                 try {
                     final Consumer<String> lineCallback = line -> {
+                        if (monitor.isCanceled()) {
+                            return;
+                        }
                         Display.getDefault().asyncExec(() -> {
                             if (text != null && !text.isDisposed()) {
                                 text.append(line + "\n");
@@ -343,7 +364,9 @@ public class PackageExplorerView extends ViewPart {
                         }
                     });
                 }
-            }).schedule();
+            });
+            job.setUser(true);
+            job.schedule();
         }
 
         @Override
