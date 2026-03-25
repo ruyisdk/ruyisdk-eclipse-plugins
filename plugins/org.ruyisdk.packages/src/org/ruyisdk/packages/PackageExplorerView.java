@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -231,7 +232,7 @@ public class PackageExplorerView extends ViewPart {
     }
 
     private void loadPackagesAsync() {
-        new Thread(() -> {
+        Job.create("Loading packages", monitor -> {
             try {
                 final var entity = "device:" + chosenType;
                 final var output = RuyiCli.listRelatedToEntity(entity);
@@ -273,7 +274,7 @@ public class PackageExplorerView extends ViewPart {
                                     "Failed to execute command: " + e.getMessage());
                 });
             }
-        }).start();
+        }).schedule();
     }
 
     // Recursively mark downloaded nodes
@@ -320,7 +321,7 @@ public class PackageExplorerView extends ViewPart {
         }
 
         private void startCommand() {
-            new Thread(() -> {
+            Job.create((uninstall ? "Uninstalling" : "Installing") + " " + packageRef, monitor -> {
                 try {
                     final Consumer<String> lineCallback = line -> {
                         Display.getDefault().asyncExec(() -> {
@@ -342,7 +343,7 @@ public class PackageExplorerView extends ViewPart {
                         }
                     });
                 }
-            }).start();
+            }).schedule();
         }
 
         @Override
