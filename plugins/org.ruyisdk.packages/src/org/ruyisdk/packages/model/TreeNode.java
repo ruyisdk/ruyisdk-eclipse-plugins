@@ -1,4 +1,4 @@
-package org.ruyisdk.packages;
+package org.ruyisdk.packages.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +10,9 @@ public class TreeNode {
     private String name;
     private String details;
     private String packageRef;
-    private boolean selected; // Record whether the checkbox is selected
     private boolean isLeaf; // Mark whether it is the last node
     private List<TreeNode> children;
+    private TreeNode parent;
     private boolean downloaded = false; // Download mark field
 
     /**
@@ -37,7 +37,6 @@ public class TreeNode {
         this.details = details;
         this.packageRef = packageRef;
         this.children = new ArrayList<>();
-        this.selected = false; // Default not selected
         this.isLeaf = false; // Default not a leaf node
     }
 
@@ -66,24 +65,6 @@ public class TreeNode {
      */
     public String getPackageRef() {
         return packageRef;
-    }
-
-    /**
-     * Checks if selected.
-     *
-     * @return true if selected
-     */
-    public boolean isSelected() {
-        return selected;
-    }
-
-    /**
-     * Sets the selected state.
-     *
-     * @param selected selected state
-     */
-    public void setSelected(boolean selected) {
-        this.selected = selected;
     }
 
     /**
@@ -120,6 +101,7 @@ public class TreeNode {
      */
     public void addChild(TreeNode child) {
         children.add(child);
+        child.parent = this;
     }
 
     /**
@@ -129,6 +111,15 @@ public class TreeNode {
      */
     public boolean hasChildren() {
         return !children.isEmpty();
+    }
+
+    /**
+     * Gets the parent node.
+     *
+     * @return parent node, or null if this is the root
+     */
+    public TreeNode getParent() {
+        return parent;
     }
 
     /**
