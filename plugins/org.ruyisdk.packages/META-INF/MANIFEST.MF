@@ -2,7 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ruyi SDK Packages
 Bundle-SymbolicName: org.ruyisdk.packages;singleton:=true
+Automatic-Module-Name: org.ruyisdk.packages
 Bundle-Version: 0.1.2.qualifier
+Bundle-Vendor: ISCAS
 Require-Bundle: 
  org.eclipse.ui,
  org.eclipse.ui.workbench,

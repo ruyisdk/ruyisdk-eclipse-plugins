@@ -3,6 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Devices
 Bundle-SymbolicName: org.ruyisdk.devices;singleton:=true
 Bundle-Version: 0.1.2.qualifier
+Bundle-Vendor: ISCAS
 Bundle-Activator: org.ruyisdk.devices.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

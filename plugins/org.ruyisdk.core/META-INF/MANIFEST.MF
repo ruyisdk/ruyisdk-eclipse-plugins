@@ -3,6 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Core
 Bundle-SymbolicName: org.ruyisdk.core;singleton:=true
 Bundle-Version: 0.1.2.qualifier
+Bundle-Vendor: ISCAS
 Automatic-Module-Name: org.ruyisdk.core
 Bundle-Activator: org.ruyisdk.core.Activator
 Bundle-ActivationPolicy: lazy
