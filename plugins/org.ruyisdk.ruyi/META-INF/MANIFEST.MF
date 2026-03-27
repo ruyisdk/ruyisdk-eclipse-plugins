@@ -19,4 +19,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Export-Package: org.ruyisdk.ruyi.util,
  org.ruyisdk.ruyi.services,
- org.ruyisdk.ruyi.core.workspace
+ org.ruyisdk.ruyi.core.workspace,
+ org.ruyisdk.ruyi.model

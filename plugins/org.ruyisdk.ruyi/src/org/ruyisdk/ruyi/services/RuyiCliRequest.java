@@ -435,6 +435,18 @@ public class RuyiCliRequest {
         }
 
         /**
+         * Filters packages whose name contains the given string.
+         *
+         * @param name substring to match (empty string matches all)
+         * @return this builder
+         */
+        public ListCommandBuilder nameContains(String name) {
+            subArgs.add("--name-contains");
+            subArgs.add(name);
+            return this;
+        }
+
+        /**
          * Lists packages related to an entity.
          *
          * @param entity entity ID

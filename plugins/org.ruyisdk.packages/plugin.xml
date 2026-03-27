@@ -9,7 +9,7 @@
         <view
             id="org.ruyisdk.packages.view"
             name="Ruyi Package Explorer"
-            class="org.ruyisdk.packages.PackageExplorerView"
+            class="org.ruyisdk.packages.view.PackageExplorerView"
             category="org.ruyisdk.packages.category"/>
     </extension>
 </plugin>

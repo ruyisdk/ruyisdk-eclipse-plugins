@@ -633,6 +633,18 @@ public class RuyiCli {
     }
 
     /**
+     * Lists all available packages.
+     *
+     * @return command result with captured output
+     * @throws RuyiCliException if the command fails
+     */
+    public static String listAllPackages() throws RuyiCliException {
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true)
+                        .experimental(true).list().nameContains("").end().build();
+        return request.execute().getOutput();
+    }
+
+    /**
      * Lists entities by type.
      *
      * @param type entity type such as device
