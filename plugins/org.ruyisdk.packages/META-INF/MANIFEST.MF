@@ -16,6 +16,9 @@ Require-Bundle:
  org.glassfish.javax.json
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-21
-Export-Package: org.ruyisdk.packages
+Export-Package: org.ruyisdk.packages,
+ org.ruyisdk.packages.model,
+ org.ruyisdk.packages.service,
+ org.ruyisdk.packages.viewmodel
 
 
