@@ -26,8 +26,8 @@ public class PackageOperationViewModel extends BaseViewModel {
     private final PackageOperationRunner runner = new PackageOperationRunner();
     private final Runnable onCompleted;
 
-    private final StringBuilder outputBuffer = new StringBuilder();
-    private boolean running;
+    private final StringBuffer outputBuffer = new StringBuffer();
+    private volatile boolean running;
     private volatile boolean cancelled;
     private Job job;
 
@@ -66,38 +66,33 @@ public class PackageOperationViewModel extends BaseViewModel {
                     final var action = op.uninstall() ? "Uninstalling" : "Installing";
                     final var text = "[" + (index + 1) + "/" + total + "] " + action + " \"" + op.packageRef()
                                     + "\"...\n";
-                    uiExecutor.accept(() -> appendOutput(text));
+                    appendOutput(text);
                 }
 
                 @Override
                 public void onOutputLine(String line) {
-                    uiExecutor.accept(() -> appendOutput(line + "\n"));
+                    appendOutput(line + "\n");
                 }
 
                 @Override
                 public void onStepDone(int index) {
-                    uiExecutor.accept(() -> appendOutput("Done.\n\n"));
+                    appendOutput("Done.\n\n");
                 }
 
                 @Override
                 public void onStepFailed(int index, String errorMessage) {
-                    uiExecutor.accept(() -> appendOutput("Failed: " + errorMessage + "\n\n"));
+                    appendOutput("Failed: " + errorMessage + "\n\n");
                 }
 
                 @Override
                 public void onAllFinished(boolean wasCancelled) {
-                    uiExecutor.accept(() -> {
-                        if (wasCancelled) {
-                            appendOutput("\nCancelled by user.\n");
-                        } else {
-                            appendOutput("\nAll operations completed.\n");
-                        }
-                        running = false;
-                        firePropertyChange(PROP_RUNNING, true, false);
-                        if (onCompleted != null) {
-                            onCompleted.run();
-                        }
-                    });
+                    final var msg = wasCancelled ? "\nCancelled by user.\n" : "\nAll operations completed.\n";
+                    appendOutput(msg);
+                    running = false;
+                    firePropertyChange(PROP_RUNNING, true, false);
+                    if (onCompleted != null) {
+                        uiExecutor.accept(onCompleted);
+                    }
                 }
             }, () -> cancelled);
         });
