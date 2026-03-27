@@ -9,9 +9,10 @@ import java.util.function.Consumer;
  * notification and a {@code uiExecutor} for marshalling work to the UI thread.
  *
  * <p>
- * Subclasses are responsible for wrapping {@link #firePropertyChange} calls inside
- * {@code uiExecutor.accept(...)} when firing from a background thread, so that listeners can safely
- * update widgets.
+ * Listener registration and removal are synchronous so that listeners are guaranteed to be
+ * registered before any subsequent {@link #firePropertyChange} call can deliver events.
+ * {@link #firePropertyChange} marshals delivery to the UI thread via {@code uiExecutor}, so callers
+ * do <em>not</em> need to wrap their own calls in {@code uiExecutor.accept(...)}.
  */
 public abstract class BaseViewModel {
 
@@ -32,25 +33,25 @@ public abstract class BaseViewModel {
 
     /** Register a listener for all property changes. */
     public void addPropertyChangeListener(PropertyChangeListener listener) {
-        uiExecutor.accept(() -> pcs.addPropertyChangeListener(listener));
+        pcs.addPropertyChangeListener(listener);
     }
 
     /** Register a listener for a specific property. */
     public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        uiExecutor.accept(() -> pcs.addPropertyChangeListener(propertyName, listener));
+        pcs.addPropertyChangeListener(propertyName, listener);
     }
 
     /** Remove a previously registered listener. */
     public void removePropertyChangeListener(PropertyChangeListener listener) {
-        uiExecutor.accept(() -> pcs.removePropertyChangeListener(listener));
+        pcs.removePropertyChangeListener(listener);
     }
 
     /** Remove a previously registered per-property listener. */
     public void removePropertyChangeListener(String propertyName, PropertyChangeListener listener) {
-        uiExecutor.accept(() -> pcs.removePropertyChangeListener(propertyName, listener));
+        pcs.removePropertyChangeListener(propertyName, listener);
     }
 
-    /** Fire a property-change event. */
+    /** Fire a property-change event on the UI thread. */
     protected void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
         uiExecutor.accept(() -> pcs.firePropertyChange(propertyName, oldValue, newValue));
     }
