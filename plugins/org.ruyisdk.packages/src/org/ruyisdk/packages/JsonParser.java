@@ -22,7 +22,7 @@ public class JsonParser {
      * @param rootLabel label for root node
      * @return parsed tree node
      */
-    public static TreeNode parseRawOutput(String rawOutput, String rootLabel) {
+    public static TreeNode parseRawOutput(String rawOutput, String rootLabel) throws Exception {
         final var root = new TreeNode(rootLabel, null);
         if (rawOutput == null || rawOutput.isEmpty()) {
             return root;
