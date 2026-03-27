@@ -13,6 +13,31 @@ import org.ruyisdk.ruyi.services.RuyiCli;
 public class PackageOperationRunner {
 
     /**
+     * Abstraction over CLI install/uninstall so that the runner can be tested without {@link RuyiCli}.
+     */
+    @FunctionalInterface
+    public interface PackageInstaller {
+
+        /**
+         * Performs an install or uninstall.
+         *
+         * @param op the operation to execute
+         * @param lineCallback called for each line of process output
+         * @throws Exception if the operation fails
+         */
+        void execute(PackageOperation op, Consumer<String> lineCallback) throws Exception;
+    }
+
+    /** Default installer that delegates to {@link RuyiCli}. */
+    public static final PackageInstaller DEFAULT_INSTALLER = (op, lineCallback) -> {
+        if (op.uninstall()) {
+            RuyiCli.uninstallPackageStreaming(op.packageRef(), true, lineCallback, null);
+        } else {
+            RuyiCli.installPackageStreaming(op.packageRef(), lineCallback, null);
+        }
+    };
+
+    /**
      * Callback interface for operation progress reporting.
      */
     public interface OperationCallback {
@@ -33,6 +58,22 @@ public class PackageOperationRunner {
         void onAllFinished(boolean wasCancelled);
     }
 
+    private final PackageInstaller installer;
+
+    /** Creates a runner using the default {@link RuyiCli}-backed installer. */
+    public PackageOperationRunner() {
+        this(DEFAULT_INSTALLER);
+    }
+
+    /**
+     * Creates a runner with the given installer (useful for testing).
+     *
+     * @param installer the installer to delegate individual operations to
+     */
+    public PackageOperationRunner(PackageInstaller installer) {
+        this.installer = installer;
+    }
+
     /**
      * Runs all operations in order. Checks {@code cancelFlag} between operations; a running operation
      * is not interrupted.
@@ -50,12 +91,7 @@ public class PackageOperationRunner {
             callback.onStepStart(i, operations.size(), op);
 
             try {
-                final Consumer<String> lineCallback = callback::onOutputLine;
-                if (op.uninstall()) {
-                    RuyiCli.uninstallPackageStreaming(op.packageRef(), true, lineCallback, null);
-                } else {
-                    RuyiCli.installPackageStreaming(op.packageRef(), lineCallback, null);
-                }
+                installer.execute(op, callback::onOutputLine);
                 callback.onStepDone(i);
             } catch (Exception e) {
                 callback.onStepFailed(i, e.getMessage());
