@@ -2,6 +2,8 @@ package org.ruyisdk.intro;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -154,8 +156,9 @@ public class CustomIntroPart implements IIntroPart {
                     event.doit = false;
                 } else if (url.startsWith("http:") || url.startsWith("https:")) {
                     try {
-                        PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
-                    } catch (PartInitException | MalformedURLException e) {
+                        PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser()
+                                        .openURL(new URI(url).toURL());
+                    } catch (PartInitException | MalformedURLException | URISyntaxException e) {
                         // Consider proper logging for 'e' here
                     }
                     event.doit = false;

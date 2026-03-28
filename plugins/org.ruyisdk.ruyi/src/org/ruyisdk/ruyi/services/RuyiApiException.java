@@ -4,6 +4,8 @@ package org.ruyisdk.ruyi.services;
  * RuyiApi专用异常.
  */
 public class RuyiApiException extends Exception {
+    private static final long serialVersionUID = 1L;
+
     /**
      * 构造异常.
      *

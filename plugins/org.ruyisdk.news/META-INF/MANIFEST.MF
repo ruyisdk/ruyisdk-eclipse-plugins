@@ -3,6 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: News
 Bundle-SymbolicName: org.ruyisdk.news;singleton:=true
 Bundle-Version: 0.1.2.qualifier
+Bundle-Vendor: ISCAS
 Automatic-Module-Name: org.ruyisdk.news
 Bundle-Activator: org.ruyisdk.news.Activator
 Bundle-ActivationPolicy: lazy
