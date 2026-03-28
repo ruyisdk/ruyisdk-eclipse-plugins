@@ -10,7 +10,8 @@ import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -32,15 +33,16 @@ public class RuyiNetworkUtils {
      * @param monitor progress monitor
      * @param progressCallback progress callback
      * @throws IOException if download fails
+     * @throws URISyntaxException if URL is invalid
      */
     public static void downloadFile(String fileUrl, String destinationPath, IProgressMonitor monitor,
-                    BiConsumer<Long, Long> progressCallback) throws IOException {
+                    BiConsumer<Long, Long> progressCallback) throws IOException, URISyntaxException {
         HttpURLConnection connection = null;
         InputStream input = null;
         OutputStream output = null;
 
         try {
-            URL url = new URL(fileUrl);
+            final var url = new URI(fileUrl).toURL();
 
             System.out.println("fileUrl===" + fileUrl);
 
@@ -103,13 +105,15 @@ public class RuyiNetworkUtils {
      * @param monitor progress monitor
      * @return string content
      * @throws IOException if fetch fails
+     * @throws URISyntaxException if URL is invalid
      */
-    public static String fetchStringContent(String urlString, IProgressMonitor monitor) throws IOException {
+    public static String fetchStringContent(String urlString, IProgressMonitor monitor)
+                    throws IOException, URISyntaxException {
         HttpURLConnection connection = null;
         InputStream input = null;
 
         try {
-            URL url = new URL(urlString);
+            final var url = new URI(urlString).toURL();
             connection = (HttpURLConnection) url.openConnection();
             configureConnection(connection);
 
@@ -156,15 +160,16 @@ public class RuyiNetworkUtils {
      * @param monitor progress monitor
      * @return response string
      * @throws IOException if post fails
+     * @throws URISyntaxException if URL is invalid
      */
     public static String postJson(String urlString, Map<String, Object> data, IProgressMonitor monitor)
-                    throws IOException {
+                    throws IOException, URISyntaxException {
         HttpURLConnection connection = null;
         OutputStream output = null;
         InputStream input = null;
 
         try {
-            URL url = new URL(urlString);
+            final var url = new URI(urlString).toURL();
             connection = (HttpURLConnection) url.openConnection();
             configureConnection(connection);
             connection.setRequestMethod("POST");
@@ -231,7 +236,7 @@ public class RuyiNetworkUtils {
     public static boolean isUrlAccessible(String urlString, int timeoutMillis) {
         HttpURLConnection connection = null;
         try {
-            URL url = new URL(urlString);
+            final var url = new URI(urlString).toURL();
             connection = (HttpURLConnection) url.openConnection();
             connection.setConnectTimeout(timeoutMillis);
             connection.setReadTimeout(timeoutMillis);

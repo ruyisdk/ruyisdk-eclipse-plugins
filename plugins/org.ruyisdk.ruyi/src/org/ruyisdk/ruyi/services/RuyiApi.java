@@ -4,7 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import org.json.JSONObject;
 import org.ruyisdk.core.ruyi.model.RuyiReleaseInfo;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
@@ -54,12 +55,12 @@ public class RuyiApi {
         }
     }
 
-    private static JSONObject sendGetRequest(String path) throws IOException {
+    private static JSONObject sendGetRequest(String path) throws IOException, URISyntaxException {
         HttpURLConnection conn = null;
         BufferedReader reader = null;
 
         try {
-            conn = (HttpURLConnection) new URL(BASE_URL + path).openConnection();
+            conn = (HttpURLConnection) new URI(BASE_URL + path).toURL().openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(TIMEOUT);
             conn.setReadTimeout(TIMEOUT);
