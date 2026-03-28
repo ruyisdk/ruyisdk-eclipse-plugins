@@ -6,6 +6,7 @@ import java.io.IOException;
  * Exception thrown when a Ruyi CLI operation fails.
  */
 public class RuyiCliException extends Exception {
+    private static final long serialVersionUID = 1L;
 
     private RuyiCliException(String message) {
         super(message);
