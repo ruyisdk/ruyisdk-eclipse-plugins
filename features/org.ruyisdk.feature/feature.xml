@@ -296,6 +296,13 @@ You may add additional accurate notices of copyright ownership.
    </license>
 
    <plugin
+         id="org.ruyisdk.promotion"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.ruyisdk.core"
          download-size="0"
          install-size="0"
