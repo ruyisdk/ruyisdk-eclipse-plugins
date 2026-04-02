@@ -211,9 +211,8 @@ public class WebsiteView extends ViewPart {
             return false;
         }
 
-        return url.equals("https://ruyisdk.cn")
-                || url.startsWith("https://ruyisdk.cn/")
-                || url.matches("^https://[a-zA-Z0-9-]+\\.ruyisdk\\.cn(/.*)?$");
+        return url.equals("https://ruyisdk.cn") || url.startsWith("https://ruyisdk.cn/")
+                        || url.matches("^https://[a-zA-Z0-9-]+\\.ruyisdk\\.cn(/.*)?$");
     }
 
     @Override
