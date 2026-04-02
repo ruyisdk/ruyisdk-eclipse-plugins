@@ -200,12 +200,20 @@ public class WebsiteView extends ViewPart {
         if (url == null) {
             return false;
         }
-        // Allow ruyisdk.cn (+ subdomains) and internal URIs only
-        if (url.startsWith("about:") || url.startsWith("data:")) {
+
+        // Allow ruyisdk.cn (+ subdomains) over HTTPS and a minimal internal URL (about:blank) only
+        if ("about:blank".equals(url)) {
             return true;
         }
-        return url.startsWith("https://ruyisdk.cn/") || url.equals("https://ruyisdk.cn")
-                        || url.matches("https://[a-zA-Z0-9-]+\\.ruyisdk\\.cn(/.*)?");
+
+        // Only allow HTTPS navigation to ruyisdk.cn and its subdomains
+        if (!url.startsWith("https://")) {
+            return false;
+        }
+
+        return url.equals("https://ruyisdk.cn")
+                || url.startsWith("https://ruyisdk.cn/")
+                || url.matches("^https://[a-zA-Z0-9-]+\\.ruyisdk\\.cn(/.*)?$");
     }
 
     @Override
