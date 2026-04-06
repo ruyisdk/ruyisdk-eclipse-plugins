@@ -105,7 +105,8 @@ public class RepoConfigPreference {
 
         final var branchValue = RuyiCli.getRepoBranch();
         branchText = new Text(container, SWT.BORDER);
-        branchText.setText(branchValue != null && !branchValue.isBlank() ? branchValue.trim() : "main");
+        branchText.setText(branchValue != null && !branchValue.isBlank() ? branchValue.trim()
+                        : Constants.NetAddress.DEFAULT_BRANCH);
         branchText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     }
 
@@ -126,11 +127,11 @@ public class RepoConfigPreference {
     /**
      * Returns the branch name entered by the user.
      *
-     * @return branch name, defaults to "main" if blank
+     * @return branch name, defaults to {@value Constants.NetAddress#DEFAULT_BRANCH} if blank
      */
     public String getBranch() {
         final var text = branchText.getText().trim();
-        return text.isEmpty() ? "main" : text;
+        return text.isEmpty() ? Constants.NetAddress.DEFAULT_BRANCH : text;
     }
 
     /**
@@ -160,6 +161,6 @@ public class RepoConfigPreference {
         customRadio.setSelection(false);
         customUrlText.setText("");
         customUrlText.setEnabled(false);
-        branchText.setText("main");
+        branchText.setText(Constants.NetAddress.DEFAULT_BRANCH);
     }
 }
