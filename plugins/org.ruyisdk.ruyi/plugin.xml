@@ -3,12 +3,18 @@
 <plugin>
 
 	<extension point="org.eclipse.ui.preferencePages">
-		<!-- 第一级：RuyiSDK 分类:在 org.ruyisdk.core 中定义-->
-		<!-- 第二级：Ruyi Config -->
+		<!-- Root: RuyiSDK -->
+		<page
+			id="org.ruyisdk.preferences.root"
+			name="RuyiSDK"
+			class="org.ruyisdk.ruyi.preferences.RootPreferencePage"
+			icon="icons/ruyisdk-icon16.png">
+		</page>
+		<!-- Sub-page: Ruyi Config (repo, telemetry, etc.) -->
 		<page
 			id="org.ruyisdk.preferences.config"
-			name="Ruyi Config"
-			class="org.ruyisdk.ruyi.preferences.RuyiConfigPreferencePage"
+			name="Ruyi Configuration"
+			class="org.ruyisdk.ruyi.preferences.ConfigPreferencePage"
 			category="org.ruyisdk.preferences.root">
 		</page>
 	</extension>

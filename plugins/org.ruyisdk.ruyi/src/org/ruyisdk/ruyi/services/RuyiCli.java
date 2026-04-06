@@ -19,7 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
-import org.ruyisdk.ruyi.services.RuyiProperties.TelemetryStatus;
+import org.ruyisdk.ruyi.model.TelemetryMode;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 /**
@@ -524,13 +524,12 @@ public class RuyiCli {
     /**
      * Sets repository remote URL.
      *
-     * @param repoUrl repository URL
+     * @param remoteUrl remote repository URL
      * @throws RuyiCliException if command fails
      */
-    public static void setRepoRemote(String repoUrl) throws RuyiCliException {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
-                        .config().set("repo.remote", repoUrl).end().build();
-        request.execute();
+    public static void setRepoRemote(String remoteUrl) throws RuyiCliException {
+        RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false).config()
+                        .set("repo.remote", remoteUrl).end().build().execute();
     }
 
     /**
@@ -550,15 +549,102 @@ public class RuyiCli {
     }
 
     /**
-     * Sets telemetry mode.
+     * Sets repository branch.
      *
-     * @param status telemetry status
+     * @param branch branch name
      * @throws RuyiCliException if command fails
      */
-    public static void setTelemetry(TelemetryStatus status) throws RuyiCliException {
+    public static void setRepoBranch(String branch) throws RuyiCliException {
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
+                        .config().set("repo.branch", branch).end().build();
+        request.execute();
+    }
+
+    /**
+     * Gets repository branch.
+     *
+     * @return branch name or null if not set
+     */
+    public static String getRepoBranch() {
+        try {
+            final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
+                            .config().get("repo.branch").end().build();
+            final var result = request.execute();
+            return readFirstLine(result);
+        } catch (RuyiCliException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Sets repository local checkout path override.
+     *
+     * @param localPath local path, or null/empty to unset
+     * @throws RuyiCliException if command fails
+     */
+    public static void setRepoLocal(String localPath) throws RuyiCliException {
+        if (localPath == null || localPath.isBlank()) {
+            RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false).config()
+                            .unset("repo.local").end().build().execute();
+        } else {
+            RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false).config()
+                            .set("repo.local", localPath).end().build().execute();
+        }
+    }
+
+    /**
+     * Gets repository local path override.
+     *
+     * @return local path or null if not set
+     */
+    public static String getRepoLocal() {
+        try {
+            final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
+                            .config().get("repo.local").end().build();
+            final var result = request.execute();
+            return readFirstLine(result);
+        } catch (RuyiCliException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Sets packages.prereleases config.
+     *
+     * @param enabled true to include pre-release packages
+     * @throws RuyiCliException if command fails
+     */
+    public static void setPackagesPrereleases(boolean enabled) throws RuyiCliException {
+        RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false).config()
+                        .set("packages.prereleases", enabled ? "true" : "false").end().build().execute();
+    }
+
+    /**
+     * Gets packages.prereleases config.
+     *
+     * @return true if pre-releases enabled, false otherwise
+     */
+    public static boolean getPackagesPrereleases() {
+        try {
+            final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
+                            .config().get("packages.prereleases").end().build();
+            final var result = request.execute();
+            return "true".equals(readFirstLine(result));
+        } catch (RuyiCliException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Sets telemetry mode.
+     *
+     * @param mode telemetry mode
+     * @throws RuyiCliException if command fails
+     */
+    public static void setTelemetry(TelemetryMode mode) throws RuyiCliException {
         final var telemetryBuilder = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
                         .porcelain(false).telemetry();
-        switch (status) {
+        switch (mode) {
             case ON:
                 telemetryBuilder.consent();
                 break;
@@ -577,11 +663,11 @@ public class RuyiCli {
     }
 
     /**
-     * Gets telemetry status.
+     * Gets telemetry mode.
      *
-     * @return telemetry status output line or null if not available or command fails
+     * @return the first line of telemetry status output or null if not available or command fails
      */
-    public static String getTelemetryStatus() {
+    public static String getTelemetryMode() {
         try {
             final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
                             .telemetry().status().end().build();
