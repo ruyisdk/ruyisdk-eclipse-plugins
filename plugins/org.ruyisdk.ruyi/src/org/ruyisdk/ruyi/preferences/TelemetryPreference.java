@@ -1,6 +1,5 @@
 package org.ruyisdk.ruyi.preferences;
 
-import java.io.IOException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -12,8 +11,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
-import org.ruyisdk.ruyi.services.RuyiProperties;
-import org.ruyisdk.ruyi.services.RuyiProperties.TelemetryStatus;
+import org.ruyisdk.ruyi.model.TelemetryMode;
+import org.ruyisdk.ruyi.services.RuyiCli;
 
 /**
  * Preference component for telemetry settings.
@@ -61,12 +60,12 @@ public class TelemetryPreference {
         label.setText("Telemetry data collection:");
         label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-        // Combo for telemetry status
+        // Combo for telemetry mode
         telemetryCombo = new Combo(comboContainer, SWT.DROP_DOWN | SWT.READ_ONLY);
         telemetryCombo.setItems(new String[] {"Enabled: Send anonymous usage data",
                 "Local only: Analyze data locally only", "Disabled: No data collection"});
         // Set default selection
-        telemetryCombo.select(initTelemetryStatus());
+        telemetryCombo.select(getTelemetrySelectionIndex());
         telemetryCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         // 创建一个Link控件来显示描述文本和链接
@@ -93,54 +92,21 @@ public class TelemetryPreference {
 
     }
 
-    // public boolean isTelemetryEnabled() {
-    // return telemetryCheckbox.getSelection();
-    // }
-    //
-    // public void defaultedTelemetryState() {
-    // telemetryCheckbox.setSelection(true);
-    // }
-    //
-    // public void saveTelemetryConfigs() throws IOException {
-    // RuyiProperties.setTelemetryStatus(telemetryCheckbox.getSelection());
-    // }
     /**
-     * Gets telemetry status.
+     * Gets telemetry mode.
      *
-     * @return telemetry status
+     * @return telemetry mode
      */
-    public TelemetryStatus getTelemetryStatus() {
+    public TelemetryMode getTelemetryMode() {
         switch (telemetryCombo.getSelectionIndex()) {
             case 0:
-                return TelemetryStatus.ON;
+                return TelemetryMode.ON;
             case 1:
-                return TelemetryStatus.LOCAL;
+                return TelemetryMode.LOCAL;
             case 2:
-                return TelemetryStatus.OFF;
+                return TelemetryMode.OFF;
             default:
-                return TelemetryStatus.ON;
-        }
-    }
-
-    /**
-     * Sets telemetry status.
-     *
-     * @param status telemetry status
-     */
-    public void setTelemetryStatus(TelemetryStatus status) {
-        switch (status) {
-            case ON:
-                telemetryCombo.select(0);
-                break;
-            case LOCAL:
-                telemetryCombo.select(1);
-                break;
-            case OFF:
-                telemetryCombo.select(2);
-                break;
-            default:
-                telemetryCombo.select(0);
-                break;
+                return TelemetryMode.ON;
         }
     }
 
@@ -152,30 +118,22 @@ public class TelemetryPreference {
     }
 
     /**
-     * Saves telemetry configurations.
+     * Get telemetry mode from the CLI for combo selection.
      *
-     * @throws IOException if save fails
+     * @return combo index (0=ON, 1=LOCAL, 2=OFF)
      */
-    public void saveTelemetryConfigs() throws IOException {
-        RuyiProperties.setTelemetryStatus(getTelemetryStatus());
-    }
-
-    /**
-     * Initializes telemetry status.
-     *
-     * @return status index
-     */
-    public int initTelemetryStatus() {
-        switch (RuyiProperties.getTelemetryStatus()) {
-            case ON:
-                return 0;
-            case LOCAL:
+    private int getTelemetrySelectionIndex() {
+        final var raw = RuyiCli.getTelemetryMode();
+        if (raw != null) {
+            final var lower = raw.trim().toLowerCase();
+            if (lower.equals("local")) {
                 return 1;
-            case OFF:
+            } else if (lower.equals("off")) {
                 return 2;
-            default:
-                return 0;
+            }
         }
+        // default to ON
+        return 0;
     }
 
 }

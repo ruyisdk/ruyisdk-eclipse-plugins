@@ -19,14 +19,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.ruyisdk.core.ruyi.model.RepoConfig;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
+import org.ruyisdk.ruyi.model.TelemetryMode;
 import org.ruyisdk.ruyi.preferences.RepoConfigPreference;
 import org.ruyisdk.ruyi.preferences.RuyiInstallPathPreference;
 import org.ruyisdk.ruyi.preferences.TelemetryPreference;
 import org.ruyisdk.ruyi.services.RuyiInstallManager;
 import org.ruyisdk.ruyi.services.RuyiProperties;
-import org.ruyisdk.ruyi.services.RuyiProperties.TelemetryStatus;
 import org.ruyisdk.ruyi.util.StatusUtil;
 
 /**
@@ -255,19 +254,17 @@ public class RuyiInstallWizard extends Wizard {
             return installPref.getTextPath();
         }
 
-        public RepoConfig[] getSelectedRepos() {
-            return repoPref.getSelectedRepos();
+        public String getSelectedUrl() {
+            return repoPref.getSelectedUrl();
         }
 
-        public TelemetryStatus getTelemetryStatus() {
-            return telemetryPref.getTelemetryStatus();
+        public TelemetryMode getTelemetryMode() {
+            return telemetryPref.getTelemetryMode();
         }
 
         public void saveConfig() {
             try {
                 installPref.saveInstallPath();
-                repoPref.saveRepoConfigs();
-                telemetryPref.saveTelemetryConfigs();
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -316,8 +313,8 @@ public class RuyiInstallWizard extends Wizard {
 
             // prepare for worker thread
             final var installPath = configPage.getInstallPath();
-            final var selectedRepos = configPage.getSelectedRepos();
-            final var telemetryStatus = configPage.getTelemetryStatus();
+            final var selectedUrl = configPage.getSelectedUrl();
+            final var telemetryMode = configPage.getTelemetryMode();
 
             progressComp.appendLog("Starting " + (mode == Mode.INSTALL ? "installation" : "upgrade") + "...");
 
@@ -334,7 +331,7 @@ public class RuyiInstallWizard extends Wizard {
                             appendLog(message);
                         }
                     };
-                    RuyiInstallManager.install(installPath, selectedRepos, telemetryStatus, monitor, listener);
+                    RuyiInstallManager.install(installPath, selectedUrl, telemetryMode, monitor, listener);
 
                     Display.getDefault().asyncExec(() -> {
                         progressComp.appendLog("Operation completed successfully!");

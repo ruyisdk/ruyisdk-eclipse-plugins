@@ -15,10 +15,9 @@ import java.util.Objects;
 import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.ruyisdk.core.ruyi.model.RepoConfig;
 import org.ruyisdk.core.ruyi.model.RuyiReleaseInfo;
 import org.ruyisdk.core.ruyi.model.SystemInfo;
-import org.ruyisdk.ruyi.services.RuyiProperties.TelemetryStatus;
+import org.ruyisdk.ruyi.model.TelemetryMode;
 import org.ruyisdk.ruyi.ui.RuyiInstallWizard.InstallationListener;
 import org.ruyisdk.ruyi.util.RuyiNetworkUtils;
 
@@ -32,15 +31,14 @@ public final class RuyiInstallManager {
      * Installs Ruyi.
      *
      * @param destinationDirectory destination directory for the installation
-     * @param selectedRepoConfigs selected repository configuration
+     * @param repoUrl selected remote repository URL
      * @param telemetryMode telemetry setting to apply after install
      * @param monitor progress monitor
      * @param listener installation listener
      * @throws Exception if installation fails
      */
-    public static void install(String destinationDirectory, RepoConfig[] selectedRepoConfigs,
-                    TelemetryStatus telemetryMode, IProgressMonitor monitor, InstallationListener listener)
-                    throws Exception {
+    public static void install(String destinationDirectory, String repoUrl, TelemetryMode telemetryMode,
+                    IProgressMonitor monitor, InstallationListener listener) throws Exception {
         SubMonitor subMonitor = SubMonitor.convert(monitor, "Installing Ruyi", 100);
 
         try {
@@ -54,7 +52,7 @@ public final class RuyiInstallManager {
             validateInstallation(listener);
             listener.logMessage("Installation completed successfully");
 
-            configureInstalledRuyi(selectedRepoConfigs, telemetryMode, listener);
+            configureInstalledRuyi(repoUrl, telemetryMode, listener);
         } catch (Exception e) {
             listener.logMessage("Installation failed: " + e.getMessage());
             throw e;
@@ -225,25 +223,20 @@ public final class RuyiInstallManager {
         listener.logMessage("Ruyi " + version.toString() + " install successful.");
     }
 
-    private static void configureInstalledRuyi(RepoConfig[] selectedRepoConfigs, TelemetryStatus telemetryMode,
+    private static void configureInstalledRuyi(String repoUrl, TelemetryMode telemetryMode,
                     InstallationListener listener) throws Exception {
         listener.logMessage("Ruyi Config...");
 
-        final var repoConfigs = Objects.requireNonNull(selectedRepoConfigs, "selectedRepoConfigs");
-        if (repoConfigs.length == 0) {
-            throw new Exception("No repository configuration selected.");
-        }
-
-        final var effectiveTelemetry = telemetryMode == null ? TelemetryStatus.ON : telemetryMode;
-
-        RuyiCli.setRepoRemote(repoConfigs[0].getUrl());
+        Objects.requireNonNull(repoUrl, "No repository configuration selected");
+        RuyiCli.setRepoRemote(repoUrl);
         listener.logMessage("ruyi config set repo.remote successful. \n repo.remote is:" + RuyiCli.getRepoRemote());
 
         RuyiCli.updatePackageIndex();
         listener.logMessage("ruyi update successful");
 
+        final var effectiveTelemetry = telemetryMode == null ? TelemetryMode.ON : telemetryMode;
         RuyiCli.setTelemetry(effectiveTelemetry);
-        listener.logMessage("ruyi telemetry set successful:" + RuyiCli.getTelemetryStatus());
+        listener.logMessage("ruyi telemetry set successful: " + RuyiCli.getTelemetryMode());
 
         listener.logMessage("Config successful");
     }

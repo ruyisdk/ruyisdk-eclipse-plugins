@@ -62,6 +62,9 @@ public final class Constants {
 
         /** Backup repository URL for packages index. */
         public static final String BACKUP_REPO_URL = MIRROR_BASE + "/git/ruyisdk/packages-index.git";
+
+        /** Default branch name for the packages index repository. */
+        public static final String DEFAULT_BRANCH = "main";
     }
 
     /**
