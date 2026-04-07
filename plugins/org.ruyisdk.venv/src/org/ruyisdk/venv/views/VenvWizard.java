@@ -50,14 +50,14 @@ public class VenvWizard extends Wizard {
             StatusManager.getManager()
                             .handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
                                             "Failed to update package index; wizard will abort.", e.getCause()),
-                                            StatusManager.BLOCK);
+                                            StatusManager.LOG | StatusManager.BLOCK);
             return;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             StatusManager.getManager()
                             .handle(new Status(IStatus.CANCEL, "org.ruyisdk.venv",
                                             "Package index update was cancelled; wizard will abort.", e),
-                                            StatusManager.BLOCK);
+                                            StatusManager.LOG | StatusManager.BLOCK);
             return;
         }
 
@@ -98,13 +98,13 @@ public class VenvWizard extends Wizard {
             StatusManager.getManager()
                             .handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
                                             "Unable to complete virtual environment setup.", e.getCause()),
-                                            StatusManager.BLOCK);
+                                            StatusManager.LOG | StatusManager.BLOCK);
             return false;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             StatusManager.getManager().handle(
                             new Status(IStatus.CANCEL, "org.ruyisdk.venv", "Operation was cancelled.", e),
-                            StatusManager.BLOCK);
+                            StatusManager.LOG | StatusManager.BLOCK);
             return false;
         }
     }

@@ -113,13 +113,13 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         } catch (InvocationTargetException e) {
             StatusManager.getManager().handle(
                             new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Failed to create project", e.getCause()),
-                            StatusManager.BLOCK);
+                            StatusManager.LOG | StatusManager.BLOCK);
             return false;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             StatusManager.getManager().handle(
                             new Status(IStatus.CANCEL, Activator.PLUGIN_ID, "Project creation aborted", e),
-                            StatusManager.BLOCK);
+                            StatusManager.LOG | StatusManager.BLOCK);
             return false;
         }
     }
