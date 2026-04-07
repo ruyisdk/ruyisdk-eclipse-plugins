@@ -289,6 +289,10 @@
       <property name="influenceFormat" value="1"/>
     </module>
   </module>
+  <module name="SuppressionSingleFilter">
+    <property name="checks" value="Indentation"/>
+    <property name="message" value="'&quot;&quot;&quot;' has incorrect indentation"/>
+  </module>
   <module name="BeforeExecutionExclusionFileFilter">
     <property name="fileNamePattern" value="module\-info\.java$"/>
   </module>

@@ -160,31 +160,31 @@ public class WebsiteView extends ViewPart {
      */
     private void injectNavigationHook() {
         browser.execute("""
-                        if (!window._ruyiSdkNavHooked) {
-                          window._ruyiSdkNavHooked = true;
-                          if (window.navigation && typeof window.navigation.addEventListener === 'function') {
-                            window.navigation.addEventListener('currententrychange', function() {
-                              window._onRuyiSdkUrlChanged();
-                            });
-                          } else {
-                            var origPush = history.pushState;
-                            var origReplace = history.replaceState;
-                            history.pushState = function() {
-                              var r = origPush.apply(this, arguments);
-                              window._onRuyiSdkUrlChanged();
-                              return r;
-                            };
-                            history.replaceState = function() {
-                              var r = origReplace.apply(this, arguments);
-                              window._onRuyiSdkUrlChanged();
-                              return r;
-                            };
-                            window.addEventListener('popstate', function() {
-                              window._onRuyiSdkUrlChanged();
-                            });
-                          }
-                        }
-                        """);
+            if (!window._ruyiSdkNavHooked) {
+              window._ruyiSdkNavHooked = true;
+              if (window.navigation && typeof window.navigation.addEventListener === 'function') {
+                window.navigation.addEventListener('currententrychange', function() {
+                  window._onRuyiSdkUrlChanged();
+                });
+              } else {
+                var origPush = history.pushState;
+                var origReplace = history.replaceState;
+                history.pushState = function() {
+                  var r = origPush.apply(this, arguments);
+                  window._onRuyiSdkUrlChanged();
+                  return r;
+                };
+                history.replaceState = function() {
+                  var r = origReplace.apply(this, arguments);
+                  window._onRuyiSdkUrlChanged();
+                  return r;
+                };
+                window.addEventListener('popstate', function() {
+                  window._onRuyiSdkUrlChanged();
+                });
+              }
+            }
+            """);
     }
 
     private void updateNavigationButtons() {
