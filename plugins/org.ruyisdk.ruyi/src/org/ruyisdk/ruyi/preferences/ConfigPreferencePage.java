@@ -72,10 +72,10 @@ public class ConfigPreferencePage extends PreferencePage implements IWorkbenchPr
 
         final var localHint = new Label(localGroup, SWT.WRAP);
         localHint.setText("""
-                        Use an existing git clone of the packages-index repository \
-                        instead of the default cache location. Must be a valid git repository \
-                        or a non-existing path (ruyi will clone into it).
-                        Leave empty to use the location managed by ruyi.""");
+            Use an existing git clone of the packages-index repository \
+            instead of the default cache location. Must be a valid git repository \
+            or a non-existing path (ruyi will clone into it).
+            Leave empty to use the location managed by ruyi.""");
         {
             final var gridData = new GridData(SWT.FILL, SWT.TOP, true, false);
             gridData.horizontalSpan = 3;

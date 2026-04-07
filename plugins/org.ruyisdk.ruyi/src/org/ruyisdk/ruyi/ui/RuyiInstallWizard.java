@@ -146,10 +146,12 @@ public class RuyiInstallWizard extends Wizard {
             // 提示文本
             Label hintLabel = new Label(container, SWT.WRAP);
             hintLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-            hintLabel.setText("Please note:\n" + "• Click [Next] to start installation wizard.\n"
-                            + "• Select [Cancel] to manually trigger from menu: " + "RuyiSDK > Ruyi Installation.\n"
-                            + "• If you already have ruyi, configure path in: "
-                            + "Windows > Preferences > RuyiSDK > Ruyi Config > " + "Ruyi Installation Directory.\n\n");
+            hintLabel.setText("""
+                Please note:
+                • Click [Next] to start installation wizard.
+                • Select [Cancel] to manually trigger from menu: RuyiSDK > Ruyi Installation.
+                • If you already have ruyi, configure path in:
+                  Windows > Preferences > RuyiSDK > Ruyi Installation Directory.""");
             Color tipColor = new Color(hintLabel.getDisplay(), 0, 0, 255);
             hintLabel.setForeground(tipColor); // 设置标签的字体颜色
             // 颜色对象使用后需要释放资源
@@ -201,15 +203,20 @@ public class RuyiInstallWizard extends Wizard {
             Label label = new Label(container, SWT.WRAP);
             label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-            String text = mode == Mode.INSTALL
-                            ? "The Ruyi SDK provides all necessary tools for Ruyi development. \n\n"
-                                            + "Before proceeding, please ensure: \n" + "• 500MB+ free disk space \n"
-                                            + "• Active internet connection \n" + "• Administrator privileges if needed"
-                            : "Your Ruyi installation will be upgraded to the latest version. \n\n" + "Please note: \n"
-                                            + "• The old version will be replaced \n"
-                                            + "• Existing configurations will be preserved \n"
-                                            + "• Active internet connection \n"
-                                            + "• Administrator privileges if needed";
+            String text = mode == Mode.INSTALL ? """
+                The Ruyi SDK provides all necessary tools for Ruyi development.
+
+                Before proceeding, please ensure:
+                • 500MB+ free disk space
+                • Active internet connection
+                • Administrator privileges if needed""" : """
+                Your Ruyi installation will be upgraded to the latest version.
+
+                Please note:
+                • The old version will be replaced
+                • Existing configurations will be preserved
+                • Active internet connection
+                • Administrator privileges if needed""";
 
             label.setText(text);
             setControl(container);
@@ -390,11 +397,19 @@ public class RuyiInstallWizard extends Wizard {
             Label label = new Label(container, SWT.WRAP);
             label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-            String text = mode == Mode.INSTALL ? "Ruyi has been successfully installed!\n\n" + "Next steps:\n"
-                            + "• Restart your IDE to apply changes\n" + "• Configure project SDK settings\n"
-                            + "• Visit documentation for tutorials"
-                            : "Ruyi has been upgraded to the latest version.\n\n" + "What's new:\n"
-                                            + "• Improved performance\n" + "• New API features\n" + "• Bug fixes";
+            String text = mode == Mode.INSTALL ? """
+                Ruyi has been successfully installed!
+
+                Next steps:
+                • Restart your IDE to apply changes
+                • Configure project SDK settings
+                • Visit documentation for tutorials""" : """
+                Ruyi has been upgraded to the latest version.
+
+                What's new:
+                • Improved performance
+                • New API features
+                • Bug fixes""";
 
             label.setText(text);
             setControl(container);
