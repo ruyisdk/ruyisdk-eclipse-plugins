@@ -95,8 +95,10 @@ public class VenvWizard extends Wizard {
             getContainer().run(true, true, operation);
             return true;
         } catch (InvocationTargetException e) {
-            StatusManager.getManager().handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
-                            "Unable to complete virtual environment setup.", e.getCause()), StatusManager.BLOCK);
+            StatusManager.getManager()
+                            .handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
+                                            "Unable to complete virtual environment setup.", e.getCause()),
+                                            StatusManager.BLOCK);
             return false;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
