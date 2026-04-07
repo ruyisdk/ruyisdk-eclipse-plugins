@@ -108,12 +108,19 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         try {
             getContainer().run(true, false, op);
             ToolchainLocator.saveLastUsedToolchainPath(toolchainPath);
-        } catch (Exception e) {
+            return true;
+        } catch (InvocationTargetException e) {
             e.printStackTrace();
-            MessageDialog.openError(getShell(), "create project failed", e.getMessage());
+            final var cause = e.getCause();
+            final var detail = cause != null ? cause.getMessage() : e.getMessage();
+            MessageDialog.openError(getShell(), "Failed to create project", detail == null ? "" : detail);
+            return false;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            final var detail = e.getMessage();
+            MessageDialog.openError(getShell(), "Project creation aborted", detail == null ? "" : detail);
             return false;
         }
-        return true;
     }
 
     /**
