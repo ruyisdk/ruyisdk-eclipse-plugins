@@ -1,20 +1,12 @@
 package org.ruyisdk.venv.views;
 
 import java.lang.reflect.InvocationTargetException;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.ruyisdk.venv.viewmodel.VenvWizardViewModel;
 
 /**
@@ -55,13 +47,17 @@ public class VenvWizard extends Wizard {
                 monitor.worked(100);
             });
         } catch (InvocationTargetException e) {
-            final var cause = e.getCause();
-            final var detail = cause != null ? cause.getMessage() : e.getMessage();
-            displaySelectableError("Package Index Update Failed", "Failed to update package index; wizard will abort.",
-                            detail == null ? "" : detail);
+            StatusManager.getManager()
+                            .handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
+                                            "Failed to update package index; wizard will abort.", e.getCause()),
+                                            StatusManager.BLOCK);
             return;
         } catch (InterruptedException e) {
-            displaySelectableError("Package Index Update Cancelled", "Update was cancelled; wizard will abort.", "");
+            Thread.currentThread().interrupt();
+            StatusManager.getManager()
+                            .handle(new Status(IStatus.CANCEL, "org.ruyisdk.venv",
+                                            "Package index update was cancelled; wizard will abort.", e),
+                                            StatusManager.BLOCK);
             return;
         }
 
@@ -99,59 +95,15 @@ public class VenvWizard extends Wizard {
             getContainer().run(true, true, operation);
             return true;
         } catch (InvocationTargetException e) {
-            final var cause = e.getCause();
-            final var detail = cause != null ? cause.getMessage() : e.getMessage();
-            final var msg = "Unable to complete virtual environment setup — see details below.";
-            displaySelectableError("Virtual Environment Setup Failed", msg, detail == null ? "" : detail);
+            StatusManager.getManager().handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
+                            "Unable to complete virtual environment setup.", e.getCause()), StatusManager.BLOCK);
             return false;
         } catch (InterruptedException e) {
-            MessageDialog.openError(getShell(), "Cancelled", "Operation was cancelled");
+            Thread.currentThread().interrupt();
+            StatusManager.getManager().handle(
+                            new Status(IStatus.CANCEL, "org.ruyisdk.venv", "Operation was cancelled.", e),
+                            StatusManager.BLOCK);
             return false;
         }
-    }
-
-    private void displaySelectableError(String title, String message, String details) {
-        final var dialog = new Dialog(getShell()) {
-            @Override
-            protected Control createDialogArea(Composite parent) {
-                final var composite = (Composite) super.createDialogArea(parent);
-                composite.setLayout(new GridLayout(1, false));
-
-                final var msgText = new Text(composite, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
-                {
-                    var gridData = new GridData(GridData.FILL_HORIZONTAL);
-                    gridData.heightHint = 80;
-                    msgText.setLayoutData(gridData);
-                }
-                msgText.setText(message == null ? "" : message);
-
-                final var detailsLabel = new Label(composite, SWT.NONE);
-                detailsLabel.setText("Details:");
-
-                final var detailsText = new Text(composite,
-                                SWT.BORDER | SWT.READ_ONLY | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
-                detailsText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
-                detailsText.setText(details == null ? "" : details);
-
-                return composite;
-            }
-
-            @Override
-            protected void configureShell(Shell newShell) {
-                super.configureShell(newShell);
-                newShell.setText(title == null ? "Error" : title);
-            }
-
-            @Override
-            protected boolean isResizable() {
-                return true;
-            }
-
-            @Override
-            protected void createButtonsForButtonBar(Composite parent) {
-                createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-            }
-        };
-        dialog.open();
     }
 }

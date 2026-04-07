@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
 import org.ruyisdk.projectcreator.Activator;
 import org.ruyisdk.projectcreator.natures.MyProjectNature;
@@ -110,15 +111,15 @@ public class NewProjectWizard extends Wizard implements INewWizard {
             ToolchainLocator.saveLastUsedToolchainPath(toolchainPath);
             return true;
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
-            final var cause = e.getCause();
-            final var detail = cause != null ? cause.getMessage() : e.getMessage();
-            MessageDialog.openError(getShell(), "Failed to create project", detail == null ? "" : detail);
+            StatusManager.getManager().handle(
+                            new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Failed to create project", e.getCause()),
+                            StatusManager.BLOCK);
             return false;
         } catch (InterruptedException e) {
-            e.printStackTrace();
-            final var detail = e.getMessage();
-            MessageDialog.openError(getShell(), "Project creation aborted", detail == null ? "" : detail);
+            Thread.currentThread().interrupt();
+            StatusManager.getManager().handle(
+                            new Status(IStatus.CANCEL, Activator.PLUGIN_ID, "Project creation aborted", e),
+                            StatusManager.BLOCK);
             return false;
         }
     }
