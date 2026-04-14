@@ -260,8 +260,9 @@ public class RuyiCli {
     /** Lists available news items using the ruyi CLI. */
     public static List<NewsListItemInfo> listNewsItems(boolean onlyUnread) {
         try {
-            final var result = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true)
-                            .news().list(onlyUnread).execute();
+            final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true)
+                            .news().list(onlyUnread).end().build();
+            final var result = request.execute();
             return parseNewsListFromString(result.getOutput());
         } catch (Exception e) {
             // ignore

@@ -371,16 +371,6 @@ public class RuyiCliRequest {
             }
             return parent;
         }
-
-        /**
-         * Executes the command.
-         *
-         * @return execution result
-         * @throws RuyiCliException if the command fails
-         */
-        public RuyiExecResult execute() throws RuyiCliException {
-            return end().build().execute();
-        }
     }
 
     /**
@@ -470,16 +460,6 @@ public class RuyiCliRequest {
             parent.args(subArgs);
             return parent;
         }
-
-        /**
-         * Executes the command.
-         *
-         * @return execution result
-         * @throws RuyiCliException if the command fails
-         */
-        public RuyiExecResult execute() throws RuyiCliException {
-            return end().build().execute();
-        }
     }
 
     /**
@@ -560,16 +540,6 @@ public class RuyiCliRequest {
             parent.args(atoms);
             return parent;
         }
-
-        /**
-         * Executes the command.
-         *
-         * @return execution result
-         * @throws RuyiCliException if the command fails
-         */
-        public RuyiExecResult execute() throws RuyiCliException {
-            return end().build().execute();
-        }
     }
 
     /**
@@ -619,16 +589,6 @@ public class RuyiCliRequest {
                 parent.args("-y");
             }
             return parent;
-        }
-
-        /**
-         * Executes the command.
-         *
-         * @return execution result
-         * @throws RuyiCliException if the command fails
-         */
-        public RuyiExecResult execute() throws RuyiCliException {
-            return end().build().execute();
         }
     }
 
@@ -734,16 +694,6 @@ public class RuyiCliRequest {
             }
             return parent;
         }
-
-        /**
-         * Executes the command.
-         *
-         * @return execution result
-         * @throws RuyiCliException if the command fails
-         */
-        public RuyiExecResult execute() throws RuyiCliException {
-            return end().build().execute();
-        }
     }
 
     /**
@@ -829,16 +779,6 @@ public class RuyiCliRequest {
             }
             return parent;
         }
-
-        /**
-         * Executes the command.
-         *
-         * @return execution result
-         * @throws RuyiCliException if the command fails
-         */
-        public RuyiExecResult execute() throws RuyiCliException {
-            return end().build().execute();
-        }
     }
 
     /**
@@ -915,16 +855,6 @@ public class RuyiCliRequest {
             }
             return parent;
         }
-
-        /**
-         * Executes the command.
-         *
-         * @return execution result
-         * @throws RuyiCliException if the command fails
-         */
-        public RuyiExecResult execute() throws RuyiCliException {
-            return end().build().execute();
-        }
     }
 
     /**
@@ -946,16 +876,6 @@ public class RuyiCliRequest {
          */
         public Builder end() {
             return parent;
-        }
-
-        /**
-         * Executes the command.
-         *
-         * @return execution result
-         * @throws RuyiCliException if the command fails
-         */
-        public RuyiExecResult execute() throws RuyiCliException {
-            return end().build().execute();
         }
     }
 
@@ -997,16 +917,6 @@ public class RuyiCliRequest {
                 parent.args(subArgs);
             }
             return parent;
-        }
-
-        /**
-         * Executes the command.
-         *
-         * @return execution result
-         * @throws RuyiCliException if the command fails
-         */
-        public RuyiExecResult execute() throws RuyiCliException {
-            return end().build().execute();
         }
     }
 }
