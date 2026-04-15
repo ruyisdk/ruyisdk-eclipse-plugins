@@ -26,6 +26,7 @@ public class Activator extends AbstractUIPlugin {
      * @param context bundle context
      * @throws Exception if start fails
      */
+    @Override
     public void start(BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
@@ -71,6 +72,7 @@ public class Activator extends AbstractUIPlugin {
      * @param context bundle context
      * @throws Exception if stop fails
      */
+    @Override
     public void stop(BundleContext context) throws Exception {
         if (buildListener != null) {
             ResourcesPlugin.getWorkspace().removeResourceChangeListener(buildListener);
