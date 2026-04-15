@@ -29,7 +29,7 @@ public class Activator extends AbstractUIPlugin {
         super.stop(context);
     }
 
-    /** Returns a logger that does not depend on {@link #getDefault()} being initialized. */
+    /** Returns an Eclipse builtin logger. */
     public static PluginLogger getLogger() {
         return LOGGER;
     }
