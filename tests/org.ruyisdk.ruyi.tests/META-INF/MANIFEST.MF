@@ -7,6 +7,7 @@ Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Require-Bundle: org.ruyisdk.ruyi,
+ org.ruyisdk.core,
  org.ruyisdk.packages,
  wrapped.junit.junit,
  wrapped.org.hamcrest.hamcrest-core

@@ -3,7 +3,6 @@ package org.ruyisdk.devices.services;
 import java.util.ArrayList;
 import java.util.List;
 import org.ruyisdk.devices.model.Device;
-import org.ruyisdk.devices.services.PropertiesService;
 
 /**
  * Service for managing device configurations.

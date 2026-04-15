@@ -1,6 +1,9 @@
 package org.ruyisdk.core.basedir;
 
 import java.nio.file.Path;
+
+import org.junit.Ignore;
+import org.junit.Test;
 import org.ruyisdk.core.config.Constants;
 
 /**
@@ -10,14 +13,11 @@ import org.ruyisdk.core.config.Constants;
  * This class shows how to retrieve and use the standard XDG directories (config, cache, data, and
  * state) for application storage following the XDG Base Directory Specification.
  */
-public class TextXdgDir {
+public class XdgDirsTest {
 
-    /**
-     * Main entry point that demonstrates XDG directory usage.
-     *
-     * @param args command-line arguments (not used)
-     */
-    public static void main(String[] args) {
+    @Ignore("Demo test: depends on local environment")
+    @Test
+    public void testXdgDirs() {
         // Get application name from constants
         String appName = Constants.AppInfo.AppDir;
 
@@ -39,5 +39,4 @@ public class TextXdgDir {
         // dataDir.toFile().mkdirs();
         // stateDir.toFile().mkdir();
     }
-
 }
