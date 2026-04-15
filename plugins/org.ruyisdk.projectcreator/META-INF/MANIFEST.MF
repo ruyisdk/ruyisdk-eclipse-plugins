@@ -6,6 +6,7 @@ Automatic-Module-Name: org.ruyisdk.projectcreator
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
 Bundle-Activator: org.ruyisdk.projectcreator.Activator
+Bundle-ClassPath: .
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
