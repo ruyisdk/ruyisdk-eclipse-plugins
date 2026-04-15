@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import org.ruyisdk.ruyi.services.RuyiCli;
 
 public class RuyiCliSmokeTest {
 
