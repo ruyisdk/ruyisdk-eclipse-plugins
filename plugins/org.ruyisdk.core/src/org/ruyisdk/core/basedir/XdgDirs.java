@@ -62,7 +62,6 @@ public class XdgDirs {
      * @param defaultRelativePath the default path relative to user home (e.g. ".config")
      * @param appName the application name for final subdirectory
      * @return fully resolved directory path
-     * @throws NullPointerException if appName is null
      */
     private static Path getXdgDir(String xdgEnvVar, String defaultRelativePath, String appName) {
         // 1. Check environment variable (e.g. $XDG_CONFIG_HOME)
