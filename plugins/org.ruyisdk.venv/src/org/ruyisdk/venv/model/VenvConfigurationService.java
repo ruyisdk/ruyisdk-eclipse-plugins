@@ -12,7 +12,6 @@ import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -211,17 +210,14 @@ public class VenvConfigurationService {
 
     /** Applies the venv configuration to the project asynchronously. */
     public void applyToProjectAsync(Venv venv, Consumer<ApplyResult> callback) {
-        final var applyJob = new Job("Applying venv configuration to CDT project") {
-            @Override
-            protected IStatus run(IProgressMonitor monitor) {
-                final var result = applyToProject(venv);
-                if (callback != null) {
-                    callback.accept(result);
-                }
-                return result.isSuccess() ? Status.OK_STATUS
-                                : new Status(IStatus.WARNING, Activator.PLUGIN_ID, result.getMessage());
+        final var applyJob = Job.create("Applying venv configuration to CDT project", monitor -> {
+            final var result = applyToProject(venv);
+            if (callback != null) {
+                callback.accept(result);
             }
-        };
+            return result.isSuccess() ? Status.OK_STATUS
+                            : new Status(IStatus.WARNING, Activator.PLUGIN_ID, result.getMessage());
+        });
         applyJob.schedule();
     }
 
