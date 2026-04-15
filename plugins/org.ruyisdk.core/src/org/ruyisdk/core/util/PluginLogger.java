@@ -16,15 +16,6 @@ public class PluginLogger {
      * Constructs a logger.
      *
      * @param eclipseLog the Eclipse log
-     */
-    public PluginLogger(ILog eclipseLog) {
-        this(eclipseLog, Activator.PLUGIN_ID);
-    }
-
-    /**
-     * Constructs a logger.
-     *
-     * @param eclipseLog the Eclipse log
      * @param pluginId the plugin ID used for {@link IStatus} entries
      */
     public PluginLogger(ILog eclipseLog, String pluginId) {
@@ -45,10 +36,28 @@ public class PluginLogger {
      * Logs a warning message.
      *
      * @param message the message
+     */
+    public void logWarning(String message) {
+        log(IStatus.WARNING, message, null);
+    }
+
+    /**
+     * Logs a warning message.
+     *
+     * @param message the message
      * @param exception the exception
      */
     public void logWarning(String message, Throwable exception) {
         log(IStatus.WARNING, message, exception);
+    }
+
+    /**
+     * Logs an error message.
+     *
+     * @param message the message
+     */
+    public void logError(String message) {
+        log(IStatus.ERROR, message, null);
     }
 
     /**
@@ -68,17 +77,8 @@ public class PluginLogger {
      * @param message the message
      * @param exception the exception
      */
-    public void log(int severity, String message, Throwable exception) {
+    private void log(int severity, String message, Throwable exception) {
         IStatus status = new Status(severity, pluginId, message, exception);
-        eclipseLog.log(status);
-    }
-
-    /**
-     * Logs a status.
-     *
-     * @param status the status
-     */
-    public void log(IStatus status) {
         eclipseLog.log(status);
     }
 }

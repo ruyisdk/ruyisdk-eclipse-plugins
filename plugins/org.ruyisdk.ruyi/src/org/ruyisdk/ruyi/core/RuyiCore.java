@@ -5,6 +5,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.ruyisdk.core.ruyi.model.CheckResult;
 import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.jobs.CheckRuyiJob;
 import org.ruyisdk.ruyi.services.RuyiProperties;
 import org.ruyisdk.ruyi.ui.RuyiInstallWizard;
@@ -13,24 +14,16 @@ import org.ruyisdk.ruyi.ui.RuyiInstallWizard;
  * Ruyi核心控制类.
  */
 public class RuyiCore {
-    private volatile boolean isChecking;
-    private final PluginLogger logger;
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
-    /**
-     * Constructs the Ruyi core.
-     *
-     * @param logger the logger
-     */
-    public RuyiCore(PluginLogger logger) {
-        this.logger = logger;
-    }
+    private volatile boolean isChecking;
 
     /**
      * Starts background environment check.
      */
     public void startBackgroundCheck() {
         boolean autocheck = autoCheckAtStartup();
-        logger.logInfo("RuyiAutoCheck set :" + autocheck);
+        LOGGER.logInfo("RuyiAutoCheck set :" + autocheck);
         if (isChecking || !autocheck) {
             return;
         }
@@ -59,7 +52,7 @@ public class RuyiCore {
      */
     public void shutdown() {
         // 自定义清理工作
-        logger.logInfo("RuyiCore services stopped successfully");
+        LOGGER.logInfo("RuyiCore services stopped successfully");
     }
 
     /**
@@ -85,11 +78,11 @@ public class RuyiCore {
                     break;
 
                 case NOTHING:
-                    logger.logInfo(result.getMessage());
+                    LOGGER.logInfo(result.getMessage());
                     break;
 
                 default:
-                    logger.logError("Unknown check result action", null);
+                    LOGGER.logError("Unknown check result action", null);
                     break;
             }
         });

@@ -58,21 +58,12 @@ public class Activator extends AbstractUIPlugin {
         LOGGER.logInfo("Venv plugin stopped");
     }
 
-    /**
-     * Returns a logger that does not depend on {@link #getDefault()} being initialized.
-     *
-     * <p>
-     * This is safe to call during early class loading (e.g., before {@link #start(BundleContext)}).
-     */
+    /** Returns an Eclipse builtin logger. */
     public static PluginLogger getLogger() {
         return LOGGER;
     }
 
-    /**
-     * Returns the shared instance.
-     *
-     * @return the shared instance
-     */
+    /** Returns the shared instance. */
     public static Activator getDefault() {
         return plugin;
     }

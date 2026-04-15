@@ -9,13 +9,15 @@ import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 import org.ruyisdk.core.basedir.XdgDirs;
 import org.ruyisdk.core.config.Constants;
-import org.ruyisdk.core.console.RuyiSdkConsole;
+import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 /**
  * Properties manager for Ruyi configuration.
  */
 public class RuyiProperties {
+    private static final PluginLogger LOGGER = Activator.getLogger();
     private static final Path CONFIG_DIR = XdgDirs.getConfigDir(Constants.AppInfo.AppDir);
     private static final Path FILE_PATH = CONFIG_DIR.resolve(Constants.ConfigFile.RuyiProperties);
     private static final Properties props = loadConfig();
@@ -126,7 +128,7 @@ public class RuyiProperties {
 
     // 错误处理
     private static void handleConfigError(String message, Exception e) {
-        RuyiSdkConsole.getInstance().logError(message + ": " + e.getMessage());
+        LOGGER.logError(message + ": " + e.getMessage());
         // if (Constants.DEBUG_MODE) {
         // e.printStackTrace();
         // }

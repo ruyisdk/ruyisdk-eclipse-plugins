@@ -1,59 +1,32 @@
-package org.ruyisdk.news;
+package org.ruyisdk.packages;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.ruyisdk.core.util.PluginLogger;
-import org.ruyisdk.news.model.NewsFetchService;
-import org.ruyisdk.news.model.NewsManager;
 
 /**
- * The activator class controls the plug-in life cycle.
+ * Activator for the packages plugin.
  */
 public class Activator extends AbstractUIPlugin {
 
-    // The plug-in ID
-    public static final String PLUGIN_ID = "org.ruyisdk.news";
-
-    // The shared instance
+    public static final String PLUGIN_ID = "org.ruyisdk.packages";
     private static Activator plugin;
-    private static NewsManager newsManager;
-    private static NewsFetchService service;
 
     private static final PluginLogger LOGGER =
                     new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
-    public NewsManager getNewsManager() {
-        return newsManager;
-    }
-
-    public NewsFetchService getService() {
-        return service;
-    }
-
     @Override
     public void start(BundleContext context) throws Exception {
-        LOGGER.logInfo("News plugin starting");
-
         super.start(context);
         plugin = this;
-        newsManager = new NewsManager();
-        service = new NewsFetchService();
-
-        LOGGER.logInfo("News plugin started");
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        LOGGER.logInfo("News plugin stopping");
-
-        newsManager = null;
-        service = null;
         plugin = null;
         super.stop(context);
-
-        LOGGER.logInfo("News plugin stopped");
     }
 
     /** Returns an Eclipse builtin logger. */

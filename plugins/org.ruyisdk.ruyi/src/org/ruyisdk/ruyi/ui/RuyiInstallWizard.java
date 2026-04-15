@@ -1,8 +1,10 @@
 package org.ruyisdk.ruyi.ui;
 
 import java.io.IOException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -20,18 +22,21 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
+import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.model.TelemetryMode;
 import org.ruyisdk.ruyi.preferences.RepoConfigPreference;
 import org.ruyisdk.ruyi.preferences.RuyiInstallPathPreference;
 import org.ruyisdk.ruyi.preferences.TelemetryPreference;
 import org.ruyisdk.ruyi.services.RuyiInstallManager;
 import org.ruyisdk.ruyi.services.RuyiProperties;
-import org.ruyisdk.ruyi.util.StatusUtil;
 
 /**
  * Wizard for Ruyi installation and upgrade.
  */
 public class RuyiInstallWizard extends Wizard {
+    private static final PluginLogger LOGGER = Activator.getLogger();
+
     /**
      * Wizard operation mode.
      */
@@ -350,9 +355,12 @@ public class RuyiInstallWizard extends Wizard {
                     Display.getDefault().asyncExec(() -> {
                         progressComp.appendLog("Failed: " + e.getMessage());
                         setPageComplete(false);
-                        StatusUtil.logAndShow(mode + " failed", e);
+                        LOGGER.logError(mode + " failed", e);
+                        Display.getDefault()
+                                        .asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(),
+                                                        "Error", mode + " failed" + ": " + e.getMessage()));
                     });
-                    return StatusUtil.createErrorStatus(mode + " failed", e);
+                    return new Status(IStatus.ERROR, Activator.PLUGIN_ID, mode + " failed", e);
                 }
             });
             installationJob.schedule();
