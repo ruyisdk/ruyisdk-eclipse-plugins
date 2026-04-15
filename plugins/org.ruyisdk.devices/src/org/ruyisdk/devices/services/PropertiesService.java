@@ -12,13 +12,15 @@ import java.util.List;
 import java.util.Properties;
 import org.ruyisdk.core.basedir.XdgDirs;
 import org.ruyisdk.core.config.Constants;
-import org.ruyisdk.core.console.RuyiSdkConsole;
+import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.devices.Activator;
 import org.ruyisdk.devices.model.Device;
 
 /**
  * Service for persisting device configurations to properties file.
  */
 public class PropertiesService {
+    private static final PluginLogger LOGGER = Activator.getLogger();
     private static final Path FILE_PATH = Paths.get(XdgDirs.getConfigDir(Constants.AppInfo.AppDir).toString(),
                     Constants.ConfigFile.DeviceProperties); // devices.properties
     private static final String DEFAULT_DEVICE_KEY = "default_device";
@@ -100,12 +102,12 @@ public class PropertiesService {
         try (OutputStream output = new FileOutputStream(FILE_PATH.toString())) {
             properties.store(output, "RuyiSDK Devices Configuration");
 
-            RuyiSdkConsole.getInstance().logInfo("Devices is successfully stored to file :" + FILE_PATH.toString());
+            LOGGER.logInfo("Devices is successfully stored to file :" + FILE_PATH.toString());
 
         } catch (IOException e) {
             e.printStackTrace();
 
-            RuyiSdkConsole.getInstance().logError("Devices storage failure!");
+            LOGGER.logError("Devices storage failure!");
         }
     }
 }

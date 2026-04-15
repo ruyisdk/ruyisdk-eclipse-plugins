@@ -14,18 +14,15 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.osgi.framework.FrameworkUtil;
 import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.venv.Activator;
 
 /** Service for applying venv configuration to Eclipse CDT projects. */
 public class VenvConfigurationService {
 
-    private static final String PLUGIN_ID = "org.ruyisdk.venv";
-    private static final PluginLogger LOGGER = new PluginLogger(
-                    Platform.getLog(FrameworkUtil.getBundle(VenvConfigurationService.class)), PLUGIN_ID);
+    private static final PluginLogger LOGGER = Activator.getLogger();
     private static final String ENV_RUYI_VENV = "RUYI_VENV";
 
     /** Result of applying venv configuration to a project. */
@@ -222,7 +219,7 @@ public class VenvConfigurationService {
                     callback.accept(result);
                 }
                 return result.isSuccess() ? Status.OK_STATUS
-                                : new Status(IStatus.WARNING, PLUGIN_ID, result.getMessage());
+                                : new Status(IStatus.WARNING, Activator.PLUGIN_ID, result.getMessage());
             }
         };
         applyJob.schedule();

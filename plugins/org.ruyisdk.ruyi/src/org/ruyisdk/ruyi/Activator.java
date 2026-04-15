@@ -38,7 +38,7 @@ public class Activator extends AbstractUIPlugin {
         // RuyiPreferenceInitializer.doInitializeDefaultPreferences();
 
         // 2. 启动核心服务
-        ruyiCore = new RuyiCore(LOGGER);
+        ruyiCore = new RuyiCore();
         ruyiCore.startBackgroundJobs();
 
         LOGGER.logInfo("Ruyi activated successfully.");
