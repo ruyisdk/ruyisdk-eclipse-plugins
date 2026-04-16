@@ -71,9 +71,6 @@ public class VenvListViewModel {
         this.detectionService = detectionService;
         this.configService = configService;
 
-        updateHasOpenProjects();
-        updateDerivedState();
-
         this.workspaceProjectsMonitor = WorkspaceProjectsMonitor.getInstance();
         this.workspaceProjectsMonitor.addListener(workspaceProjectsListener);
 
@@ -84,6 +81,9 @@ public class VenvListViewModel {
         observableVenvList.addListChangeListener(e -> {
             updateDerivedState();
         });
+
+        updateHasOpenProjects();
+        updateDerivedState();
     }
 
     /**
