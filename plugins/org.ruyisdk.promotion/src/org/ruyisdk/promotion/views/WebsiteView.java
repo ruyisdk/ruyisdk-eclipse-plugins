@@ -20,9 +20,6 @@ import org.eclipse.ui.part.ViewPart;
  * Embedded browser view for the RuyiSDK website. Uses the platform's native engine.
  */
 public class WebsiteView extends ViewPart {
-
-    public static final String ID = "org.ruyisdk.promotion.view";
-
     private static final String RUYISDK_URL = "https://ruyisdk.cn/";
 
     private Browser browser;
