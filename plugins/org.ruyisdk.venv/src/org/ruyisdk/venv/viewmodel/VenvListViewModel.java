@@ -33,13 +33,33 @@ public class VenvListViewModel {
     private String tableAreaMessage = "uninitialized.";
 
     private volatile boolean disposed = false;
-    private final WorkspaceProjectsMonitor.Listener workspaceProjectsListener;
 
-    private final WorkspaceProjectsMonitor workspaceProjectsMonitor;
     private final VenvDetectionService detectionService;
     private final VenvConfigurationService configService;
     private final IObservableList<Venv> observableVenvList = new WritableList<>(new ArrayList<>(), Venv.class);
     private final IObservableList<Venv> selectedVenvs = new WritableList<>(new ArrayList<>(), Venv.class);
+    private final WorkspaceProjectsMonitor workspaceProjectsMonitor;
+    private final WorkspaceProjectsMonitor.Listener workspaceProjectsListener = (event) -> {
+        if (event == null || disposed) {
+            return;
+        }
+        observableVenvList.getRealm().asyncExec(() -> {
+            if (disposed) {
+                return;
+            }
+            if (event.getKind() == EventKind.PROJECTS_CHANGED) {
+                setHasOpenProjects(event.hasOpenProjects());
+                observableVenvList.clear();
+                selectedVenvs.clear();
+                setRefreshScheduled(event.hasOpenProjects());
+                updateDerivedState();
+                return;
+            } else if (event.getKind() == EventKind.DEBOUNCE_TRIGGERED) {
+                onRefreshVenvListAsync();
+                return;
+            }
+        });
+    };
 
     /**
      * Creates a new view model.
@@ -50,35 +70,11 @@ public class VenvListViewModel {
     public VenvListViewModel(VenvDetectionService detectionService, VenvConfigurationService configService) {
         this.detectionService = detectionService;
         this.configService = configService;
-        this.workspaceProjectsMonitor = WorkspaceProjectsMonitor.getInstance();
 
         updateHasOpenProjects();
         updateDerivedState();
 
-        workspaceProjectsListener = new WorkspaceProjectsMonitor.Listener() {
-            @Override
-            public void onWorkspaceProjectsEvent(WorkspaceProjectsMonitor.Event event) {
-                if (event == null || disposed) {
-                    return;
-                }
-                observableVenvList.getRealm().asyncExec(() -> {
-                    if (disposed) {
-                        return;
-                    }
-                    if (event.getKind() == EventKind.PROJECTS_CHANGED) {
-                        setHasOpenProjects(event.hasOpenProjects());
-                        observableVenvList.clear();
-                        selectedVenvs.clear();
-                        setRefreshScheduled(event.hasOpenProjects());
-                        updateDerivedState();
-                        return;
-                    } else if (event.getKind() == EventKind.DEBOUNCE_TRIGGERED) {
-                        onRefreshVenvListAsync();
-                        return;
-                    }
-                });
-            }
-        };
+        this.workspaceProjectsMonitor = WorkspaceProjectsMonitor.getInstance();
         this.workspaceProjectsMonitor.addListener(workspaceProjectsListener);
 
         selectedVenvs.addListChangeListener(e -> {
