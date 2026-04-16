@@ -140,22 +140,19 @@ public class VenvDetectionService {
 
     /** Fetches venvs asynchronously and passes them to the callback. */
     public void fetchVenvsAsync(Consumer<List<Venv>> callback) {
-        final var fetchJob = new Job("Fetching virtual environments") {
-            @Override
-            protected IStatus run(IProgressMonitor monitor) {
-                LOGGER.logInfo("Fetching venv list (async)");
-                List<Venv> result;
-                try {
-                    result = fetchVenvs();
-                } catch (Exception e) {
-                    LOGGER.logError("Failed to fetch venv list", e);
-                    result = new ArrayList<>();
-                }
-                LOGGER.logInfo("Venv list fetch completed: count=" + result.size());
-                callback.accept(result);
-                return Status.OK_STATUS;
+        final var fetchJob = Job.create("Fetching virtual environments", monitor -> {
+            LOGGER.logInfo("Fetching venv list (async)");
+            List<Venv> result;
+            try {
+                result = fetchVenvs();
+            } catch (Exception e) {
+                LOGGER.logError("Failed to fetch venv list", e);
+                result = new ArrayList<>();
             }
-        };
+            LOGGER.logInfo("Venv list fetch completed: count=" + result.size());
+            callback.accept(result);
+            return Status.OK_STATUS;
+        });
         fetchJob.schedule();
     }
 
@@ -191,8 +188,8 @@ public class VenvDetectionService {
                     out.add(venv);
                 });
             } catch (Exception e) {
-                LOGGER.logError("Failed to scan project for venv config: path=" + projectPath, e);
                 // ignore per-project failures
+                LOGGER.logError("Failed to scan project for venv config: path=" + projectPath, e);
             }
         }
         LOGGER.logInfo("Project venv detection completed: count=" + out.size());
@@ -230,35 +227,32 @@ public class VenvDetectionService {
 
     /** Deletes venv directories asynchronously and reports completion through the callback. */
     public void deleteVenvDirectoriesAsync(List<String> venvDirectoryPaths, Consumer<Exception> callback) {
-        final var deleteJob = new Job("Deleting virtual environments") {
-            @Override
-            protected IStatus run(IProgressMonitor monitor) {
-                LOGGER.logInfo("Deleting venv directories: count="
-                                + (venvDirectoryPaths == null ? 0 : venvDirectoryPaths.size()));
-                try {
-                    final var venvDirectories = toPathList(venvDirectoryPaths);
-                    if (venvDirectories != null) {
-                        for (final var dir : venvDirectories) {
-                            LOGGER.logInfo("Deleting venv directory: path=" + dir);
-                            deleteDirectoryRecursively(dir);
-                        }
+        final var deleteJob = Job.create("Deleting virtual environments", monitor -> {
+            LOGGER.logInfo("Deleting venv directories: count="
+                            + (venvDirectoryPaths == null ? 0 : venvDirectoryPaths.size()));
+            try {
+                final var venvDirectories = toPathList(venvDirectoryPaths);
+                if (venvDirectories != null) {
+                    for (final var dir : venvDirectories) {
+                        LOGGER.logInfo("Deleting venv directory: path=" + dir);
+                        deleteDirectoryRecursively(dir);
+                    }
 
-                        refreshWorkspaceProjects(monitor);
-                    }
-                    if (callback != null) {
-                        callback.accept(null);
-                    }
-                    LOGGER.logInfo("Venv directories deletion finished");
-                    return Status.OK_STATUS;
-                } catch (Exception e) {
-                    LOGGER.logError("Failed to delete venv directories", e);
-                    if (callback != null) {
-                        callback.accept(e);
-                    }
-                    return new Status(IStatus.ERROR, "org.ruyisdk.venv", "Failed to delete virtual environment", e);
+                    refreshWorkspaceProjects(monitor);
                 }
+                if (callback != null) {
+                    callback.accept(null);
+                }
+                LOGGER.logInfo("Venv directories deletion finished");
+                return Status.OK_STATUS;
+            } catch (Exception e) {
+                LOGGER.logError("Failed to delete venv directories", e);
+                if (callback != null) {
+                    callback.accept(e);
+                }
+                return new Status(IStatus.ERROR, "org.ruyisdk.venv", "Failed to delete virtual environment", e);
             }
-        };
+        });
         deleteJob.schedule();
     }
 
@@ -311,6 +305,7 @@ public class VenvDetectionService {
             }
         } catch (Exception e) {
             // ignore scan failures
+            LOGGER.logError("Failed to list entries in dir: path=" + binDir, e);
         }
         // No GCC found, but bin directory exists
         return new DerivedToolchainInfo(binDir.toString(), "");
@@ -354,8 +349,8 @@ public class VenvDetectionService {
                 }
             }
         } catch (Exception e) {
-            LOGGER.logWarning("Failed to parse venv config: path=" + tomlPath, e);
             // ignore parse failures
+            LOGGER.logWarning("Failed to parse venv config: path=" + tomlPath, e);
         }
         return new DetectedVenvConfig(profile, sysroot);
     }

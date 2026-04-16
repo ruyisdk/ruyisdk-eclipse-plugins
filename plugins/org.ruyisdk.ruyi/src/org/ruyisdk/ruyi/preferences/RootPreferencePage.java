@@ -12,11 +12,15 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.ruyi.Activator;
 
 /**
  * Root preference page for RuyiSDK.
  */
 public class RootPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+    private static final PluginLogger LOGGER = Activator.getLogger();
+
     private AutomaticCheckPreference automaticCheckPreference;
     private RuyiInstallPathPreference installPreference;
 
@@ -72,8 +76,8 @@ public class RootPreferencePage extends PreferencePage implements IWorkbenchPref
             automaticCheckPreference.setAutomaticDetection();
             installPreference.saveInstallPath();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.logError("Failed to save preferences", e);
+            return false;
         }
         return true;
     }

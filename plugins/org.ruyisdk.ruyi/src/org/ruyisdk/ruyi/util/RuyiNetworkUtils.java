@@ -16,11 +16,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.ruyi.Activator;
 
 /**
  * Network utility methods for Ruyi.
  */
 public class RuyiNetworkUtils {
+    private static final PluginLogger LOGGER = Activator.getLogger();
     private static final int CONNECT_TIMEOUT = 15000;
     private static final int READ_TIMEOUT = 30000;
     private static final int BUFFER_SIZE = 8192;
@@ -44,7 +47,7 @@ public class RuyiNetworkUtils {
         try {
             final var url = new URI(fileUrl).toURL();
 
-            System.out.println("fileUrl===" + fileUrl);
+            LOGGER.logInfo("Downloading file from: " + fileUrl);
 
             connection = (HttpURLConnection) url.openConnection();
             configureConnection(connection);

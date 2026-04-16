@@ -182,8 +182,7 @@ public class RuyiInstallWizard extends Wizard {
             try {
                 RuyiProperties.setAutomaticDetection(!dontCheckAgainCheckbox.getSelection());
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.logError("Failed to save automatic detection setting", e);
             }
         }
     }
@@ -278,8 +277,7 @@ public class RuyiInstallWizard extends Wizard {
             try {
                 installPref.saveInstallPath();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.logError("Failed to save install path", e);
             }
         }
     }

@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.devices.Activator;
 import org.ruyisdk.devices.model.Device;
 import org.ruyisdk.devices.providers.DeviceLabelProvider;
@@ -26,6 +27,8 @@ import org.ruyisdk.devices.services.DeviceService;
  * Preference page for managing RISC-V development devices.
  */
 public class DevicePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+    private static final PluginLogger LOGGER = Activator.getLogger();
+
     private TableViewer tableViewer;
     private Button addButton;
     private Button editButton;
@@ -40,9 +43,6 @@ public class DevicePreferencePage extends PreferencePage implements IWorkbenchPr
      * Constructs the device preference page.
      */
     public DevicePreferencePage() {
-        if (Activator.getDefault() == null) {
-            throw new IllegalStateException("Plugin not activated!");
-        }
         setPreferenceStore(Activator.getDefault().getPreferenceStore());
     }
 
@@ -212,6 +212,7 @@ public class DevicePreferencePage extends PreferencePage implements IWorkbenchPr
             deviceService.saveDevices();
             return true;
         } catch (Exception e) {
+            LOGGER.logError("Failed to save devices to properties file", e);
             setErrorMessage("保存失败: " + e.getMessage());
             return false;
         }

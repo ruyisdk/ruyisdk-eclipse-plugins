@@ -41,12 +41,10 @@ public class RuyiVersion implements Comparable<RuyiVersion> {
         try {
             String[] parts = versionStr.split("\\.");
             if (parts.length != 3) {
-                System.out.print("Invalid version format: " + versionStr);
                 return null;
             }
             return new RuyiVersion(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
         } catch (NumberFormatException e) {
-            System.out.print("Invalid version number: " + versionStr);
             return null;
         }
     }

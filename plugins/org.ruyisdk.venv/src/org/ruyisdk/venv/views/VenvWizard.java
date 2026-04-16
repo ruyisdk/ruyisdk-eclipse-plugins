@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.ruyisdk.venv.viewmodel.VenvWizardViewModel;
@@ -74,25 +73,23 @@ public class VenvWizard extends Wizard {
 
     @Override
     public boolean performFinish() {
-        final IRunnableWithProgress operation = monitor -> {
-            try {
-                monitor.subTask("install toolchain");
-                viewModel.installToolchain();
-
-                if (viewModel.isEmulatorEnabled()) {
-                    monitor.subTask("install emulator");
-                    viewModel.installEmulator();
-                }
-
-                monitor.subTask("create venv");
-                viewModel.createVenv();
-            } catch (Exception e) {
-                throw new InvocationTargetException(e);
-            }
-        };
-
         try {
-            getContainer().run(true, true, operation);
+            getContainer().run(true, true, monitor -> {
+                try {
+                    monitor.subTask("install toolchain");
+                    viewModel.installToolchain();
+
+                    if (viewModel.isEmulatorEnabled()) {
+                        monitor.subTask("install emulator");
+                        viewModel.installEmulator();
+                    }
+
+                    monitor.subTask("create venv");
+                    viewModel.createVenv();
+                } catch (Exception e) {
+                    throw new InvocationTargetException(e);
+                }
+            });
             return true;
         } catch (InvocationTargetException e) {
             StatusManager.getManager()

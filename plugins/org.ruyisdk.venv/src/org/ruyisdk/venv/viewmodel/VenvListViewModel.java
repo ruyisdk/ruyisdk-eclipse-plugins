@@ -320,7 +320,7 @@ public class VenvListViewModel {
                 if (result.isSuccess()) {
                     LOGGER.logInfo("Venv configuration applied successfully");
                 } else {
-                    LOGGER.logWarning("Venv configuration failed: " + result.getMessage(), null);
+                    LOGGER.logWarning("Venv configuration failed: " + result.getMessage());
                 }
                 if (callback != null) {
                     callback.accept(result);

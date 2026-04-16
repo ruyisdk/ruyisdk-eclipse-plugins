@@ -27,11 +27,14 @@ import org.eclipse.ui.intro.IIntroPart;
 import org.eclipse.ui.intro.IIntroSite;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
+import org.ruyisdk.core.util.PluginLogger;
 
 /**
  * Custom intro part for welcome page.
  */
 public class CustomIntroPart implements IIntroPart {
+    private static final PluginLogger LOGGER = Activator.getLogger();
+
     private Browser browser;
     private IIntroSite site;
     private List<IPropertyListener> propertyListeners = new ArrayList<>();
@@ -151,7 +154,7 @@ public class CustomIntroPart implements IIntroPart {
                             }
                         }
                     } catch (Exception e) {
-                        // Consider proper logging for 'e' here
+                        LOGGER.logError("Failed to execute command: " + commandId, e);
                     }
                     event.doit = false;
                 } else if (url.startsWith("http:") || url.startsWith("https:")) {
@@ -159,7 +162,7 @@ public class CustomIntroPart implements IIntroPart {
                         PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser()
                                         .openURL(new URI(url).toURL());
                     } catch (PartInitException | MalformedURLException | URISyntaxException e) {
-                        // Consider proper logging for 'e' here
+                        LOGGER.logError("Failed to open URL: " + url, e);
                     }
                     event.doit = false;
                 } else if (url.startsWith("file:")) {

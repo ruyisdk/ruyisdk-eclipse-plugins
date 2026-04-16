@@ -32,9 +32,6 @@ import org.ruyisdk.venv.viewmodel.VenvWizardViewModel;
  * View showing detected virtual environments and actions to manage them.
  */
 public class VenvView extends ViewPart {
-
-    public static final String ID = "org.ruyisdk.venv.view";
-
     private VenvListViewModel venvListViewModel;
     private DataBindingContext dbc;
 

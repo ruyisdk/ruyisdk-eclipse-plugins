@@ -5,12 +5,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.services.RuyiProperties;
 
 /**
  * Preference component for automatic detection.
  */
 public class AutomaticCheckPreference {
+    private static final PluginLogger LOGGER = Activator.getLogger();
     private final Composite parent;
     private Button automaticCheckCheckbox;
 
@@ -64,8 +67,7 @@ public class AutomaticCheckPreference {
         try {
             RuyiProperties.setAutomaticDetection(automaticCheckCheckbox.getSelection());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.logError("Failed to save automatic detection setting", e);
         }
     }
 }

@@ -19,7 +19,7 @@ public class FlashDeviceProvisionHandler extends AbstractHandler {
     public Object execute(ExecutionEvent event) throws ExecutionException {
         try {
             new DeviceProvisionService().launchProvisionWizard();
-            LOGGER.logInfo("Flash device (device provision) command launched in built-in terminal.");
+            LOGGER.logInfo("Flash device (device provision) command launched in built-in terminal");
             return null;
         } catch (Exception e) {
             LOGGER.logError("Failed to launch flash device (device provision) command", e);

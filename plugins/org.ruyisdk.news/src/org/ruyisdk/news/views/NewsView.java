@@ -39,8 +39,6 @@ import org.ruyisdk.news.viewmodel.NewsListViewModel;
  * View showing the news list and details.
  */
 public class NewsView extends ViewPart {
-    public static final String ID = "org.ruyisdk.news.views.NewsView";
-
     private Composite topComposite;
     private Composite middleComposite;
     private Composite bottomComposite;

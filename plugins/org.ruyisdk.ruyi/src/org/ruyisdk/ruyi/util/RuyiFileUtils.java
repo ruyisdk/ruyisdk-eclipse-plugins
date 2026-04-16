@@ -44,11 +44,9 @@ public class RuyiFileUtils {
      */
     public static String getInstallPath() {
         String path = RuyiProperties.getInstallPath();
-        // System.out.println("Ruyi install path set by the user is :" + path);
         if (path == null || path.trim().isEmpty()) {
             path = getDefaultInstallPath().toString();
         }
-        // System.out.println("Ruyi install path using default set : " + path);
         return path;
     }
 

@@ -8,8 +8,11 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.ruyisdk.core.util.PluginLogger;
 
 /**
  * Activator for the project creator plugin.
@@ -17,6 +20,8 @@ import org.osgi.framework.BundleContext;
 public class Activator extends AbstractUIPlugin {
 
     public static final String PLUGIN_ID = "org.ruyisdk.projectcreator";
+    private static final PluginLogger LOGGER =
+                    new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
     private static Activator plugin;
     private IResourceChangeListener buildListener;
 
@@ -38,16 +43,16 @@ public class Activator extends AbstractUIPlugin {
                     case IResourceChangeEvent.PRE_BUILD:
                         if (event.getSource() instanceof IProject) {
                             IProject project = (IProject) event.getSource();
-                            System.out.println(">>> Activator: Building project: " + project.getName());
+                            LOGGER.logInfo("Building project: " + project.getName());
                             try {
                                 IProjectDescription desc = project.getDescription();
                                 ICommand[] commands = desc.getBuildSpec();
-                                System.out.println(">>> Activator: Project builders:");
+                                LOGGER.logInfo("Project builders:");
                                 for (ICommand cmd : commands) {
-                                    System.out.println(">>>   - " + cmd.getBuilderName());
+                                    LOGGER.logInfo("  - " + cmd.getBuilderName());
                                 }
                             } catch (CoreException e) {
-                                System.err.println(">>> Activator: Failed to add Makefile builder: " + e.getMessage());
+                                LOGGER.logError("Failed to add Makefile builder: " + e.getMessage(), e);
                             }
                         }
                         break;
@@ -58,11 +63,9 @@ public class Activator extends AbstractUIPlugin {
             workspace.addResourceChangeListener(buildListener, IResourceChangeEvent.PRE_BUILD
                             | IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_DELETE);
 
-            System.out.println(">>> Activator: Build listener registered successfully");
-
+            LOGGER.logInfo("Build listener registered successfully");
         } catch (Exception e) {
-            System.err.println(">>> Activator: Error during plugin initialization!");
-            e.printStackTrace();
+            LOGGER.logError("Error during plugin initialization", e);
         }
     }
 
@@ -76,7 +79,7 @@ public class Activator extends AbstractUIPlugin {
     public void stop(BundleContext context) throws Exception {
         if (buildListener != null) {
             ResourcesPlugin.getWorkspace().removeResourceChangeListener(buildListener);
-            System.out.println(">>> Activator: Build listener unregistered");
+            LOGGER.logInfo("Build listener unregistered");
         }
         plugin = null;
         super.stop(context);
@@ -85,5 +88,10 @@ public class Activator extends AbstractUIPlugin {
     /** Returns the shared instance. */
     public static Activator getDefault() {
         return plugin;
+    }
+
+    /** Returns an Eclipse builtin logger. */
+    public static PluginLogger getLogger() {
+        return LOGGER;
     }
 }

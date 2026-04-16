@@ -18,12 +18,14 @@ import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.projectcreator.Activator;
 
 /**
  * Launch shortcut for building projects.
  */
 public class BuildLaunchShortcut implements ILaunchShortcut {
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     @Override
     public void launch(ISelection selection, String mode) {
@@ -47,8 +49,7 @@ public class BuildLaunchShortcut implements ILaunchShortcut {
                             launchManager.getLaunchConfigurationType(ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
 
             if (type == null) {
-
-                System.err.println("Launch configuration type not found: " + ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
+                LOGGER.logError("Launch configuration type not found: " + ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
                 return;
             }
 
@@ -84,8 +85,7 @@ public class BuildLaunchShortcut implements ILaunchShortcut {
             DebugUITools.launch(config, mode);
 
         } catch (CoreException e) {
-
-            e.printStackTrace();
+            LOGGER.logError("Failed to launch build configuration", e);
         }
     }
 }

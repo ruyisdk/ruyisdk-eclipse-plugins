@@ -10,11 +10,14 @@ import org.json.JSONObject;
 import org.ruyisdk.core.ruyi.model.RuyiReleaseInfo;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
 import org.ruyisdk.core.ruyi.model.SystemInfo;
+import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.ruyi.Activator;
 
 /**
  * RuyiSDK 网络接口服务类.
  */
 public class RuyiApi {
+    private static final PluginLogger LOGGER = Activator.getLogger();
     private static final String BASE_URL = "https://api.ruyisdk.cn";
     private static final int TIMEOUT = 10000;
 
@@ -32,7 +35,7 @@ public class RuyiApi {
 
             // 验证架构支持
             String platformKey = SystemInfo.getPlatformKey();
-            System.out.println("platformKey==" + platformKey);
+            LOGGER.logInfo("Platform key: " + platformKey);
 
 
             JSONObject downloads = stable.getJSONObject("download_urls");

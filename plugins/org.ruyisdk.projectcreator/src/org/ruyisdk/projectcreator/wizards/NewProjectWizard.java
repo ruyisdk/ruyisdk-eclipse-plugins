@@ -24,13 +24,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.projectcreator.Activator;
 import org.ruyisdk.projectcreator.natures.MyProjectNature;
 import org.ruyisdk.projectcreator.utils.ToolchainLocator;
@@ -39,6 +39,7 @@ import org.ruyisdk.projectcreator.utils.ToolchainLocator;
  * New project wizard.
  */
 public class NewProjectWizard extends Wizard implements INewWizard {
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     private BoardSelectionPage boardSelectionPage;
     private ProjectSettingsPage projectSettingsPage;
@@ -95,19 +96,17 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         }
 
         final String finalTemplateName = templateToUse;
-        IRunnableWithProgress op = monitor -> {
-            try {
-                // 2. Pass CFLAGS to the createProject method
-                createProject(projectName, boardModel, toolchainPath, cflags, finalTemplateName, monitor);
-            } catch (CoreException | IOException e) {
-                throw new InvocationTargetException(e);
-            } finally {
-                monitor.done();
-            }
-        };
-
         try {
-            getContainer().run(true, false, op);
+            getContainer().run(true, false, monitor -> {
+                try {
+                    // 2. Pass CFLAGS to the createProject method
+                    createProject(projectName, boardModel, toolchainPath, cflags, finalTemplateName, monitor);
+                } catch (CoreException | IOException e) {
+                    throw new InvocationTargetException(e);
+                } finally {
+                    monitor.done();
+                }
+            });
             ToolchainLocator.saveLastUsedToolchainPath(toolchainPath);
             return true;
         } catch (InvocationTargetException e) {
@@ -206,7 +205,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
                 if (toolchainPrefixName == null) {
                     toolchainPrefixName = "riscv64-unknown-elf";
-                    System.err.println("Warning: Failed to infer toolchain prefix name from '" + toolchainRootPath
+                    LOGGER.logWarning("Failed to infer toolchain prefix name from '" + toolchainRootPath
                                     + "', using default value: " + toolchainPrefixName);
                 }
 

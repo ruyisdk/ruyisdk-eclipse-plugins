@@ -14,8 +14,6 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.ruyisdk.core.util.PluginLogger;
@@ -94,13 +92,10 @@ public final class WorkspaceProjectsMonitor {
     }
 
     private final List<WeakReference<Listener>> listeners = new CopyOnWriteArrayList<>();
-    private final Job debounceJob = new Job("Ruyi workspace projects debounce") {
-        @Override
-        protected IStatus run(IProgressMonitor monitor) {
-            notifyListeners(EventKind.DEBOUNCE_TRIGGERED, hasOpenProjects());
-            return Status.OK_STATUS;
-        }
-    };
+    private final Job debounceJob = Job.create("Ruyi workspace projects debounce", monitor -> {
+        notifyListeners(EventKind.DEBOUNCE_TRIGGERED, hasOpenProjects());
+        return Status.OK_STATUS;
+    });
 
     private final IResourceChangeListener resourceChangeListener = this::resourceChanged;
 
@@ -173,7 +168,7 @@ public final class WorkspaceProjectsMonitor {
                 }
             }
         } catch (Exception e) {
-            // ignore workspace discovery failures
+            LOGGER.logWarning("Failed to get workspace projects", e);
         }
         return false;
     }
@@ -215,7 +210,7 @@ public final class WorkspaceProjectsMonitor {
                 out.add(Path.of(loc.toOSString()));
             }
         } catch (Exception e) {
-            // ignore workspace discovery failures
+            LOGGER.logWarning("Failed to get workspace projects", e);
         }
         out.removeIf(Objects::isNull);
         return out;

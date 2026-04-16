@@ -43,7 +43,7 @@ public class RuyiProperties {
                 }
             }
         } catch (IOException e) {
-            handleConfigError("Failed to init config directory", e);
+            LOGGER.logError("Failed to init config directory", e);
         }
     }
 
@@ -54,7 +54,7 @@ public class RuyiProperties {
             try (InputStream is = Files.newInputStream(FILE_PATH)) {
                 loadedProps.load(is);
             } catch (IOException e) {
-                handleConfigError("Failed to load config file", e);
+                LOGGER.logError("Failed to load config file", e);
             }
         }
         return loadedProps;
@@ -124,13 +124,5 @@ public class RuyiProperties {
     public static void setInstallPath(String path) throws IOException {
         props.setProperty("ruyi.install.path", path != null ? path : "");
         saveConfig();
-    }
-
-    // 错误处理
-    private static void handleConfigError(String message, Exception e) {
-        LOGGER.logError(message + ": " + e.getMessage());
-        // if (Constants.DEBUG_MODE) {
-        // e.printStackTrace();
-        // }
     }
 }
