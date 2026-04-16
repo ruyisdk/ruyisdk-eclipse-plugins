@@ -1,10 +1,8 @@
 package org.ruyisdk.ruyi.ui;
 
 import java.io.IOException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -350,15 +348,7 @@ public class RuyiInstallWizard extends Wizard {
 
                     return Status.OK_STATUS;
                 } catch (Exception e) {
-                    Display.getDefault().asyncExec(() -> {
-                        progressComp.appendLog("Failed: " + e.getMessage());
-                        setPageComplete(false);
-                        LOGGER.logError(mode + " failed", e);
-                        Display.getDefault()
-                                        .asyncExec(() -> MessageDialog.openError(Display.getDefault().getActiveShell(),
-                                                        "Error", mode + " failed" + ": " + e.getMessage()));
-                    });
-                    return new Status(IStatus.ERROR, Activator.PLUGIN_ID, mode + " failed", e);
+                    return Status.error(mode + " failed", e);
                 }
             });
             installationJob.schedule();
