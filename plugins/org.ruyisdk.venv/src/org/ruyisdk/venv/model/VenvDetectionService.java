@@ -201,27 +201,24 @@ public class VenvDetectionService {
      * callback.
      */
     public void detectProjectVenvsAsync(List<String> projectRootPaths, Consumer<List<Venv>> callback) {
-        final var detectJob = new Job("Detecting virtual environments") {
-            @Override
-            protected IStatus run(IProgressMonitor monitor) {
-                LOGGER.logInfo("Detecting project venvs (async)");
+        final var detectJob = Job.create("Detecting virtual environments", monitor -> {
+            LOGGER.logInfo("Detecting project venvs (async)");
 
-                List<Venv> result;
-                try {
-                    final var projectPaths = toPathList(projectRootPaths);
-                    result = detectProjectVenvs(projectPaths);
-                } catch (Exception e) {
-                    LOGGER.logError("Failed to detect project venvs", e);
-                    result = List.of();
-                }
-                LOGGER.logInfo("Project venv detection finished: count=" + result.size());
-
-                if (callback != null) {
-                    callback.accept(result);
-                }
-                return Status.OK_STATUS;
+            List<Venv> result;
+            try {
+                final var projectPaths = toPathList(projectRootPaths);
+                result = detectProjectVenvs(projectPaths);
+            } catch (Exception e) {
+                LOGGER.logError("Failed to detect project venvs", e);
+                result = List.of();
             }
-        };
+            LOGGER.logInfo("Project venv detection finished: count=" + result.size());
+
+            if (callback != null) {
+                callback.accept(result);
+            }
+            return Status.OK_STATUS;
+        });
         detectJob.schedule();
     }
 
