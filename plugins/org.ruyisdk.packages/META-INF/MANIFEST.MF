@@ -2,26 +2,27 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ruyi SDK Packages
 Bundle-SymbolicName: org.ruyisdk.packages;singleton:=true
-Automatic-Module-Name: org.ruyisdk.packages
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Automatic-Module-Name: org.ruyisdk.packages
 Bundle-Activator: org.ruyisdk.packages.Activator
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: 
+ .
 Require-Bundle: 
- org.eclipse.ui,
- org.eclipse.ui.workbench,
+ org.eclipse.core.runtime,
+ org.eclipse.jdt.annotation,
  org.eclipse.jface,
  org.eclipse.swt,
- org.eclipse.core.runtime,
+ org.eclipse.ui,
  org.eclipse.ui.console,
- org.eclipse.jdt.annotation,
+ org.eclipse.ui.workbench,
  org.ruyisdk.core,
  org.ruyisdk.ruyi,
  org.glassfish.javax.json
-Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: JavaSE-21
-Export-Package: org.ruyisdk.packages,
+Export-Package: 
+ org.ruyisdk.packages,
  org.ruyisdk.packages.model,
  org.ruyisdk.packages.service,
  org.ruyisdk.packages.viewmodel
-
-

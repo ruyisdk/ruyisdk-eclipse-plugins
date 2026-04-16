@@ -52,9 +52,6 @@ public class Activator extends AbstractUIPlugin {
      */
     @Override
     public void stop(BundleContext context) throws Exception {
-        // ruyiCore.shutdown();
-        // plugin = null;
-        // super.stop(context);
         try {
             // 1. 停止核心服务
             if (ruyiCore != null) {
@@ -64,8 +61,6 @@ public class Activator extends AbstractUIPlugin {
             cleanupResources();
 
             LOGGER.logInfo("Ruyi plugin deactivated");
-        } catch (Exception e) {
-            LOGGER.logError("Error during plugin deactivation", e);
         } finally {
             WorkspaceProjectsMonitor.getInstance().dispose();
             plugin = null;

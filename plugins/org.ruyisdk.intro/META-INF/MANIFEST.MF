@@ -4,16 +4,20 @@ Bundle-Name: RuyiSDK Intro
 Bundle-SymbolicName: org.ruyisdk.intro;singleton:=true
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
-Export-Package: org.ruyisdk.intro
-Bundle-Activator: org.ruyisdk.intro.Activator
-Require-Bundle: org.eclipse.ui,
- org.ruyisdk.core,
- org.eclipse.core.runtime,
- org.eclipse.swt,
- org.eclipse.ui.intro
-Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.ruyisdk.intro
-Bundle-ClassPath: .,
+Bundle-Activator: org.ruyisdk.intro.Activator
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: 
+ .,
  html/,
  icons/
+Require-Bundle: 
+ org.eclipse.core.commands,
+ org.eclipse.core.runtime,
+ org.eclipse.swt,
+ org.eclipse.ui,
+ org.eclipse.ui.intro,
+ org.ruyisdk.core
+Export-Package: 
+ org.ruyisdk.intro

@@ -4,11 +4,13 @@ Bundle-Name: Promotion
 Bundle-SymbolicName: org.ruyisdk.promotion;singleton:=true
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.ruyisdk.promotion
 Bundle-Activator: org.ruyisdk.promotion.Activator
-Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-21
-Require-Bundle: org.eclipse.core.runtime,
+Bundle-ClassPath: 
+ .
+Require-Bundle: 
+ org.eclipse.core.runtime,
  org.eclipse.swt,
  org.eclipse.ui

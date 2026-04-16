@@ -4,6 +4,7 @@ Bundle-Name: Ui
 Bundle-SymbolicName: org.ruyisdk.ui
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
-Automatic-Module-Name: org.ruyisdk.ui
-Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-21
+Automatic-Module-Name: org.ruyisdk.ui
+Bundle-ClassPath: 
+ .

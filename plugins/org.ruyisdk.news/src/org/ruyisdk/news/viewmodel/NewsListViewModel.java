@@ -5,7 +5,6 @@ import java.beans.PropertyChangeSupport;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.ruyisdk.news.model.NewsFetchService;
@@ -27,6 +26,7 @@ public class NewsListViewModel {
         private static final String notUpdated = "Not Updated, yet";
         private static final String updating = "Updating...";
         private static final String updatedTemplate = "Last Updated on %s";
+        private static final String updateFailed = "Failed to update news list";
     }
 
     /**
@@ -114,14 +114,16 @@ public class NewsListViewModel {
         setInfoText(UpdatingState.updating);
 
         service.fetchNewsListAsync(result -> {
-            final var sorted = new ArrayList<NewsItem>(result);
-            sorted.sort(Comparator.comparingInt(NewsItem::getOrd).reversed());
             observableNewsList.getRealm().asyncExec(() -> {
                 observableNewsList.clear();
-                observableNewsList.addAll(sorted);
+                if (result != null) {
+                    observableNewsList.addAll(result);
+                    setInfoText(String.format(UpdatingState.updatedTemplate,
+                                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+                } else {
+                    setInfoText(UpdatingState.updateFailed);
+                }
             });
-            setInfoText(String.format(UpdatingState.updatedTemplate,
-                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
             setFetching(false);
         });
     }
