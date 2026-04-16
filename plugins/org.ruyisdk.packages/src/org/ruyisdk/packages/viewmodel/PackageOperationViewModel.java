@@ -96,7 +96,6 @@ public class PackageOperationViewModel extends BaseViewModel {
                 }
             }, () -> cancelled);
         });
-        job.setSystem(true);
         job.schedule();
     }
 

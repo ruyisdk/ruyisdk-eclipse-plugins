@@ -101,10 +101,6 @@ public final class WorkspaceProjectsMonitor {
 
     private volatile boolean installed = false;
 
-    private WorkspaceProjectsMonitor() {
-        debounceJob.setSystem(true);
-    }
-
     /**
      * Adds a listener for workspace projects events.
      *

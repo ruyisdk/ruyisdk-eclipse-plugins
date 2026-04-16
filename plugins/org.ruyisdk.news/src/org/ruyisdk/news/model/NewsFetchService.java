@@ -17,69 +17,58 @@ public class NewsFetchService {
     public void fetchNewsDetailsAsync(String id, Consumer<String> callback, Consumer<String> errorCallback) {
         final var fetchJob = Job.create("Fetching News Details", monitor -> {
             LOGGER.logInfo("Fetching news details: id=" + id);
-            String result = "";
             try {
-                RuyiCli.NewsReadResult read = RuyiCli.readNewsItem(id);
-                if (read == null) {
+                final var result = RuyiCli.readNewsItem(id);
+                if (result == null) {
                     throw new Exception("timed out");
                 }
-                result = read.getContent() == null ? "" : read.getContent();
-                LOGGER.logInfo("Fetched news details: id=" + id + ", length=" + result.length());
+                final var content = result.getContent() == null ? "" : result.getContent();
+                LOGGER.logInfo("Fetched news details: id=" + id + ", length=" + content.length());
+                callback.accept(content);
+                return Status.OK_STATUS;
             } catch (Exception e) {
                 LOGGER.logError("Failed to fetch news details: id=" + id, e);
                 final var msg = e.getMessage() == null ? "Failed to read news details" : e.getMessage();
                 if (errorCallback != null) {
                     errorCallback.accept(msg);
                 }
-                return Status.CANCEL_STATUS;
+                return Status.CANCEL_STATUS; // avoid Eclipse error dialog
             }
-            callback.accept(result);
-            return Status.OK_STATUS;
         });
         fetchJob.schedule();
     }
 
     /** Fetches the news list asynchronously. */
     public void fetchNewsListAsync(Consumer<List<NewsItem>> callback) {
-        fetchNewsListAsync(callback, null);
-    }
-
-    /** Fetches the news list asynchronously with an optional error callback. */
-    public void fetchNewsListAsync(Consumer<List<NewsItem>> callback, Consumer<String> errorCallback) {
         final var fetchJob = Job.create("Fetching News List", monitor -> {
             LOGGER.logInfo("Fetching news list");
-            var newsList = new ArrayList<NewsItem>();
             try {
+                final var newsList = new ArrayList<NewsItem>();
                 int unreadCount = 0;
-                for (var item : RuyiCli.listNewsItems(false)) {
+                for (final var item : RuyiCli.listNewsItems(false)) {
                     if (item == null) {
                         continue;
                     }
 
-                    final Boolean isRead = item.isRead();
-                    boolean unread = isRead == null || !isRead.booleanValue();
+                    final var isRead = item.isRead();
+                    final var unread = isRead == null || !isRead.booleanValue();
                     if (unread) {
                         unreadCount++;
                     }
 
-                    final Integer ordObj = item.getOrd();
-                    final int ord = ordObj == null ? -1 : ordObj.intValue();
-                    final String title = item.getTitle() == null ? "" : item.getTitle();
-                    final String id = item.getId() == null ? "" : item.getId();
+                    final var ordObj = item.getOrd();
+                    final var ord = ordObj == null ? -1 : ordObj.intValue();
+                    final var title = item.getTitle() == null ? "" : item.getTitle();
+                    final var id = item.getId() == null ? "" : item.getId();
                     newsList.add(new NewsItem(ord, title, id, unread));
                 }
                 LOGGER.logInfo("Fetched news list: count=" + newsList.size() + ", unread=" + unreadCount);
+                callback.accept(newsList);
+                return Status.OK_STATUS;
             } catch (Exception e) {
-                String msg = e.getMessage() == null ? "Failed to list news" : e.getMessage();
-                LOGGER.logError("Failed to fetch news list", e);
-                if (errorCallback != null) {
-                    errorCallback.accept(msg);
-                }
+                callback.accept(null);
+                return Status.error("Failed to fetch news list", e);
             }
-
-            callback.accept(newsList);
-
-            return Status.OK_STATUS;
         });
         fetchJob.schedule();
     }

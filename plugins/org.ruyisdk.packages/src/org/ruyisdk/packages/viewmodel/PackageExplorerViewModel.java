@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.annotation.Nullable;
 import org.ruyisdk.packages.model.DeviceList;
@@ -199,7 +200,7 @@ public class PackageExplorerViewModel extends BaseViewModel {
                         onFinished.run();
                     }
                 });
-                return;
+                return Status.CANCEL_STATUS;
             }
 
             try {
@@ -212,7 +213,7 @@ public class PackageExplorerViewModel extends BaseViewModel {
                             onFinished.run();
                         }
                     });
-                    return;
+                    return Status.CANCEL_STATUS;
                 }
 
                 uiExecutor.accept(() -> {
@@ -225,6 +226,8 @@ public class PackageExplorerViewModel extends BaseViewModel {
                         }
                     }
                 });
+
+                return Status.OK_STATUS;
             } catch (Exception e) {
                 final var msg = e.getMessage();
                 uiExecutor.accept(() -> {
@@ -234,10 +237,9 @@ public class PackageExplorerViewModel extends BaseViewModel {
                         onFinished.run();
                     }
                 });
+                return Status.CANCEL_STATUS; // avoid Eclipse error dialog
             }
         });
-        job.setUser(true);
-        job.setPriority(Job.LONG);
         job.schedule();
     }
 
@@ -249,12 +251,13 @@ public class PackageExplorerViewModel extends BaseViewModel {
                     setDevices(fetched);
                     setDeviceListErrorMessage(null);
                 });
+                return Status.OK_STATUS;
             } catch (Exception e) {
                 final var msg = e.getMessage();
                 uiExecutor.accept(() -> setDeviceListErrorMessage(msg));
+                return Status.CANCEL_STATUS; // avoid Eclipse error dialog
             }
         });
-        job.setSystem(true);
         job.schedule();
     }
 

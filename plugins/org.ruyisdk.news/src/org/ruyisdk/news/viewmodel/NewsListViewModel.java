@@ -27,6 +27,7 @@ public class NewsListViewModel {
         private static final String notUpdated = "Not Updated, yet";
         private static final String updating = "Updating...";
         private static final String updatedTemplate = "Last Updated on %s";
+        private static final String updateFailed = "Failed to update news list";
     }
 
     /**
@@ -114,14 +115,20 @@ public class NewsListViewModel {
         setInfoText(UpdatingState.updating);
 
         service.fetchNewsListAsync(result -> {
-            final var sorted = new ArrayList<NewsItem>(result);
-            sorted.sort(Comparator.comparingInt(NewsItem::getOrd).reversed());
             observableNewsList.getRealm().asyncExec(() -> {
                 observableNewsList.clear();
-                observableNewsList.addAll(sorted);
             });
-            setInfoText(String.format(UpdatingState.updatedTemplate,
-                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            if (result != null) {
+                final var sorted = new ArrayList<NewsItem>(result);
+                sorted.sort(Comparator.comparingInt(NewsItem::getOrd).reversed());
+                observableNewsList.getRealm().asyncExec(() -> {
+                    observableNewsList.addAll(sorted);
+                });
+                setInfoText(String.format(UpdatingState.updatedTemplate,
+                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            } else {
+                setInfoText(UpdatingState.updateFailed);
+            }
             setFetching(false);
         });
     }
