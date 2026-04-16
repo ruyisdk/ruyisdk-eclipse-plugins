@@ -436,14 +436,6 @@ public class RuyiCli {
         }
     }
 
-    private static String requireInstallPath() throws IOException {
-        final var install = requireInstallPathResult();
-        if (install == null || install.isBlank()) {
-            throw new IOException("ruyi executable not found in configured or default install path");
-        }
-        return install;
-    }
-
     /**
      * Runs a command with experimental environment and optional working directory.
      *
@@ -467,7 +459,11 @@ public class RuyiCli {
      * @throws IOException if no executable can be resolved
      */
     public static String getResolvedExecutablePath() throws IOException {
-        return requireInstallPath() + File.separator + "ruyi";
+        final var install = requireInstallPathResult();
+        if (install == null || install.isBlank()) {
+            throw new IOException("ruyi executable not found in configured or default install path");
+        }
+        return install + File.separator + "ruyi";
     }
 
     /**
