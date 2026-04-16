@@ -22,13 +22,14 @@ public class FlashDeviceProvisionHandler extends AbstractHandler {
             LOGGER.logInfo("Flash device (device provision) command launched in built-in terminal");
             return null;
         } catch (Exception e) {
-            LOGGER.logError("Failed to launch flash device (device provision) command", e);
+            final var msg = "Failed to launch flash device (device provision) command";
+            LOGGER.logError(msg, e);
             final var shell = HandlerUtil.getActiveShell(event);
             if (shell != null) {
-                MessageDialog.openError(shell, "Failed to launch flash device (device provision)",
+                MessageDialog.openError(shell, msg,
                                 "Unable to start built-in terminal for 'ruyi device provision'.\n\n" + e.getMessage());
             }
-            throw new ExecutionException("Failed to launch flash device (device provision)", e);
+            throw new ExecutionException(msg, e);
         }
     }
 }
