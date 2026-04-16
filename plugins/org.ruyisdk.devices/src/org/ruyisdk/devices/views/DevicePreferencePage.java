@@ -43,9 +43,6 @@ public class DevicePreferencePage extends PreferencePage implements IWorkbenchPr
      * Constructs the device preference page.
      */
     public DevicePreferencePage() {
-        if (Activator.getDefault() == null) {
-            throw new IllegalStateException("Plugin not activated!");
-        }
         setPreferenceStore(Activator.getDefault().getPreferenceStore());
     }
 
