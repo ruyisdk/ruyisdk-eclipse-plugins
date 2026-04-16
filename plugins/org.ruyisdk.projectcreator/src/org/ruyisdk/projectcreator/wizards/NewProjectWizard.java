@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.INewWizard;
@@ -95,19 +94,17 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         }
 
         final String finalTemplateName = templateToUse;
-        IRunnableWithProgress op = monitor -> {
-            try {
-                // 2. Pass CFLAGS to the createProject method
-                createProject(projectName, boardModel, toolchainPath, cflags, finalTemplateName, monitor);
-            } catch (CoreException | IOException e) {
-                throw new InvocationTargetException(e);
-            } finally {
-                monitor.done();
-            }
-        };
-
         try {
-            getContainer().run(true, false, op);
+            getContainer().run(true, false, monitor -> {
+                try {
+                    // 2. Pass CFLAGS to the createProject method
+                    createProject(projectName, boardModel, toolchainPath, cflags, finalTemplateName, monitor);
+                } catch (CoreException | IOException e) {
+                    throw new InvocationTargetException(e);
+                } finally {
+                    monitor.done();
+                }
+            });
             ToolchainLocator.saveLastUsedToolchainPath(toolchainPath);
             return true;
         } catch (InvocationTargetException e) {
