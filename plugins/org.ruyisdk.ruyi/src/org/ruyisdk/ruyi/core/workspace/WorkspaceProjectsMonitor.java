@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.ruyisdk.core.util.PluginLogger;
@@ -283,11 +284,9 @@ public final class WorkspaceProjectsMonitor {
             if (listener == null) {
                 continue;
             }
-            try {
+            SafeRunner.run(() -> {
                 listener.onWorkspaceProjectsEvent(event);
-            } catch (Exception e) {
-                LOGGER.logWarning("Workspace projects listener failed", e);
-            }
+            });
         }
     }
 }

@@ -2,6 +2,7 @@ package org.ruyisdk.packages.viewmodel;
 
 import java.util.List;
 import java.util.function.Consumer;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.ruyisdk.packages.model.PackageOperation;
 import org.ruyisdk.packages.service.PackageOperationRunner;
@@ -28,7 +29,6 @@ public class PackageOperationViewModel extends BaseViewModel {
 
     private final StringBuffer outputBuffer = new StringBuffer();
     private volatile boolean running;
-    private volatile boolean cancelled;
     private Job job;
 
     /**
@@ -94,14 +94,19 @@ public class PackageOperationViewModel extends BaseViewModel {
                         uiExecutor.accept(onCompleted);
                     }
                 }
-            }, () -> cancelled);
+            }, () -> monitor.isCanceled());
+
+            if (monitor.isCanceled()) {
+                return Status.CANCEL_STATUS;
+            } else {
+                return Status.OK_STATUS;
+            }
         });
         job.schedule();
     }
 
     /** Request abort. The current operation will finish before stopping. */
     public void abort() {
-        cancelled = true;
         if (job != null) {
             job.cancel();
         }
