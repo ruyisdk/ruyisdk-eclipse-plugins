@@ -4,20 +4,22 @@ Bundle-Name: Venv
 Bundle-SymbolicName: org.ruyisdk.venv;singleton:=true
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.ruyisdk.venv
 Bundle-Activator: org.ruyisdk.venv.Activator
-Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-21
-Require-Bundle: org.eclipse.core.runtime,
-  org.eclipse.core.resources,
-  org.eclipse.core.databinding,
-  org.eclipse.ui,
-  org.eclipse.swt,
-  org.eclipse.jface.databinding,
-  org.eclipse.core.databinding.beans,
-  org.eclipse.core.databinding.property,
-  org.ruyisdk.ruyi,
-  org.ruyisdk.core,
-  org.eclipse.cdt.core,
-  org.eclipse.cdt.managedbuilder.core
+Bundle-ClassPath: 
+ .
+Require-Bundle: 
+ org.eclipse.cdt.core,
+ org.eclipse.cdt.managedbuilder.core,
+ org.eclipse.core.resources,
+ org.eclipse.core.runtime,
+ org.eclipse.core.databinding,
+ org.eclipse.core.databinding.beans,
+ org.eclipse.core.databinding.property,
+ org.eclipse.jface.databinding,
+ org.eclipse.swt,
+ org.eclipse.ui,
+ org.ruyisdk.core,
+ org.ruyisdk.ruyi

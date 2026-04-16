@@ -2,12 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ruyi Tests
 Bundle-SymbolicName: org.ruyisdk.ruyi.tests
-Automatic-Module-Name: org.ruyisdk.ruyi.tests
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
 Bundle-RequiredExecutionEnvironment: JavaSE-21
-Require-Bundle: org.ruyisdk.ruyi,
+Automatic-Module-Name: org.ruyisdk.ruyi.tests
+Require-Bundle: 
+ wrapped.junit.junit,
  org.ruyisdk.core,
  org.ruyisdk.packages,
- wrapped.junit.junit,
+ org.ruyisdk.ruyi,
  wrapped.org.hamcrest.hamcrest-core

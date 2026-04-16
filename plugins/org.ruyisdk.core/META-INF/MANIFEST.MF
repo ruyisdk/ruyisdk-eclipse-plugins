@@ -4,19 +4,21 @@ Bundle-Name: Core
 Bundle-SymbolicName: org.ruyisdk.core;singleton:=true
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.ruyisdk.core
 Bundle-Activator: org.ruyisdk.core.Activator
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-21
-Export-Package: org.ruyisdk.core.basedir,
+Bundle-ClassPath: 
+ .,
+ icons/
+Require-Bundle: 
+ org.eclipse.core.runtime,
+ org.eclipse.jface,
+ org.eclipse.ui.console,
+ org.eclipse.ui.workbench
+Export-Package: 
+ org.ruyisdk.core.basedir,
  org.ruyisdk.core.config,
  org.ruyisdk.core.console,
  org.ruyisdk.core.ruyi.model,
  org.ruyisdk.core.util
-Require-Bundle: org.eclipse.ui,
- org.eclipse.jface,
- org.eclipse.ui.console,
- org.eclipse.core.runtime,
- org.eclipse.ui.workbench
-Bundle-ClassPath: .,
- icons/

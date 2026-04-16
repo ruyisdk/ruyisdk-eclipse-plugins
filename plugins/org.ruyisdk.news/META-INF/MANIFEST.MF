@@ -4,21 +4,24 @@ Bundle-Name: News
 Bundle-SymbolicName: org.ruyisdk.news;singleton:=true
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.ruyisdk.news
 Bundle-Activator: org.ruyisdk.news.Activator
-Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-21
-Require-Bundle: org.eclipse.core.runtime,
+Bundle-ClassPath: 
+ .
+Require-Bundle: 
  org.eclipse.core.databinding,
- org.eclipse.ui,
- org.eclipse.swt,
- org.eclipse.jface.databinding,
  org.eclipse.core.databinding.beans,
  org.eclipse.core.databinding.property,
- org.ruyisdk.ruyi,
- org.ruyisdk.core
-Import-Package: org.commonmark,
+ org.eclipse.core.runtime,
+ org.eclipse.jface.databinding,
+ org.eclipse.swt,
+ org.eclipse.ui,
+ org.ruyisdk.core,
+ org.ruyisdk.ruyi
+Import-Package: 
+ org.commonmark,
  org.commonmark.ext.gfm.tables,
  org.commonmark.node,
  org.commonmark.parser,
