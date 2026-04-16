@@ -29,7 +29,6 @@ public class PackageOperationViewModel extends BaseViewModel {
 
     private final StringBuffer outputBuffer = new StringBuffer();
     private volatile boolean running;
-    private volatile boolean cancelled;
     private Job job;
 
     /**
@@ -95,16 +94,19 @@ public class PackageOperationViewModel extends BaseViewModel {
                         uiExecutor.accept(onCompleted);
                     }
                 }
-            }, () -> cancelled);
+            }, () -> monitor.isCanceled());
 
-            return Status.OK_STATUS;
+            if (monitor.isCanceled()) {
+                return Status.CANCEL_STATUS;
+            } else {
+                return Status.OK_STATUS;
+            }
         });
         job.schedule();
     }
 
     /** Request abort. The current operation will finish before stopping. */
     public void abort() {
-        cancelled = true;
         if (job != null) {
             job.cancel();
         }
