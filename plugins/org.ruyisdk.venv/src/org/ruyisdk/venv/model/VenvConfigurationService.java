@@ -204,7 +204,8 @@ public class VenvConfigurationService {
                 config.setOption(toolChain, option, value);
             }
         } catch (Exception e) {
-            // Option doesn't exist or can't be set - ignore
+            // Option doesn't exist or can't be set for this toolchain type - ignore
+            LOGGER.logWarning("Could not set toolchain option: " + optionId, e);
         }
     }
 

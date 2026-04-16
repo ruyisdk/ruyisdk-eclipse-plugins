@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.packages.JsonParser;
 import org.ruyisdk.projectcreator.Activator;
 
@@ -12,7 +13,7 @@ import org.ruyisdk.projectcreator.Activator;
  * Locates toolchain paths for boards.
  */
 public class ToolchainLocator {
-
+    private static final PluginLogger LOGGER = Activator.getLogger();
     private static final String PREF_LAST_TOOLCHAIN_PATH = "lastToolchainPath";
 
     /**
@@ -22,54 +23,48 @@ public class ToolchainLocator {
      * @return toolchain path or null
      */
     public static String findToolchainPathForBoard(String boardModel) {
-        System.out.println("[DEBUG] Entering ToolchainLocator.findToolchainPathForBoard...");
+        LOGGER.logInfo("Entering ToolchainLocator.findToolchainPathForBoard...");
 
         if (boardModel == null || boardModel.isEmpty()) {
-            System.out.println("[DEBUG] boardModel is null or empty. Exiting.");
+            LOGGER.logError("boardModel is null or empty");
             return null;
         }
-        System.out.println("[DEBUG] Received boardModel: " + boardModel);
+        LOGGER.logInfo("Received boardModel: " + boardModel);
 
         String toolchainName = null;
         try {
             // 1. jsonParser.findInstalledToolchainForBoard method
-            System.out.println("[DEBUG] Preparing to call JsonParser.findInstalledToolchainForBoard...");
+            LOGGER.logInfo("Preparing to call JsonParser.findInstalledToolchainForBoard...");
             toolchainName = JsonParser.findInstalledToolchainForBoard(boardModel);
-            System.out.println("[DEBUG] Successfully called JsonParser. Returned toolchainName: " + toolchainName);
-
+            LOGGER.logInfo("Successfully called JsonParser. Returned toolchainName: " + toolchainName);
         } catch (NoClassDefFoundError e) {
-            System.err.println("[DEBUG] CRITICAL: NoClassDefFoundError caught!");
-            System.err.println("[DEBUG] Failed to find or load class: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.logError("Failed to find or load class", e);
             return null;
         } catch (Throwable t) {
-            System.err.println("[DEBUG] CRITICAL: An unexpected error or exception occurred!");
-            t.printStackTrace();
+            LOGGER.logError("An unexpected error or exception occurred", t);
             return null;
         }
 
         if (toolchainName == null || toolchainName.isEmpty()) {
-            System.out.println("[DEBUG] toolchainName is null or empty. No toolchain found for this board.");
+            LOGGER.logError("toolchainName is null or empty. No toolchain found for this board");
             return null;
         }
 
-        System.out.println("[DEBUG] Constructing toolchain path with name: " + toolchainName);
+        LOGGER.logInfo("Constructing toolchain path with name: " + toolchainName);
         String userHome = System.getProperty("user.home");
         if (userHome == null) {
-            System.err.println("[DEBUG] user.home is null. Cannot construct path.");
+            LOGGER.logError("user.home is null. Cannot construct path");
             return null;
         }
         File toolchainDir =
                         Paths.get(userHome, ".local", "share", "ruyi", "binaries", "x86_64", toolchainName).toFile();
-        System.out.println("[DEBUG] Constructed path: " + toolchainDir.getAbsolutePath());
+        LOGGER.logInfo("Constructed path: " + toolchainDir.getAbsolutePath());
 
         if (isValidToolchainPath(toolchainDir.getAbsolutePath())) {
-            System.out.println("[DEBUG] Path is valid. Returning path.");
+            LOGGER.logInfo("Path is valid. Returning path");
             return toolchainDir.getAbsolutePath();
-        } else {
-            System.err.println("[DEBUG] Constructed path is not a valid toolchain path.");
         }
-
+        LOGGER.logError("Constructed path is not a valid toolchain path");
         return null;
     }
 
@@ -122,7 +117,7 @@ public class ToolchainLocator {
             prefs.put(key, value);
             prefs.flush();
         } catch (BackingStoreException e) {
-            e.printStackTrace();
+            LOGGER.logError("Failed to save preference: " + key, e);
         }
     }
 }

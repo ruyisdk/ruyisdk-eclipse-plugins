@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.packages.JsonParser;
 import org.ruyisdk.projectcreator.Activator;
 import org.ruyisdk.ruyi.services.RuyiCli;
@@ -33,6 +34,7 @@ import org.ruyisdk.ruyi.services.RuyiCliException;
  */
 public class MakefileBuilder extends IncrementalProjectBuilder {
 
+    private static final PluginLogger LOGGER = Activator.getLogger();
     public static final String BUILDER_ID = "org.ruyisdk.projectcreator.makefileBuilder";
     private static final String BUILD_CMD_PROPERTY = "buildCmd";
     private static final String BOARD_MODEL_PROPERTY = "boardModel";
@@ -109,7 +111,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    System.out.println(">>> MakefileBuilder: " + line);
+                    LOGGER.logInfo("MakefileBuilder: " + line);
                     logToFile(project, line);
                 }
             }
@@ -118,10 +120,9 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
             logToFile(project, resultMessage);
 
         } catch (Exception e) {
-            String errorMessage = "Build failed with exception: " + e.getMessage();
-            System.err.println(">>> MakefileBuilder: " + errorMessage);
-            e.printStackTrace();
-            logToFile(project, errorMessage);
+            final var errorMessage = "Build failed with exception";
+            LOGGER.logError("MakefileBuilder: " + errorMessage, e);
+            logToFile(project, errorMessage + ": " + e.getMessage());
         } finally {
             logToFile(project, "=== Build finished at " + new Date() + " ===");
             project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
@@ -270,7 +271,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
                 logFile.delete(true, null);
             }
         } catch (CoreException e) {
-            System.err.println(">>> MakefileBuilder: Failed to clear log file: " + e.getMessage());
+            LOGGER.logError("MakefileBuilder: Failed to clear log file", e);
         }
     }
 
@@ -291,7 +292,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
                 printWriter.println(message);
             }
         } catch (IOException | CoreException e) {
-            System.err.println(">>> MakefileBuilder: Failed to write to log file: " + e.getMessage());
+            LOGGER.logError("MakefileBuilder: Failed to write to log file", e);
         }
     }
 }

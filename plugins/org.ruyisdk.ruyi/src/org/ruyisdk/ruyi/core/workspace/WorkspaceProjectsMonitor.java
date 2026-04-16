@@ -168,7 +168,7 @@ public final class WorkspaceProjectsMonitor {
                 }
             }
         } catch (Exception e) {
-            // ignore workspace discovery failures
+            LOGGER.logWarning("Failed to get workspace projects", e);
         }
         return false;
     }
@@ -210,7 +210,7 @@ public final class WorkspaceProjectsMonitor {
                 out.add(Path.of(loc.toOSString()));
             }
         } catch (Exception e) {
-            // ignore workspace discovery failures
+            LOGGER.logWarning("Failed to get workspace projects", e);
         }
         out.removeIf(Objects::isNull);
         return out;

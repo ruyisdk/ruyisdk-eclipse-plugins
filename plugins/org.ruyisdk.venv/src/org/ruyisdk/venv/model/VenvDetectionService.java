@@ -188,8 +188,8 @@ public class VenvDetectionService {
                     out.add(venv);
                 });
             } catch (Exception e) {
-                LOGGER.logError("Failed to scan project for venv config: path=" + projectPath, e);
                 // ignore per-project failures
+                LOGGER.logError("Failed to scan project for venv config: path=" + projectPath, e);
             }
         }
         LOGGER.logInfo("Project venv detection completed: count=" + out.size());
@@ -305,6 +305,7 @@ public class VenvDetectionService {
             }
         } catch (Exception e) {
             // ignore scan failures
+            LOGGER.logError("Failed to list entries in dir: path=" + binDir, e);
         }
         // No GCC found, but bin directory exists
         return new DerivedToolchainInfo(binDir.toString(), "");
@@ -348,8 +349,8 @@ public class VenvDetectionService {
                 }
             }
         } catch (Exception e) {
-            LOGGER.logWarning("Failed to parse venv config: path=" + tomlPath, e);
             // ignore parse failures
+            LOGGER.logWarning("Failed to parse venv config: path=" + tomlPath, e);
         }
         return new DetectedVenvConfig(profile, sysroot);
     }

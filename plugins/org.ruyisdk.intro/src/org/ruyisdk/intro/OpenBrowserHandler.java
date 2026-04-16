@@ -6,11 +6,13 @@ import java.util.Locale;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.ruyisdk.core.util.PluginLogger;
 
 /**
  * Handler to open browser for various URLs.
  */
 public class OpenBrowserHandler extends AbstractHandler {
+    private static final PluginLogger LOGGER = Activator.getLogger();
     // URL Mapping Table
     private static final String[][] URL_MAPPINGS = {{"blog", "https://ruyisdk.org/blog"},
             {"home", "https://ruyisdk.org"}, {"contact", "https://ruyisdk.org/contact"},
@@ -26,7 +28,7 @@ public class OpenBrowserHandler extends AbstractHandler {
         // Find URL
         String url = findUrl(target);
         if (url == null) {
-            System.err.println("No URL mapping found for: " + target);
+            LOGGER.logWarning("No URL mapping found for: " + target);
             return null;
         }
 
@@ -49,8 +51,7 @@ public class OpenBrowserHandler extends AbstractHandler {
             java.awt.Desktop.getDesktop().browse(new URI(url));
             return;
         } catch (Exception e) {
-            System.err.println("Java Desktop open failed : " + e.getMessage());
-            System.out.println("Desktop method failed, falling back to command invocation");
+            LOGGER.logWarning("Java Desktop open failed", e);
         }
 
         // L2: System commands (highest compatibility)
@@ -65,7 +66,7 @@ public class OpenBrowserHandler extends AbstractHandler {
             }
             new ProcessBuilder(cmd).inheritIO().start();
         } catch (IOException ex) {
-            System.err.println("All methods failed: " + ex.getMessage());
+            LOGGER.logError("All browser open methods failed", ex);
         }
     }
 

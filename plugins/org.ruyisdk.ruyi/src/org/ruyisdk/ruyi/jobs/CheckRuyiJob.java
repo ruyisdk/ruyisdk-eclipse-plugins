@@ -59,17 +59,20 @@ public class CheckRuyiJob {
     }
 
     private boolean isInstalled() {
-        System.out.println("Ruyi is installed ? " + RuyiManager.isRuyiInstalled());
-        return RuyiManager.isRuyiInstalled();
+        final var installed = RuyiManager.isRuyiInstalled();
+        LOGGER.logInfo("Ruyi is installed ? " + installed);
+        return installed;
     }
 
     private RuyiVersion getInstalledVersion() {
-        System.out.println("Ruyi is installed ? " + RuyiManager.isRuyiInstalled());
-        return RuyiManager.getInstalledVersion();
+        final var version = RuyiManager.getInstalledVersion();
+        LOGGER.logInfo("Installed Ruyi version: " + version);
+        return version;
     }
 
     private RuyiVersion getLatestRelease() {
-        System.out.println("Ruyi has new version: " + RuyiManager.getLatestVersion());
-        return RuyiManager.getLatestVersion();
+        final var latest = RuyiManager.getLatestVersion();
+        LOGGER.logInfo("Latest Ruyi version available: " + latest);
+        return latest;
     }
 }

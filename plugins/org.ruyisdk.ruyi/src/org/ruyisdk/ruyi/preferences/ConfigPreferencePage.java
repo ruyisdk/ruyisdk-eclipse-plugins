@@ -13,6 +13,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.services.RuyiCli;
 import org.ruyisdk.ruyi.services.RuyiCliException;
 
@@ -20,6 +22,7 @@ import org.ruyisdk.ruyi.services.RuyiCliException;
  * Preference page for Ruyi's configuration.
  */
 public class ConfigPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+    private static final PluginLogger LOGGER = Activator.getLogger();
     private RepoConfigPreference repoPreference;
     private Text localPathText;
     private Button prereleasesCheckbox;
@@ -121,8 +124,7 @@ public class ConfigPreferencePage extends PreferencePage implements IWorkbenchPr
             RuyiCli.setPackagesPrereleases(prereleasesCheckbox.getSelection());
             RuyiCli.setTelemetry(telemetryPreference.getTelemetryMode());
         } catch (RuyiCliException e) {
-            // ruyi may not be installed yet
-            e.printStackTrace();
+            LOGGER.logError("Failed to apply Ruyi config", e);
         }
         return true;
     }

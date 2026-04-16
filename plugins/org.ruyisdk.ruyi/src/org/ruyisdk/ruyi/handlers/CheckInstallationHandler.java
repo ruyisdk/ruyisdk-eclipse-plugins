@@ -21,7 +21,7 @@ public class CheckInstallationHandler extends AbstractHandler {
             LOGGER.logInfo("Manual installation check triggered");
             ruyiCore = new RuyiCore();
             ruyiCore.runManualCheck();
-            LOGGER.logInfo("Ruyi activated successfully.");
+            LOGGER.logInfo("Ruyi activated successfully");
             return null;
         } catch (Exception e) {
             LOGGER.logError("Failed to execute check installation command", e);

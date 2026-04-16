@@ -12,17 +12,20 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.projectcreator.Activator;
 
 /**
  * Property page for build configuration.
  */
 public class BuildPropertyPage extends PropertyPage implements IWorkbenchPropertyPage {
-    private Text buildCommandText;
-    private Text ruyiVenvCmdText;
+    private static final PluginLogger LOGGER = Activator.getLogger();
     private static final String BUILD_CMD_PROPERTY = "buildCmd";
     private static final String RUYI_VENV_CMD_PROPERTY = "ruyiVenvCmd";
     private static final String BOARD_MODEL_PROPERTY = "boardModel";
+
+    private Text buildCommandText;
+    private Text ruyiVenvCmdText;
 
     @Override
     protected Control createContents(Composite parent) {
@@ -63,7 +66,7 @@ public class BuildPropertyPage extends PropertyPage implements IWorkbenchPropert
             }
 
         } catch (CoreException e) {
-            e.printStackTrace();
+            LOGGER.logError("Failed to load build properties", e);
         }
     }
 
@@ -129,7 +132,7 @@ public class BuildPropertyPage extends PropertyPage implements IWorkbenchPropert
             return String.format("ruyi venv -t %s %s ./%s", toolchain, profile, "ruyiVenv");
 
         } catch (CoreException e) {
-            e.printStackTrace();
+            LOGGER.logError("Failed to generate default venv command", e);
             return "";
         }
     }

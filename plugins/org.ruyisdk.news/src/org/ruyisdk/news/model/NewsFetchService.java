@@ -26,8 +26,8 @@ public class NewsFetchService {
                 result = read.getContent() == null ? "" : read.getContent();
                 LOGGER.logInfo("Fetched news details: id=" + id + ", length=" + result.length());
             } catch (Exception e) {
-                String msg = e.getMessage() == null ? "Failed to read news details" : e.getMessage();
                 LOGGER.logError("Failed to fetch news details: id=" + id, e);
+                final var msg = e.getMessage() == null ? "Failed to read news details" : e.getMessage();
                 if (errorCallback != null) {
                     errorCallback.accept(msg);
                 }

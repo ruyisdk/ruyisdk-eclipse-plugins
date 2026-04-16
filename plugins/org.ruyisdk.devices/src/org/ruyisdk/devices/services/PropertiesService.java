@@ -51,7 +51,7 @@ public class PropertiesService {
                 index++;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.logError("Failed to load devices from properties file", e);
         }
 
         return devices;
@@ -103,11 +103,8 @@ public class PropertiesService {
             properties.store(output, "RuyiSDK Devices Configuration");
 
             LOGGER.logInfo("Devices is successfully stored to file :" + FILE_PATH.toString());
-
         } catch (IOException e) {
-            e.printStackTrace();
-
-            LOGGER.logError("Devices storage failure!");
+            LOGGER.logError("Failed to store devices to properties file: " + FILE_PATH.toString(), e);
         }
     }
 }

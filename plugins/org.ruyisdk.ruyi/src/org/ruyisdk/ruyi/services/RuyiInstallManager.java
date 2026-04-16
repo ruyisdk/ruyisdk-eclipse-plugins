@@ -17,6 +17,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.ruyisdk.core.ruyi.model.RuyiReleaseInfo;
 import org.ruyisdk.core.ruyi.model.SystemInfo;
+import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.model.TelemetryMode;
 import org.ruyisdk.ruyi.ui.RuyiInstallWizard.InstallationListener;
 import org.ruyisdk.ruyi.util.RuyiNetworkUtils;
@@ -25,6 +27,8 @@ import org.ruyisdk.ruyi.util.RuyiNetworkUtils;
  * Utility methods for Ruyi installation operations.
  */
 public final class RuyiInstallManager {
+    private static final PluginLogger LOGGER = Activator.getLogger();
+
     private RuyiInstallManager() {}
 
     /**
@@ -65,7 +69,7 @@ public final class RuyiInstallManager {
                     throws Exception {
         final var destinationPath = Paths.get(destinationDirectory);
         listener.logMessage("Verifying installation directory: " + destinationPath);
-        System.out.println("Ruyi包管理器安装地址：" + destinationPath);
+        LOGGER.logInfo("Ruyi package manager install path: " + destinationPath);
 
         if (!Files.exists(destinationPath)) {
             listener.logMessage("Directory does not exist, attempting to create...");
@@ -123,8 +127,7 @@ public final class RuyiInstallManager {
         for (int i = 0; i < downloadSources.length; i++) {
             String sourceName = i == 0 ? "镜像源" : "GitHub源";
             String ruyiDownloadUrl = downloadSources[i];
-            System.out.println("ruyiDownloadUrl===" + ruyiDownloadUrl);
-            System.out.println("ruyiInstallPath===" + ruyiExecutablePath);
+            LOGGER.logInfo("Downloading Ruyi from: " + ruyiDownloadUrl + " to: " + ruyiExecutablePath);
 
             try {
                 listener.logMessage(String.format("尝试从%s下载: %s", sourceName, ruyiDownloadUrl));

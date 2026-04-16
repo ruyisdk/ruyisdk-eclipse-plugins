@@ -6,6 +6,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
+import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.packages.model.TreeNode;
 import org.ruyisdk.ruyi.services.RuyiCli;
 
@@ -13,6 +14,7 @@ import org.ruyisdk.ruyi.services.RuyiCli;
  * JSON parser for package tree data.
  */
 public class JsonParser {
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     /**
      * Parses raw porcelain CLI output into a tree structure. Each non-empty line that starts with '{'
@@ -150,7 +152,7 @@ public class JsonParser {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.logError("Failed to find installed toolchain for board: " + boardName, e);
             return null;
         }
 
