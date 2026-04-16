@@ -2,6 +2,7 @@ package org.ruyisdk.packages.viewmodel;
 
 import java.util.List;
 import java.util.function.Consumer;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.ruyisdk.packages.model.PackageOperation;
 import org.ruyisdk.packages.service.PackageOperationRunner;
@@ -95,6 +96,8 @@ public class PackageOperationViewModel extends BaseViewModel {
                     }
                 }
             }, () -> cancelled);
+
+            return Status.OK_STATUS;
         });
         job.schedule();
     }
