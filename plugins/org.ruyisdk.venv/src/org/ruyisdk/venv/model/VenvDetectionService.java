@@ -1,6 +1,5 @@
 package org.ruyisdk.venv.model;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -9,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -118,42 +116,6 @@ public class VenvDetectionService {
         RuyiCli.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
         refreshWorkspaceProjects(null);
         LOGGER.logInfo("Venv creation finished: path=" + path);
-    }
-
-    private List<Venv> fetchVenvs() {
-        final var profileInfos = listProfiles();
-        final var profileQuirks = new HashMap<String, List<String>>();
-        for (final var profileInfo : profileInfos) {
-            profileQuirks.put(profileInfo.getName(), profileInfo.getQuirks());
-        }
-
-        final var detectedVenvs = detectVenvs();
-        final var out = new ArrayList<Venv>();
-        for (final var detectedVenv : detectedVenvs) {
-            final var quirks = profileQuirks.getOrDefault(detectedVenv.getProfile(), List.of());
-            out.add(Venv.createStandalone(detectedVenv.getPath(), detectedVenv.getProfile(), detectedVenv.getSysroot(),
-                            quirks));
-        }
-        LOGGER.logInfo("Fetched venv list: count=" + out.size());
-        return out;
-    }
-
-    /** Fetches venvs asynchronously and passes them to the callback. */
-    public void fetchVenvsAsync(Consumer<List<Venv>> callback) {
-        final var fetchJob = Job.create("Fetching virtual environments", monitor -> {
-            LOGGER.logInfo("Fetching venv list (async)");
-            List<Venv> result;
-            try {
-                result = fetchVenvs();
-            } catch (Exception e) {
-                LOGGER.logError("Failed to fetch venv list", e);
-                result = new ArrayList<>();
-            }
-            LOGGER.logInfo("Venv list fetch completed: count=" + result.size());
-            callback.accept(result);
-            return Status.OK_STATUS;
-        });
-        fetchJob.schedule();
     }
 
     private static List<Venv> detectProjectVenvs(List<Path> projectPaths) {
@@ -402,44 +364,5 @@ public class VenvDetectionService {
                 LOGGER.logError("Failed to refresh project: " + project.getName(), e);
             }
         }
-    }
-
-    private static List<DetectedVenv> detectVenvs() {
-        final var out = new ArrayList<DetectedVenv>();
-        try {
-            final var home = System.getProperty("user.home");
-            if (home == null) {
-                return out;
-            }
-            final var homeDir = new File(home);
-            final var children = homeDir.listFiles();
-            if (children == null) {
-                return out;
-            }
-            for (final var dir : children) {
-                if (!dir.isDirectory()) {
-                    continue;
-                }
-                // common marker for venvs: bin/activate (POSIX) or Scripts/activate (Windows)
-                final var binActivate = new File(dir, "bin/activate");
-                final var scriptsActivate = new File(dir, "Scripts/activate");
-                if (binActivate.exists() || scriptsActivate.exists()) {
-                    final var path = dir.getAbsolutePath();
-                    final var profile = dir.getName();
-                    final var sysroot = new File(dir, "sysroot").getAbsolutePath();
-                    out.add(new DetectedVenv(path, profile, sysroot));
-                }
-                // also consider directories named *-venv or ruyiVenv
-                if (dir.getName().toLowerCase().endsWith("-venv") || dir.getName().equalsIgnoreCase("ruyivenv")) {
-                    final var path = dir.getAbsolutePath();
-                    final var profile = dir.getName().replaceAll("-venv$", "");
-                    final var sysroot = new File(dir, "sysroot").getAbsolutePath();
-                    out.add(new DetectedVenv(path, profile, sysroot));
-                }
-            }
-        } catch (Exception e) {
-            // ignore and return what we have
-        }
-        return out;
     }
 }
