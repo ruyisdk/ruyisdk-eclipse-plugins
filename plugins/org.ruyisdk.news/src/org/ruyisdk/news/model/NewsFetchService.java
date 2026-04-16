@@ -1,6 +1,7 @@
 package org.ruyisdk.news.model;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.Status;
@@ -63,6 +64,7 @@ public class NewsFetchService {
                     newsList.add(new NewsItem(ord, title, id, unread));
                 }
                 LOGGER.logInfo("Fetched news list: count=" + newsList.size() + ", unread=" + unreadCount);
+                newsList.sort(Comparator.comparingInt(NewsItem::getOrd).reversed());
                 callback.accept(newsList);
                 return Status.OK_STATUS;
             } catch (Exception e) {
