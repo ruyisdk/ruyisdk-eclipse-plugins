@@ -43,8 +43,6 @@ public class WizardConfigPage extends WizardPage {
     private DataBindingContext dbc;
 
     private Composite container;
-    private Composite leftColumn;
-    private Composite rightColumn;
     private Composite profileComposite;
     private Composite toolchainComposite;
     private Composite emulatorHeader;
@@ -118,7 +116,7 @@ public class WizardConfigPage extends WizardPage {
             });
         }
 
-        leftColumn = new Composite(container, SWT.NONE);
+        final var leftColumn = new Composite(container, SWT.NONE);
         leftColumn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         {
             final var gridLayout = new GridLayout(1, false);
@@ -126,7 +124,7 @@ public class WizardConfigPage extends WizardPage {
             leftColumn.setLayout(gridLayout);
         }
 
-        rightColumn = new Composite(container, SWT.NONE);
+        final var rightColumn = new Composite(container, SWT.NONE);
         rightColumn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         {
             final var gridLayout = new GridLayout(1, false);
