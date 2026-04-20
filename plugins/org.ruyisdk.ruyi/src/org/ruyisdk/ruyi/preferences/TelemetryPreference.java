@@ -64,7 +64,7 @@ public class TelemetryPreference {
         int telemetryIndex;
         try {
             telemetryIndex = getTelemetrySelectionIndex();
-        } catch (Exception e) {
+        } catch (PluginException e) {
             telemetryIndex = 0; // default to ON
         }
         telemetryCombo = new Combo(comboContainer, SWT.DROP_DOWN | SWT.READ_ONLY);
