@@ -47,13 +47,15 @@ public class RuyiInstallException extends PluginException {
 
     /** Failed to set executable permissions on the Ruyi binary. */
     public static RuyiInstallException permissionFailed(String path, Throwable cause) {
-        return new RuyiInstallException("Failed to set executable permissions: " + path, cause);
+        return new RuyiInstallException(
+                String.format("Failed to set executable permissions for: %s", path), cause);
     }
 
     /** Executable permissions could not be verified after setting them. */
     public static RuyiInstallException permissionVerifyFailed(String path) {
-        return new RuyiInstallException("Failed to set executable permissions for: " + path
-                + ". You may need root/sudo privileges.");
+        return new RuyiInstallException(String.format(
+                "Failed to set executable permissions for: %s. You may need root/sudo privileges.",
+                path));
     }
 
     /** Post-installation validation failed. */

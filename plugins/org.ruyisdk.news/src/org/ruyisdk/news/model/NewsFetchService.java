@@ -65,8 +65,8 @@ public class NewsFetchService {
                     final var id = item.getId() == null ? "" : item.getId();
                     newsList.add(new NewsItem(ord, title, id, unread));
                 }
-                LOGGER.logInfo(
-                        "Fetched news list: count=" + newsList.size() + ", unread=" + unreadCount);
+                LOGGER.logInfo(String.format("Fetched news list: count=%d, unread=%d",
+                        newsList.size(), unreadCount));
                 newsList.sort(Comparator.comparingInt(NewsItem::getOrd).reversed());
                 callback.accept(newsList);
                 return Status.OK_STATUS;

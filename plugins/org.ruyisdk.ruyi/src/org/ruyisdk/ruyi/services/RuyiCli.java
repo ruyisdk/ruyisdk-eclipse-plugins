@@ -278,8 +278,7 @@ public class RuyiCli {
             throw RuyiCliException.invalidArgument("Invalid news item ID or ordinal");
         }
         // TODO: the 3-second timeout help us avoid hanging if the CLI gets stuck trying to read
-        // news
-        // content.
+        // news content.
         // The hang is due to a unresolved bug.
         final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
                 .porcelain(true).timeoutSeconds(3).news().read(idOrOrdinal).end().build();

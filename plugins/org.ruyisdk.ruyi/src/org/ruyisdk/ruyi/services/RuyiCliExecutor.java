@@ -87,8 +87,8 @@ public final class RuyiCliExecutor {
     private static RuyiExecResult executeCommand(List<String> command,
             Map<String, String> environment, File workingDirectory, boolean redirectErrorStream,
             Consumer<String> lineCallback, IProgressMonitor monitor, int timeoutSeconds) {
-        LOGGER.logInfo(
-                "[RuyiCliExecutor] Executing ruyi command: [" + String.join("] [", command) + "]");
+        LOGGER.logInfo(String.format("[RuyiCliExecutor] Executing ruyi command: [%s]",
+                String.join("] [", command)));
         final var process =
                 startProcess(command, environment, workingDirectory, redirectErrorStream);
         final var outputFuture = CompletableFuture.supplyAsync(() -> {
@@ -174,8 +174,8 @@ public final class RuyiCliExecutor {
             }
             return outputFuture.get(remainingNanos, TimeUnit.NANOSECONDS);
         } catch (TimeoutException e) {
-            LOGGER.logWarning(
-                    "[RuyiCliExecutor] ruyi command timed out after " + timeoutSeconds + "s");
+            LOGGER.logWarning(String.format("[RuyiCliExecutor] ruyi command timed out after %d s",
+                    timeoutSeconds));
             throw RuyiCliException.timeout(timeoutSeconds);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

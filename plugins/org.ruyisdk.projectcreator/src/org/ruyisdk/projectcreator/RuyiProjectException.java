@@ -49,11 +49,13 @@ public class RuyiProjectException extends PluginException {
     /** Failed to read a persistent project property. */
     public static RuyiProjectException propertyAccessFailed(String property, Throwable cause) {
         return new RuyiProjectException(
-                "Failed to retrieve " + property + " from project properties", cause);
+                String.format("Failed to retrieve \"%s\" from project properties", property),
+                cause);
     }
 
     /** A required persistent project property is not set. */
     public static RuyiProjectException propertyMissing(String property) {
-        return new RuyiProjectException(property + " not set for project");
+        return new RuyiProjectException(
+                String.format("Property \"%s\" has not been set for project", property));
     }
 }

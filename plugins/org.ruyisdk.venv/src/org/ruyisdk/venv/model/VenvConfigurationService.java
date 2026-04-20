@@ -61,8 +61,8 @@ public class VenvConfigurationService {
             return new ApplyResult(false, "Venv is null");
         }
 
-        LOGGER.logInfo("Applying venv configuration: venv=" + venv.getPath() + ", project="
-                + venv.getProjectPath());
+        LOGGER.logInfo(String.format("Applying venv configuration: venv=%s, project=%s",
+                venv.getPath(), venv.getProjectPath()));
 
         final var projectPath = venv.getProjectPath();
         if (projectPath == null || projectPath.isBlank()) {
@@ -71,11 +71,13 @@ public class VenvConfigurationService {
 
         final var project = findProjectByPath(projectPath);
         if (project == null) {
-            return new ApplyResult(false, "Could not find project at: " + projectPath);
+            return new ApplyResult(false,
+                    String.format("Could not find project at: %s", projectPath));
         }
 
         if (!project.isOpen()) {
-            return new ApplyResult(false, "Project is not open: " + project.getName());
+            return new ApplyResult(false,
+                    String.format("Project is not open: %s", project.getName()));
         }
 
         try {
@@ -85,7 +87,7 @@ public class VenvConfigurationService {
 
             if (projectDesc == null) {
                 return new ApplyResult(false,
-                        "Project has no CDT configuration: " + project.getName());
+                        String.format("Project has no CDT configuration: %s", project.getName()));
             }
 
             // Configure all build configurations

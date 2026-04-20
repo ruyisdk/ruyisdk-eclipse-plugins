@@ -189,9 +189,9 @@ public class PackageExplorerViewModel extends BaseViewModel {
 
     private void loadPackagesAsync(Runnable onFinished) {
         final var entityId = chosenDevice != null ? chosenDevice.getEntityId() : null;
-        final var jobLabel =
-                chosenDevice != null ? "Loading packages for " + chosenDevice.getLabel()
-                        : "Loading all packages";
+        final var jobLabel = chosenDevice != null
+                ? String.format("Loading packages for %s", chosenDevice.getLabel())
+                : "Loading all packages";
 
         setPackagesLoading(true);
 
