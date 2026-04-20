@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.ruyi.model.TelemetryMode;
 import org.ruyisdk.ruyi.services.RuyiCli;
 
