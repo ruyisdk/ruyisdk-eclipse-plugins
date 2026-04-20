@@ -2,6 +2,7 @@ package org.ruyisdk.ruyi.services;
 
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
 import org.ruyisdk.core.ruyi.model.SystemInfo;
+import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 /**
  * Manager for Ruyi operations.
@@ -14,7 +15,7 @@ public class RuyiManager {
      * @return true if installed
      */
     public static boolean isRuyiInstalled() {
-        return getInstalledVersion() != null;
+        return !RuyiFileUtils.findInstallPathWithRuyi().isEmpty();
     }
 
     /**

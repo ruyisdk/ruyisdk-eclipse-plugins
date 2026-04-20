@@ -109,12 +109,7 @@ public final class RuyiCliExecutor {
     }
 
     private static void cleanupProcess(Process process, CompletableFuture<String> outputFuture) {
-        try {
-            outputFuture.cancel(true);
-        } catch (CancellationException e) {
-            // why not "throws CancellationException"???
-            // ignore
-        }
+        outputFuture.cancel(true);
 
         try {
             process.getInputStream().close();
@@ -137,7 +132,9 @@ public final class RuyiCliExecutor {
 
         try {
             outputFuture.get(OUTPUT_JOIN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException
+                | CancellationException e) {
+            // why not "throws CancellationException" but documents it???
             // ignore
         }
     }
