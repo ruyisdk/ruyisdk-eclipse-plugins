@@ -7,7 +7,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.statushandlers.StatusManager;
-import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.ruyi.Activator;
 
 /**
@@ -28,8 +27,6 @@ public final class PackageIndexUpdater {
                 monitor.beginTask("Updating package index...", IProgressMonitor.UNKNOWN);
                 try {
                     RuyiCli.updatePackageIndex();
-                } catch (RuntimeException e) {
-                    throw new InvocationTargetException(e);
                 } finally {
                     monitor.done();
                 }
