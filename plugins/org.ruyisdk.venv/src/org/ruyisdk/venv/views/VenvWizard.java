@@ -3,7 +3,6 @@ package org.ruyisdk.venv.views;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.ruyisdk.core.exception.PluginException;
@@ -32,34 +31,7 @@ public class VenvWizard extends Wizard {
 
     @Override
     public void addPages() {
-        try {
-            final var pmd = new ProgressMonitorDialog(getShell());
-            if (pmd.getShell() != null) {
-                pmd.getShell().setText("Updating package index");
-            }
-            pmd.run(true, true, monitor -> {
-                monitor.beginTask("Updating package index...", 100);
-                try {
-                    viewModel.refreshAll();
-                } catch (PluginException e) {
-                    throw new InvocationTargetException(e);
-                }
-                monitor.worked(100);
-            });
-        } catch (InvocationTargetException e) {
-            StatusManager.getManager()
-                    .handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
-                            "Failed to update package index; wizard will abort.", e.getCause()),
-                            StatusManager.LOG | StatusManager.BLOCK);
-            return;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            StatusManager.getManager()
-                    .handle(new Status(IStatus.CANCEL, "org.ruyisdk.venv",
-                            "Package index update was cancelled; wizard will abort.", e),
-                            StatusManager.LOG | StatusManager.BLOCK);
-            return;
-        }
+        viewModel.loadAll();
 
         configurationPage = new WizardConfigPage(viewModel);
         addPage(configurationPage);

@@ -79,13 +79,6 @@ public class VenvDetectionService {
         return RuyiCli.listEmulators();
     }
 
-    /** Updates the local package index via the Ruyi CLI. */
-    public void updateIndex() {
-        LOGGER.logInfo("Updating Ruyi package index");
-        RuyiCli.updatePackageIndex();
-        LOGGER.logInfo("Ruyi package index update finished successfully");
-    }
-
     /** Installs a package via the Ruyi CLI. */
     public void installPackage(String name, String version) {
         LOGGER.logInfo("Installing package: name=" + name + ", version=" + version);

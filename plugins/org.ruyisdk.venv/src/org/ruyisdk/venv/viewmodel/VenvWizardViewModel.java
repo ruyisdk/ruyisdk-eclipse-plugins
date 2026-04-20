@@ -150,9 +150,7 @@ public class VenvWizardViewModel {
         return sb.toString();
     }
 
-    private void refreshLists() {
-        service.updateIndex();
-
+    private void loadLists() {
         profiles.clear();
         allToolchains.clear();
         allEmulators.clear();
@@ -227,9 +225,9 @@ public class VenvWizardViewModel {
         return providedByPackage.containsAll(neededByProfile);
     }
 
-    /** Updates the CLI index and refreshes all view model data. */
-    public void refreshAll() {
-        refreshLists();
+    /** Loads package lists from the Ruyi CLI and refreshes all view model data. */
+    public void loadAll() {
+        loadLists();
         filterPackagesBySelectedProfile();
         recomputeDerivedState();
     }

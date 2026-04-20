@@ -36,6 +36,11 @@
 			name="Flash (Device Provision)"
 			description="Launch the Ruyi Device Provisioning Wizard (ruyi device provision) to flash an OS image">
 		</command>
+		<command
+			id="org.ruyisdk.ruyi.commands.updatePackageIndex"
+			name="Update Package Index"
+			description="Update the Ruyi package index (ruyi update)">
+		</command>
 	</extension>
 
 	<!-- 3. 命令处理器（必须） -->
@@ -47,6 +52,10 @@
 		<handler
 			class="org.ruyisdk.ruyi.handlers.FlashDeviceProvisionHandler"
 			commandId="org.ruyisdk.ruyi.commands.flashDeviceProvision">
+		</handler>
+		<handler
+			class="org.ruyisdk.ruyi.handlers.UpdatePackageIndexHandler"
+			commandId="org.ruyisdk.ruyi.commands.updatePackageIndex">
 		</handler>
 	</extension>
 
@@ -64,6 +73,11 @@
 					commandId="org.ruyisdk.ruyi.commands.flashDeviceProvision"
 					label="Flash (Device Provision)"
 					tooltip="Run ruyi device provision in the built-in terminal">
+				</command>
+				<command
+					commandId="org.ruyisdk.ruyi.commands.updatePackageIndex"
+					label="Update Package Index"
+					tooltip="Update the Ruyi package index">
 				</command>
 			</menu>
 		</menuContribution>
