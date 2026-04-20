@@ -22,7 +22,7 @@ public class Activator extends AbstractUIPlugin {
     private static VenvConfigurationService configService;
 
     private static final PluginLogger LOGGER =
-                    new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
+            new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
     /** Returns the venv service. */
     public VenvDetectionService getDetectionService() {

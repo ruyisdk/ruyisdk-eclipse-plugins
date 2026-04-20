@@ -31,8 +31,8 @@ public class EntityInfo {
      * @param relatedRefs list of related entity references, must not be {@code null}
      * @param reverseRefs list of reverse entity references, must not be {@code null}
      */
-    public EntityInfo(String entityType, String entityId, String displayName, List<String> relatedRefs,
-                    List<String> reverseRefs) {
+    public EntityInfo(String entityType, String entityId, String displayName,
+            List<String> relatedRefs, List<String> reverseRefs) {
         this.entityType = entityType;
         this.entityId = entityId;
         this.displayName = displayName;

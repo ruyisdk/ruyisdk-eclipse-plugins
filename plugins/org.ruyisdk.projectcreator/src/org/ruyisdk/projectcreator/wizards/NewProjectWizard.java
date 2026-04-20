@@ -67,7 +67,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
     @Override
     public boolean canFinish() {
-        return (getContainer().getCurrentPage() == projectSettingsPage && projectSettingsPage.isPageComplete());
+        return (getContainer().getCurrentPage() == projectSettingsPage
+                && projectSettingsPage.isPageComplete());
     }
 
     @Override
@@ -87,8 +88,9 @@ public class NewProjectWizard extends Wizard implements INewWizard {
         URL templateDirUrl = bundle.getEntry("/templates/" + boardModel);
 
         if (templateDirUrl == null) {
-            boolean useDefault = MessageDialog.openConfirm(getShell(), "Template Not Found",
-                            boardModel + "\" demo is not found\n\nare you want to use the default template?");
+            boolean useDefault =
+                    MessageDialog.openConfirm(getShell(), "Template Not Found", boardModel
+                            + "\" demo is not found\n\nare you want to use the default template?");
 
             if (useDefault) {
                 templateToUse = "default";
@@ -102,7 +104,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
             getContainer().run(true, false, monitor -> {
                 try {
                     // 2. Pass CFLAGS to the createProject method
-                    createProject(projectName, boardModel, toolchainPath, cflags, finalTemplateName, monitor);
+                    createProject(projectName, boardModel, toolchainPath, cflags, finalTemplateName,
+                            monitor);
                 } catch (PluginException e) {
                     throw new InvocationTargetException(e);
                 } finally {
@@ -112,15 +115,16 @@ public class NewProjectWizard extends Wizard implements INewWizard {
             ToolchainLocator.saveLastUsedToolchainPath(toolchainPath);
             return true;
         } catch (InvocationTargetException e) {
-            StatusManager.getManager().handle(
-                            new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Failed to create project", e.getCause()),
+            StatusManager.getManager()
+                    .handle(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
+                            "Failed to create project", e.getCause()),
                             StatusManager.LOG | StatusManager.BLOCK);
             return false;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             StatusManager.getManager().handle(
-                            new Status(IStatus.CANCEL, Activator.PLUGIN_ID, "Project creation aborted", e),
-                            StatusManager.LOG | StatusManager.BLOCK);
+                    new Status(IStatus.CANCEL, Activator.PLUGIN_ID, "Project creation aborted", e),
+                    StatusManager.LOG | StatusManager.BLOCK);
             return false;
         }
     }
@@ -138,8 +142,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
     }
 
     // 3. Update method signature to accept CFLAGS
-    private void createProject(String projectName, String boardModel, String toolchainPath, String cflags,
-                    String templateName, IProgressMonitor monitor) {
+    private void createProject(String projectName, String boardModel, String toolchainPath,
+            String cflags, String templateName, IProgressMonitor monitor) {
         try {
             monitor.beginTask("Creating project " + projectName, 4);
 
@@ -161,9 +165,12 @@ public class NewProjectWizard extends Wizard implements INewWizard {
             copyTemplateFiles(project, templateName, toolchainPath, cflags, monitor);
             monitor.worked(1);
 
-            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "boardModel"), boardModel);
-            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "toolchainPath"), toolchainPath);
-            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "buildCmd"), "make");
+            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "boardModel"),
+                    boardModel);
+            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "toolchainPath"),
+                    toolchainPath);
+            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "buildCmd"),
+                    "make");
             // 5. Save CFLAGS as a persistent property
             project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "cflags"), cflags);
             // refresh the project to ensure all changes are applied
@@ -175,8 +182,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
     }
 
     // 6. Update method signature to accept CFLAGS
-    private void copyTemplateFiles(IProject project, String templateName, String toolchainRootPath, String cflags,
-                    IProgressMonitor monitor) {
+    private void copyTemplateFiles(IProject project, String templateName, String toolchainRootPath,
+            String cflags, IProgressMonitor monitor) {
         Bundle bundle = Activator.getDefault().getBundle();
         String templatePath = "/templates/" + templateName;
         Enumeration<URL> entries = bundle.findEntries(templatePath, "*", true);
@@ -214,18 +221,20 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
                 if (toolchainPrefixName == null) {
                     toolchainPrefixName = "riscv64-unknown-elf";
-                    LOGGER.logWarning("Failed to infer toolchain prefix name from '" + toolchainRootPath
-                                    + "', using default value: " + toolchainPrefixName);
+                    LOGGER.logWarning(String.format(
+                            "Failed to infer toolchain prefix name from '%s', using default value: %s",
+                            toolchainRootPath, toolchainPrefixName));
                 }
 
                 StringBuilder sb = new StringBuilder();
                 try (BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(entryUrl.openStream(), StandardCharsets.UTF_8))) {
+                        new InputStreamReader(entryUrl.openStream(), StandardCharsets.UTF_8))) {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         line = line.replace("__TOOLCHAIN_BIN_PATH__", toolchainBinPath);
                         line = line.replace("__TOOLCHAIN_PREFIX_NAME__", toolchainPrefixName);
-                        line = line.replace("__CFLAGS_OPTIONS__", cflags); // 7. Replace CFLAGS placeholder
+                        // 7. Replace CFLAGS placeholder
+                        line = line.replace("__CFLAGS_OPTIONS__", cflags);
                         sb.append(line).append(System.lineSeparator());
                     }
                 } catch (IOException e) {
@@ -234,7 +243,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
                 String finalContent = sb.toString();
                 try (InputStream newContentStream =
-                                new ByteArrayInputStream(finalContent.getBytes(StandardCharsets.UTF_8))) {
+                        new ByteArrayInputStream(finalContent.getBytes(StandardCharsets.UTF_8))) {
                     if (file.exists()) {
                         file.setContents(newContentStream, true, true, monitor);
                     } else {

@@ -82,7 +82,8 @@ public class NewsView extends ViewPart {
         topComposite.setLayout(new GridLayout(3, false));
 
         middleComposite = new Composite(parent, SWT.NONE);
-        middleComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
+        middleComposite
+                .setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
         middleComposite.setLayout(new GridLayout(1, false));
 
         bottomComposite = new Composite(parent, SWT.NONE);
@@ -106,7 +107,8 @@ public class NewsView extends ViewPart {
         {
             var tableComposite = new Composite(middleComposite, SWT.NONE);
             {
-                final var gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
+                final var gridData =
+                        new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
                 gridData.heightHint = 100;
                 tableComposite.setLayoutData(gridData);
             }
@@ -141,17 +143,17 @@ public class NewsView extends ViewPart {
             final var contentProvider = new ObservableListContentProvider<NewsItem>();
             tableViewer.setContentProvider(contentProvider);
             // do NOT use ViewerSupport.bind() due to customized cell content.
-            final var labelProvider =
-                            new ObservableMapLabelProvider(Properties.observeEach(contentProvider.getKnownElements(),
-                                            BeanProperties.values(NewsItem.class, "unread", "title", "id"))) {
-                                @Override
-                                public String getColumnText(Object element, int columnIndex) {
-                                    if (columnIndex == 0 /* unread */) {
-                                        return ((NewsItem) element).getUnread() ? "*" : "";
-                                    }
-                                    return super.getColumnText(element, columnIndex);
-                                }
-                            };
+            final var labelProvider = new ObservableMapLabelProvider(
+                    Properties.observeEach(contentProvider.getKnownElements(),
+                            BeanProperties.values(NewsItem.class, "unread", "title", "id"))) {
+                @Override
+                public String getColumnText(Object element, int columnIndex) {
+                    if (columnIndex == 0 /* unread */) {
+                        return ((NewsItem) element).getUnread() ? "*" : "";
+                    }
+                    return super.getColumnText(element, columnIndex);
+                }
+            };
             tableViewer.setLabelProvider(labelProvider);
 
             tableViewer.setInput(newsListViewModel.getNewsList());
@@ -173,7 +175,8 @@ public class NewsView extends ViewPart {
         updateInfoLabel.setText("<updateInfo>");
 
         hideDetailsButton = new Button(bottomComposite, SWT.PUSH);
-        hideDetailsButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL));
+        hideDetailsButton.setLayoutData(
+                new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL));
         hideDetailsButton.setText("Hide Details");
     }
 
@@ -182,8 +185,10 @@ public class NewsView extends ViewPart {
             @Override
             protected NewsListViewerFilter calculate() {
                 final var newsFilter = new NewsListViewerFilter();
-                newsFilter.setPattern(WidgetProperties.text(SWT.Modify).observe(searchTextBox).getValue());
-                newsFilter.setOnlyUnread(WidgetProperties.buttonSelection().observe(unreadCheckBox).getValue());
+                newsFilter.setPattern(
+                        WidgetProperties.text(SWT.Modify).observe(searchTextBox).getValue());
+                newsFilter.setOnlyUnread(
+                        WidgetProperties.buttonSelection().observe(unreadCheckBox).getValue());
                 return newsFilter;
             }
         }.addValueChangeListener(e -> {
@@ -217,7 +222,8 @@ public class NewsView extends ViewPart {
         });
 
         {
-            final var selectionObservable = ViewerProperties.singleSelection(NewsItem.class).observe(tableViewer);
+            final var selectionObservable =
+                    ViewerProperties.singleSelection(NewsItem.class).observe(tableViewer);
             selectionObservable.addValueChangeListener(e -> {
                 final var selected = e.diff.getNewValue();
                 if (selected != null) {
@@ -228,7 +234,8 @@ public class NewsView extends ViewPart {
                 }
             });
 
-            final var detailsHtmlObservable = BeanProperties.value(NewsItem.class, "detailsHtml", String.class)
+            final var detailsHtmlObservable =
+                    BeanProperties.value(NewsItem.class, "detailsHtml", String.class)
                             .observeDetail(selectionObservable);
             detailsHtmlObservable.addValueChangeListener(e -> {
                 final var html = e.diff.getNewValue();
@@ -243,15 +250,18 @@ public class NewsView extends ViewPart {
             updateInfoObservable.addValueChangeListener(e -> {
                 updateInfoLabel.requestLayout();
             });
-            dbc.bindValue(updateInfoObservable, BeanProperties.value(NewsListViewModel.class, "infoText", String.class)
+            dbc.bindValue(updateInfoObservable,
+                    BeanProperties.value(NewsListViewModel.class, "infoText", String.class)
                             .observe(newsListViewModel));
-            dbc.bindValue(WidgetProperties.enabled().observe(updateButton), new ComputedValue<Boolean>() {
-                @Override
-                protected Boolean calculate() {
-                    return !BeanProperties.value(NewsListViewModel.class, "fetching", Boolean.class)
+            dbc.bindValue(WidgetProperties.enabled().observe(updateButton),
+                    new ComputedValue<Boolean>() {
+                        @Override
+                        protected Boolean calculate() {
+                            return !BeanProperties
+                                    .value(NewsListViewModel.class, "fetching", Boolean.class)
                                     .observe(newsListViewModel).getValue();
-                }
-            });
+                        }
+                    });
         }
     }
 
@@ -279,9 +289,10 @@ public class NewsView extends ViewPart {
         public boolean select(Viewer viewer, Object parentElement, Object element) {
             final var newsItem = (NewsItem) element;
 
-            final Pattern compiledPattern = Pattern.compile(Pattern.quote(pattern), Pattern.CASE_INSENSITIVE);
+            final Pattern compiledPattern =
+                    Pattern.compile(Pattern.quote(pattern), Pattern.CASE_INSENSITIVE);
             final boolean matchesPattern = compiledPattern.matcher(newsItem.getTitle()).find()
-                            || compiledPattern.matcher(newsItem.getId()).find();
+                    || compiledPattern.matcher(newsItem.getId()).find();
             final boolean onlyUnreadValue = Boolean.TRUE.equals(onlyUnread);
             final boolean matchesUnread = !onlyUnreadValue || newsItem.getUnread();
             return matchesPattern && matchesUnread;

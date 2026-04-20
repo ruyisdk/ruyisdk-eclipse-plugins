@@ -189,8 +189,10 @@ public class WizardConfigPage extends WizardPage {
                     final var p2 = (Profile) e2;
                     int result;
                     if (sortColumn == quirksColumn.getColumn()) {
-                        final var q1 = p1.getQuirks() == null ? "" : String.join(", ", p1.getQuirks());
-                        final var q2 = p2.getQuirks() == null ? "" : String.join(", ", p2.getQuirks());
+                        final var q1 =
+                                p1.getQuirks() == null ? "" : String.join(", ", p1.getQuirks());
+                        final var q2 =
+                                p2.getQuirks() == null ? "" : String.join(", ", p2.getQuirks());
                         result = q1.compareTo(q2);
                     } else {
                         final var n1 = p1.getName() == null ? "" : p1.getName();
@@ -231,7 +233,8 @@ public class WizardConfigPage extends WizardPage {
             }
             tcLabel.setText("Toolchains");
 
-            toolchainNamesViewer = new TableViewer(toolchainComposite, SWT.BORDER | SWT.FULL_SELECTION);
+            toolchainNamesViewer =
+                    new TableViewer(toolchainComposite, SWT.BORDER | SWT.FULL_SELECTION);
             final var tcNames = toolchainNamesViewer.getTable();
             {
                 final var gridData = new GridData(GridData.FILL_BOTH);
@@ -242,7 +245,8 @@ public class WizardConfigPage extends WizardPage {
             tcNames.setHeaderVisible(false);
             tcNames.setLinesVisible(true);
 
-            toolchainVersionsViewer = new TableViewer(toolchainComposite, SWT.BORDER | SWT.FULL_SELECTION);
+            toolchainVersionsViewer =
+                    new TableViewer(toolchainComposite, SWT.BORDER | SWT.FULL_SELECTION);
             final var tcVersions = toolchainVersionsViewer.getTable();
             {
                 final var gridData = new GridData(GridData.FILL_BOTH);
@@ -276,7 +280,8 @@ public class WizardConfigPage extends WizardPage {
             emulatorCheckBox.setText("Enable");
             emulatorCheckBox.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
 
-            emulatorNamesViewer = new TableViewer(emulatorComposite, SWT.BORDER | SWT.FULL_SELECTION);
+            emulatorNamesViewer =
+                    new TableViewer(emulatorComposite, SWT.BORDER | SWT.FULL_SELECTION);
             emulatorNames = emulatorNamesViewer.getTable();
             emulatorNames.setHeaderVisible(false);
             emulatorNames.setLinesVisible(true);
@@ -285,7 +290,8 @@ public class WizardConfigPage extends WizardPage {
             enData.widthHint = 300;
             emulatorNames.setLayoutData(enData);
 
-            emulatorVersionsViewer = new TableViewer(emulatorComposite, SWT.BORDER | SWT.FULL_SELECTION);
+            emulatorVersionsViewer =
+                    new TableViewer(emulatorComposite, SWT.BORDER | SWT.FULL_SELECTION);
             emulatorVersions = emulatorVersionsViewer.getTable();
             emulatorVersions.setHeaderVisible(false);
             emulatorVersions.setLinesVisible(true);
@@ -330,66 +336,76 @@ public class WizardConfigPage extends WizardPage {
         });
 
         final var profileIndexObservable = BeanProperties
-                        .value(VenvWizardViewModel.class, "selectedProfileIndex", Integer.class).observe(viewModel);
+                .value(VenvWizardViewModel.class, "selectedProfileIndex", Integer.class)
+                .observe(viewModel);
 
         // profiles
         {
-            final var profileSelection = ViewerProperties.singleSelection(Profile.class).observe(profileTableViewer);
+            final var profileSelection =
+                    ViewerProperties.singleSelection(Profile.class).observe(profileTableViewer);
             final var profileToIndex = new UpdateValueStrategy<Profile, Integer>();
-            profileToIndex.setConverter(new Converter<Profile, Integer>(Profile.class, Integer.class) {
-                @Override
-                public Integer convert(Profile fromObject) {
-                    if (fromObject == null) {
-                        return Integer.valueOf(-1);
-                    }
-                    return Integer.valueOf(viewModel.getProfiles().indexOf(fromObject));
-                }
-            });
+            profileToIndex
+                    .setConverter(new Converter<Profile, Integer>(Profile.class, Integer.class) {
+                        @Override
+                        public Integer convert(Profile fromObject) {
+                            if (fromObject == null) {
+                                return Integer.valueOf(-1);
+                            }
+                            return Integer.valueOf(viewModel.getProfiles().indexOf(fromObject));
+                        }
+                    });
             final var indexToProfile = new UpdateValueStrategy<Integer, Profile>();
-            indexToProfile.setConverter(new Converter<Integer, Profile>(Integer.class, Profile.class) {
-                @Override
-                public Profile convert(Integer fromObject) {
-                    final var idx = ((Integer) fromObject).intValue();
-                    return idx >= 0 && idx < viewModel.getProfiles().size() ? viewModel.getProfiles().get(idx) : null;
-                }
-            });
+            indexToProfile
+                    .setConverter(new Converter<Integer, Profile>(Integer.class, Profile.class) {
+                        @Override
+                        public Profile convert(Integer fromObject) {
+                            final var idx = ((Integer) fromObject).intValue();
+                            return idx >= 0 && idx < viewModel.getProfiles().size()
+                                    ? viewModel.getProfiles().get(idx)
+                                    : null;
+                        }
+                    });
             dbc.bindValue(profileSelection, profileIndexObservable, profileToIndex, indexToProfile);
         }
 
         // toolchain names
         {
             final var toolchainSelection =
-                            ViewerProperties.singleSelection(Toolchain.class).observe(toolchainNamesViewer);
-            final var toolchainIndexObservable =
-                            BeanProperties.value(VenvWizardViewModel.class, "selectedToolchainIndex", Integer.class)
-                                            .observe(viewModel);
+                    ViewerProperties.singleSelection(Toolchain.class).observe(toolchainNamesViewer);
+            final var toolchainIndexObservable = BeanProperties
+                    .value(VenvWizardViewModel.class, "selectedToolchainIndex", Integer.class)
+                    .observe(viewModel);
             final var toolchainToIndex = new UpdateValueStrategy<Toolchain, Integer>();
-            toolchainToIndex.setConverter(new Converter<Toolchain, Integer>(Toolchain.class, Integer.class) {
-                @Override
-                public Integer convert(Toolchain fromObject) {
-                    if (fromObject == null) {
-                        return Integer.valueOf(-1);
-                    }
-                    return Integer.valueOf(viewModel.getToolchains().indexOf(fromObject));
-                }
-            });
+            toolchainToIndex.setConverter(
+                    new Converter<Toolchain, Integer>(Toolchain.class, Integer.class) {
+                        @Override
+                        public Integer convert(Toolchain fromObject) {
+                            if (fromObject == null) {
+                                return Integer.valueOf(-1);
+                            }
+                            return Integer.valueOf(viewModel.getToolchains().indexOf(fromObject));
+                        }
+                    });
             final var indexToToolchain = new UpdateValueStrategy<Integer, Toolchain>();
-            indexToToolchain.setConverter(new Converter<Integer, Toolchain>(Integer.class, Toolchain.class) {
-                @Override
-                public Toolchain convert(Integer fromObject) {
-                    final var idx = ((Integer) fromObject).intValue();
-                    if (idx >= 0 && idx < viewModel.getToolchains().size()) {
-                        return viewModel.getToolchains().get(idx);
-                    }
-                    return null;
-                }
-            });
-            dbc.bindValue(toolchainSelection, toolchainIndexObservable, toolchainToIndex, indexToToolchain);
+            indexToToolchain.setConverter(
+                    new Converter<Integer, Toolchain>(Integer.class, Toolchain.class) {
+                        @Override
+                        public Toolchain convert(Integer fromObject) {
+                            final var idx = ((Integer) fromObject).intValue();
+                            if (idx >= 0 && idx < viewModel.getToolchains().size()) {
+                                return viewModel.getToolchains().get(idx);
+                            }
+                            return null;
+                        }
+                    });
+            dbc.bindValue(toolchainSelection, toolchainIndexObservable, toolchainToIndex,
+                    indexToToolchain);
 
             toolchainIndexObservable.addValueChangeListener(e -> {
                 final var idx = viewModel.getSelectedToolchainIndex();
                 if (idx >= 0 && idx < viewModel.getToolchains().size()) {
-                    toolchainVersionsViewer.setInput(viewModel.getToolchains().get(idx).getVersions());
+                    toolchainVersionsViewer
+                            .setInput(viewModel.getToolchains().get(idx).getVersions());
                 } else {
                     toolchainVersionsViewer.setInput(List.of());
                 }
@@ -399,81 +415,94 @@ public class WizardConfigPage extends WizardPage {
         // toolchain versions
         {
             final var toolchainVersionSelection =
-                            ViewerProperties.singleSelection(String.class).observe(toolchainVersionsViewer);
-            final var toolchainVersionIndexObservable = BeanProperties
-                            .value(VenvWizardViewModel.class, "selectedToolchainVersionIndex", Integer.class)
-                            .observe(viewModel);
+                    ViewerProperties.singleSelection(String.class).observe(toolchainVersionsViewer);
+            final var toolchainVersionIndexObservable =
+                    BeanProperties.value(VenvWizardViewModel.class, "selectedToolchainVersionIndex",
+                            Integer.class).observe(viewModel);
             final var toolchainVersionToIndex = new UpdateValueStrategy<String, Integer>();
-            toolchainVersionToIndex.setConverter(new Converter<String, Integer>(String.class, Integer.class) {
-                @Override
-                public Integer convert(String fromObject) {
-                    final var idx = viewModel.getSelectedToolchainIndex();
-                    if (idx < 0 || idx >= viewModel.getToolchains().size()) {
-                        return Integer.valueOf(-1);
-                    }
-                    final var vers = viewModel.getToolchains().get(idx).getVersions();
-                    return Integer.valueOf(vers == null ? -1 : vers.indexOf(fromObject));
-                }
-            });
+            toolchainVersionToIndex
+                    .setConverter(new Converter<String, Integer>(String.class, Integer.class) {
+                        @Override
+                        public Integer convert(String fromObject) {
+                            final var idx = viewModel.getSelectedToolchainIndex();
+                            if (idx < 0 || idx >= viewModel.getToolchains().size()) {
+                                return Integer.valueOf(-1);
+                            }
+                            final var vers = viewModel.getToolchains().get(idx).getVersions();
+                            return Integer.valueOf(vers == null ? -1 : vers.indexOf(fromObject));
+                        }
+                    });
             final var indexToToolchainVersion = new UpdateValueStrategy<Integer, String>();
-            indexToToolchainVersion.setConverter(new Converter<Integer, String>(Integer.class, String.class) {
-                @Override
-                public String convert(Integer fromObject) {
-                    final var idx = viewModel.getSelectedToolchainIndex();
-                    if (idx < 0 || idx >= viewModel.getToolchains().size()) {
-                        return null;
-                    }
-                    final var vers = viewModel.getToolchains().get(idx).getVersions();
-                    final var verIdx = ((Integer) fromObject).intValue();
-                    return vers != null && verIdx >= 0 && verIdx < vers.size() ? vers.get(verIdx) : null;
-                }
-            });
-            dbc.bindValue(toolchainVersionSelection, toolchainVersionIndexObservable, toolchainVersionToIndex,
-                            indexToToolchainVersion);
+            indexToToolchainVersion
+                    .setConverter(new Converter<Integer, String>(Integer.class, String.class) {
+                        @Override
+                        public String convert(Integer fromObject) {
+                            final var idx = viewModel.getSelectedToolchainIndex();
+                            if (idx < 0 || idx >= viewModel.getToolchains().size()) {
+                                return null;
+                            }
+                            final var vers = viewModel.getToolchains().get(idx).getVersions();
+                            final var verIdx = ((Integer) fromObject).intValue();
+                            return vers != null && verIdx >= 0 && verIdx < vers.size()
+                                    ? vers.get(verIdx)
+                                    : null;
+                        }
+                    });
+            dbc.bindValue(toolchainVersionSelection, toolchainVersionIndexObservable,
+                    toolchainVersionToIndex, indexToToolchainVersion);
         }
 
         // emulator enablement
         {
             final var emulatorEnabledObservable = BeanProperties
-                            .value(VenvWizardViewModel.class, "emulatorEnabled", Boolean.class).observe(viewModel);
-            dbc.bindValue(WidgetProperties.buttonSelection().observe(emulatorCheckBox), emulatorEnabledObservable);
-            dbc.bindValue(WidgetProperties.enabled().observe(emulatorNames), emulatorEnabledObservable);
-            dbc.bindValue(WidgetProperties.enabled().observe(emulatorVersions), emulatorEnabledObservable);
+                    .value(VenvWizardViewModel.class, "emulatorEnabled", Boolean.class)
+                    .observe(viewModel);
+            dbc.bindValue(WidgetProperties.buttonSelection().observe(emulatorCheckBox),
+                    emulatorEnabledObservable);
+            dbc.bindValue(WidgetProperties.enabled().observe(emulatorNames),
+                    emulatorEnabledObservable);
+            dbc.bindValue(WidgetProperties.enabled().observe(emulatorVersions),
+                    emulatorEnabledObservable);
         }
 
         // emulator names
         {
-            final var emulatorSelection = ViewerProperties.singleSelection(Emulator.class).observe(emulatorNamesViewer);
-            final var emulatorIndexObservable =
-                            BeanProperties.value(VenvWizardViewModel.class, "selectedEmulatorIndex", Integer.class)
-                                            .observe(viewModel);
+            final var emulatorSelection =
+                    ViewerProperties.singleSelection(Emulator.class).observe(emulatorNamesViewer);
+            final var emulatorIndexObservable = BeanProperties
+                    .value(VenvWizardViewModel.class, "selectedEmulatorIndex", Integer.class)
+                    .observe(viewModel);
             final var emulatorToIndex = new UpdateValueStrategy<Emulator, Integer>();
-            emulatorToIndex.setConverter(new Converter<Emulator, Integer>(Emulator.class, Integer.class) {
-                @Override
-                public Integer convert(Emulator fromObject) {
-                    if (fromObject == null) {
-                        return Integer.valueOf(-1);
-                    }
-                    return Integer.valueOf(viewModel.getEmulators().indexOf(fromObject));
-                }
-            });
+            emulatorToIndex
+                    .setConverter(new Converter<Emulator, Integer>(Emulator.class, Integer.class) {
+                        @Override
+                        public Integer convert(Emulator fromObject) {
+                            if (fromObject == null) {
+                                return Integer.valueOf(-1);
+                            }
+                            return Integer.valueOf(viewModel.getEmulators().indexOf(fromObject));
+                        }
+                    });
             final var indexToEmulator = new UpdateValueStrategy<Integer, Emulator>();
-            indexToEmulator.setConverter(new Converter<Integer, Emulator>(Integer.class, Emulator.class) {
-                @Override
-                public Emulator convert(Integer fromObject) {
-                    final var idx = ((Integer) fromObject).intValue();
-                    if (idx >= 0 && idx < viewModel.getEmulators().size()) {
-                        return viewModel.getEmulators().get(idx);
-                    }
-                    return null;
-                }
-            });
-            dbc.bindValue(emulatorSelection, emulatorIndexObservable, emulatorToIndex, indexToEmulator);
+            indexToEmulator
+                    .setConverter(new Converter<Integer, Emulator>(Integer.class, Emulator.class) {
+                        @Override
+                        public Emulator convert(Integer fromObject) {
+                            final var idx = ((Integer) fromObject).intValue();
+                            if (idx >= 0 && idx < viewModel.getEmulators().size()) {
+                                return viewModel.getEmulators().get(idx);
+                            }
+                            return null;
+                        }
+                    });
+            dbc.bindValue(emulatorSelection, emulatorIndexObservable, emulatorToIndex,
+                    indexToEmulator);
 
             emulatorIndexObservable.addValueChangeListener(e -> {
                 final var idx = viewModel.getSelectedEmulatorIndex();
                 if (idx >= 0 && idx < viewModel.getEmulators().size()) {
-                    emulatorVersionsViewer.setInput(viewModel.getEmulators().get(idx).getVersions());
+                    emulatorVersionsViewer
+                            .setInput(viewModel.getEmulators().get(idx).getVersions());
                 } else {
                     emulatorVersionsViewer.setInput(List.of());
                 }
@@ -483,37 +512,41 @@ public class WizardConfigPage extends WizardPage {
         // emulator versions
         {
             final var emulatorVersionSelection =
-                            ViewerProperties.singleSelection(String.class).observe(emulatorVersionsViewer);
+                    ViewerProperties.singleSelection(String.class).observe(emulatorVersionsViewer);
             final var emulatorVersionIndexObservable = BeanProperties
-                            .value(VenvWizardViewModel.class, "selectedEmulatorVersionIndex", Integer.class)
-                            .observe(viewModel);
+                    .value(VenvWizardViewModel.class, "selectedEmulatorVersionIndex", Integer.class)
+                    .observe(viewModel);
             final var emulatorVersionToIndex = new UpdateValueStrategy<String, Integer>();
-            emulatorVersionToIndex.setConverter(new Converter<String, Integer>(String.class, Integer.class) {
-                @Override
-                public Integer convert(String fromObject) {
-                    final var idx = viewModel.getSelectedEmulatorIndex();
-                    if (idx < 0 || idx >= viewModel.getEmulators().size()) {
-                        return Integer.valueOf(-1);
-                    }
-                    final var vers = viewModel.getEmulators().get(idx).getVersions();
-                    return Integer.valueOf(vers == null ? -1 : vers.indexOf(fromObject));
-                }
-            });
+            emulatorVersionToIndex
+                    .setConverter(new Converter<String, Integer>(String.class, Integer.class) {
+                        @Override
+                        public Integer convert(String fromObject) {
+                            final var idx = viewModel.getSelectedEmulatorIndex();
+                            if (idx < 0 || idx >= viewModel.getEmulators().size()) {
+                                return Integer.valueOf(-1);
+                            }
+                            final var vers = viewModel.getEmulators().get(idx).getVersions();
+                            return Integer.valueOf(vers == null ? -1 : vers.indexOf(fromObject));
+                        }
+                    });
             final var indexToEmulatorVersion = new UpdateValueStrategy<Integer, String>();
-            indexToEmulatorVersion.setConverter(new Converter<Integer, String>(Integer.class, String.class) {
-                @Override
-                public String convert(Integer fromObject) {
-                    final var idx = viewModel.getSelectedEmulatorIndex();
-                    if (idx < 0 || idx >= viewModel.getEmulators().size()) {
-                        return null;
-                    }
-                    final var vers = viewModel.getEmulators().get(idx).getVersions();
-                    final var verIdx = ((Integer) fromObject).intValue();
-                    return vers != null && verIdx >= 0 && verIdx < vers.size() ? vers.get(verIdx) : null;
-                }
-            });
-            dbc.bindValue(emulatorVersionSelection, emulatorVersionIndexObservable, emulatorVersionToIndex,
-                            indexToEmulatorVersion);
+            indexToEmulatorVersion
+                    .setConverter(new Converter<Integer, String>(Integer.class, String.class) {
+                        @Override
+                        public String convert(Integer fromObject) {
+                            final var idx = viewModel.getSelectedEmulatorIndex();
+                            if (idx < 0 || idx >= viewModel.getEmulators().size()) {
+                                return null;
+                            }
+                            final var vers = viewModel.getEmulators().get(idx).getVersions();
+                            final var verIdx = ((Integer) fromObject).intValue();
+                            return vers != null && verIdx >= 0 && verIdx < vers.size()
+                                    ? vers.get(verIdx)
+                                    : null;
+                        }
+                    });
+            dbc.bindValue(emulatorVersionSelection, emulatorVersionIndexObservable,
+                    emulatorVersionToIndex, indexToEmulatorVersion);
         }
 
         // filter toolchains and emulators by quirks when profile changes
@@ -524,22 +557,22 @@ public class WizardConfigPage extends WizardPage {
 
         // sysroot
         {
-            final var sysrootSelection = new SelectObservableValue<VenvWizardViewModel.SysrootOption>();
+            final var sysrootSelection =
+                    new SelectObservableValue<VenvWizardViewModel.SysrootOption>();
             sysrootSelection.addOption(VenvWizardViewModel.SysrootOption.DEFAULT_SYSROOT,
-                            WidgetProperties.buttonSelection().observe(sysrootDefaultRadio));
+                    WidgetProperties.buttonSelection().observe(sysrootDefaultRadio));
             sysrootSelection.addOption(VenvWizardViewModel.SysrootOption.NONE_SYSROOT,
-                            WidgetProperties.buttonSelection().observe(sysrootNoneRadio));
+                    WidgetProperties.buttonSelection().observe(sysrootNoneRadio));
             sysrootSelection.addOption(VenvWizardViewModel.SysrootOption.FOREIGN_TOOLCHAIN,
-                            WidgetProperties.buttonSelection().observe(sysrootForeignRadio));
+                    WidgetProperties.buttonSelection().observe(sysrootForeignRadio));
 
-            dbc.bindValue(sysrootSelection, BeanProperties
-                            .value(VenvWizardViewModel.class, "sysrootOption", VenvWizardViewModel.SysrootOption.class)
-                            .observe(viewModel));
+            dbc.bindValue(sysrootSelection, BeanProperties.value(VenvWizardViewModel.class,
+                    "sysrootOption", VenvWizardViewModel.SysrootOption.class).observe(viewModel));
         }
 
-        final var completeObservable =
-                        BeanProperties.value(VenvWizardViewModel.class, "configurationPageComplete", Boolean.class)
-                                        .observe(viewModel);
+        final var completeObservable = BeanProperties
+                .value(VenvWizardViewModel.class, "configurationPageComplete", Boolean.class)
+                .observe(viewModel);
         completeObservable.addValueChangeListener(e -> updatePageComplete());
     }
 

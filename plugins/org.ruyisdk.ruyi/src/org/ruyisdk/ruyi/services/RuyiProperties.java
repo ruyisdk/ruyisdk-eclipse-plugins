@@ -34,7 +34,8 @@ public class RuyiProperties {
             {
                 var removed = false;
                 for (final var key : new String[] {"ruyi.telemetry.status", "ruyi.mirror.custom",
-                        "ruyi.mirror.iscas.checked", "ruyi.mirror.github.checked", "ruyi.mirror.custom.checked"}) {
+                        "ruyi.mirror.iscas.checked", "ruyi.mirror.github.checked",
+                        "ruyi.mirror.custom.checked"}) {
                     if (props.remove(key) != null) {
                         removed = true;
                     }
@@ -74,7 +75,7 @@ public class RuyiProperties {
     // 修改saveConfig方法使其能接受Properties参数
     private static synchronized void saveConfig(Properties propsToSave) {
         try (OutputStream os = Files.newOutputStream(FILE_PATH, StandardOpenOption.CREATE,
-                        StandardOpenOption.TRUNCATE_EXISTING)) {
+                StandardOpenOption.TRUNCATE_EXISTING)) {
             propsToSave.store(os, "Ruyi Configuration");
         } catch (IOException e) {
             throw RuyiConfigException.saveFailed("config: " + FILE_PATH, e);

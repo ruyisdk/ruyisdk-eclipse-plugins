@@ -37,7 +37,8 @@ public class ToolchainLocator {
             // 1. jsonParser.findInstalledToolchainForBoard method
             LOGGER.logInfo("Preparing to call JsonParser.findInstalledToolchainForBoard...");
             toolchainName = JsonParser.findInstalledToolchainForBoard(boardModel);
-            LOGGER.logInfo("Successfully called JsonParser. Returned toolchainName: " + toolchainName);
+            LOGGER.logInfo(
+                    "Successfully called JsonParser. Returned toolchainName: " + toolchainName);
         } catch (PluginException e) {
             LOGGER.logError("Failed to find installed toolchain for board: " + boardModel, e);
             return null;
@@ -55,7 +56,8 @@ public class ToolchainLocator {
             return null;
         }
         File toolchainDir =
-                        Paths.get(userHome, ".local", "share", "ruyi", "binaries", "x86_64", toolchainName).toFile();
+                Paths.get(userHome, ".local", "share", "ruyi", "binaries", "x86_64", toolchainName)
+                        .toFile();
         LOGGER.logInfo("Constructed path: " + toolchainDir.getAbsolutePath());
 
         if (isValidToolchainPath(toolchainDir.getAbsolutePath())) {

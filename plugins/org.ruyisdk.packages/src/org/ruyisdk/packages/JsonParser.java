@@ -15,8 +15,8 @@ import org.ruyisdk.ruyi.services.RuyiCli;
 public class JsonParser {
 
     /**
-     * Parses raw porcelain CLI output into a tree structure. Each non-empty line that starts with '{'
-     * and is not a log entry is treated as a JSON object.
+     * Parses raw porcelain CLI output into a tree structure. Each non-empty line that starts with
+     * '{' and is not a log entry is treated as a JSON object.
      *
      * @param rawOutput raw CLI output (newline-separated JSON objects)
      * @param rootLabel label for root node
@@ -29,7 +29,8 @@ public class JsonParser {
         }
         for (final var line : rawOutput.split("\\R")) {
             final var trimmed = line.trim();
-            if (trimmed.isEmpty() || !trimmed.startsWith("{") || trimmed.contains("\"ty\":\"log-v1\"")) {
+            if (trimmed.isEmpty() || !trimmed.startsWith("{")
+                    || trimmed.contains("\"ty\":\"log-v1\"")) {
                 continue;
             }
             try (final var reader = Json.createReader(new StringReader(trimmed))) {
@@ -62,11 +63,13 @@ public class JsonParser {
                 }
                 String semver = versionObject.getString("semver");
                 JsonArray remarks = versionObject.getJsonArray("remarks");
-                String remark = (remarks != null && !remarks.isEmpty()) ? " [" + remarks.getString(0) + "]" : "";
+                String remark =
+                        (remarks != null && !remarks.isEmpty()) ? " [" + remarks.getString(0) + "]"
+                                : "";
 
                 boolean isDownloaded = versionObject.getBoolean("is_installed", false);
 
-                final var packageRef = name + "(" + semver + ")";
+                final var packageRef = String.format("%s(%s)", name, semver);
                 final var versionNode = new TreeNode(semver + remark, null, packageRef);
                 versionNode.setLeaf(true);
                 versionNode.setDownloaded(isDownloaded);

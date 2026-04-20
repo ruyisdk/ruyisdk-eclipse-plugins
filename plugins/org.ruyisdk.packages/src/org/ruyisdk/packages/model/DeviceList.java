@@ -20,7 +20,8 @@ public class DeviceList {
     public static List<DeviceEntityInfo> loadDevices() {
         final var output = RuyiCli.listEntitiesByType("device");
         final var devices = EntityInfoParser.parseDeviceEntities(output);
-        devices.sort(Comparator.comparing(DeviceEntityInfo::getLabel, String.CASE_INSENSITIVE_ORDER));
+        devices.sort(
+                Comparator.comparing(DeviceEntityInfo::getLabel, String.CASE_INSENSITIVE_ORDER));
         return List.copyOf(devices);
     }
 }

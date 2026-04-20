@@ -38,8 +38,8 @@ public class PackageOperationViewModel extends BaseViewModel {
      * @param operations the operations to execute
      * @param onCompleted called on the UI thread after all operations finish (may be {@code null})
      */
-    public PackageOperationViewModel(Consumer<Runnable> uiExecutor, List<PackageOperation> operations,
-                    Runnable onCompleted) {
+    public PackageOperationViewModel(Consumer<Runnable> uiExecutor,
+            List<PackageOperation> operations, Runnable onCompleted) {
         super(uiExecutor);
         this.operations = List.copyOf(operations);
         this.onCompleted = onCompleted;
@@ -65,8 +65,8 @@ public class PackageOperationViewModel extends BaseViewModel {
                 @Override
                 public void onStepStart(int index, int total, PackageOperation op) {
                     final var action = op.uninstall() ? "Uninstalling" : "Installing";
-                    final var text = "[" + (index + 1) + "/" + total + "] " + action + " \"" + op.packageRef()
-                                    + "\"...\n";
+                    final var text = String.format("[%d/%d] %s \"%s\"...%n", index + 1, total,
+                            action, op.packageRef());
                     appendOutput(text);
                 }
 
@@ -87,7 +87,8 @@ public class PackageOperationViewModel extends BaseViewModel {
 
                 @Override
                 public void onAllFinished(boolean wasCancelled) {
-                    final var msg = wasCancelled ? "\nCancelled by user.\n" : "\nAll operations completed.\n";
+                    final var msg = wasCancelled ? "\nCancelled by user.\n"
+                            : "\nAll operations completed.\n";
                     appendOutput(msg);
                     running = false;
                     firePropertyChange(PROP_RUNNING, true, false);

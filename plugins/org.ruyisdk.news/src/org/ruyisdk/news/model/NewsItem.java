@@ -155,7 +155,8 @@ public class NewsItem {
      * @param detailsFetched whether details have been fetched
      */
     public void setDetailsFetched(boolean detailsFetched) {
-        pcs.firePropertyChange("detailsFetched", this.detailsFetched, this.detailsFetched = detailsFetched);
+        pcs.firePropertyChange("detailsFetched", this.detailsFetched,
+                this.detailsFetched = detailsFetched);
     }
 
     /**

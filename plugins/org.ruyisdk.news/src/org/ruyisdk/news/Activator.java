@@ -22,7 +22,7 @@ public class Activator extends AbstractUIPlugin {
     private static NewsFetchService service;
 
     private static final PluginLogger LOGGER =
-                    new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
+            new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
     public NewsManager getNewsManager() {
         return newsManager;

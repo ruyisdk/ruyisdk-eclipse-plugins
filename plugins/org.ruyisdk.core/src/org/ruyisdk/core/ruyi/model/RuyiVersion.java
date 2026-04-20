@@ -43,7 +43,8 @@ public class RuyiVersion implements Comparable<RuyiVersion> {
             if (parts.length != 3) {
                 return null;
             }
-            return new RuyiVersion(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+            return new RuyiVersion(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]),
+                    Integer.parseInt(parts[2]));
         } catch (NumberFormatException e) {
             return null;
         }
@@ -68,7 +69,7 @@ public class RuyiVersion implements Comparable<RuyiVersion> {
 
     @Override
     public String toString() {
-        return major + "." + minor + "." + patch;
+        return String.format("%d.%d.%d", major, minor, patch);
     }
 
     /**

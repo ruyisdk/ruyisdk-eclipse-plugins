@@ -24,15 +24,15 @@ public class DeviceSelectionViewModel extends BaseViewModel {
      * Creates a new device-selection ViewModel.
      *
      * <p>
-     * This ViewModel is always used from the UI thread (dialog interaction), so it uses a synchronous
-     * executor ({@code Runnable::run}).
+     * This ViewModel is always used from the UI thread (dialog interaction), so it uses a
+     * synchronous executor ({@code Runnable::run}).
      *
      * @param devices the cached device list (snapshot)
      * @param currentDevice the device currently chosen in the main view (may be {@code null})
      * @param errorMessage the error message from the last device-load attempt (may be {@code null})
      */
     public DeviceSelectionViewModel(List<DeviceEntityInfo> devices, DeviceEntityInfo currentDevice,
-                    String errorMessage) {
+            String errorMessage) {
         super(Runnable::run);
         this.devices = devices;
         this.selectedDevice = currentDevice;

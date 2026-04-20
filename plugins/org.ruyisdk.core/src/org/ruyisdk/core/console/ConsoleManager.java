@@ -33,6 +33,6 @@ public class ConsoleManager {
      */
     public static void dispose() {
         ConsolePlugin.getDefault().getConsoleManager()
-                        .removeConsoles(new IConsole[] {RuyiSdkConsole.getInstance().getConsole()});
+                .removeConsoles(new IConsole[] {RuyiSdkConsole.getInstance().getConsole()});
     }
 }

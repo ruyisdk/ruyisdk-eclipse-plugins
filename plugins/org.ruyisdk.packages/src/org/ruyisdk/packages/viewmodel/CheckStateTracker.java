@@ -30,9 +30,9 @@ public class CheckStateTracker {
      * Returns whether the given node should appear checked.
      *
      * <p>
-     * A leaf is checked when the user has explicitly selected it, or when there is no user override and
-     * the package is already downloaded. A non-leaf is checked when at least one descendant leaf is
-     * effectively checked.
+     * A leaf is checked when the user has explicitly selected it, or when there is no user override
+     * and the package is already downloaded. A non-leaf is checked when at least one descendant
+     * leaf is effectively checked.
      */
     public boolean isEffectivelyChecked(TreeNode node) {
         if (node.isLeaf()) {
@@ -51,8 +51,8 @@ public class CheckStateTracker {
      * Returns whether the given non-leaf node should appear grayed (partially checked).
      *
      * <p>
-     * A node is grayed when some, but not all, of its descendant leaves are effectively checked. Leaf
-     * nodes are never grayed.
+     * A node is grayed when some, but not all, of its descendant leaves are effectively checked.
+     * Leaf nodes are never grayed.
      */
     public boolean isEffectivelyGrayed(TreeNode node) {
         if (node.isLeaf()) {

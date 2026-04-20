@@ -45,14 +45,14 @@ public class RuyiApi {
             }
 
             // 构建版本信息对象
-            String[] urls = downloads.getJSONArray(platformKey).toList().stream().map(Object::toString)
-                            .toArray(String[]::new);
+            String[] urls = downloads.getJSONArray(platformKey).toList().stream()
+                    .map(Object::toString).toArray(String[]::new);
 
             String version = stable.getString("version");
             String filename = urls[0].split(version + "/")[1];
             // GitHub URL and Mirror URL
-            return new RuyiReleaseInfo(RuyiVersion.parse(version), stable.getString("channel"), filename, urls[0],
-                            urls[1]);
+            return new RuyiReleaseInfo(RuyiVersion.parse(version), stable.getString("channel"),
+                    filename, urls[0], urls[1]);
 
         } catch (JSONException e) {
             throw RuyiApiException.jsonError(e);

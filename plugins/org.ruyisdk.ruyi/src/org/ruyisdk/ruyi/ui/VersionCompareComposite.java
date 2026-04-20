@@ -30,7 +30,8 @@ public class VersionCompareComposite extends Composite {
         currentGroup.setLayout(new GridLayout());
         currentGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        currentVersionText = new StyledText(currentGroup, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
+        currentVersionText =
+                new StyledText(currentGroup, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.WRAP);
         currentVersionText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         currentVersionText.setEditable(false);
 
@@ -56,10 +57,17 @@ public class VersionCompareComposite extends Composite {
         if (!isDisposed()) {
             getDisplay().asyncExec(() -> {
                 if (!currentVersionText.isDisposed()) {
-                    currentVersionText.setText("Version: " + currentVersion + "\n\nNo update information available");
+                    currentVersionText.setText(String.format("""
+                        Version: %s
+
+                        No update information available""", currentVersion));
                 }
                 if (!newVersionText.isDisposed()) {
-                    newVersionText.setText("Version: " + newVersion + "\n\nChanges:\n" + changelog);
+                    newVersionText.setText(String.format("""
+                        Version: %s
+
+                        Changes:
+                        %s""", newVersion, changelog));
                 }
             });
         }

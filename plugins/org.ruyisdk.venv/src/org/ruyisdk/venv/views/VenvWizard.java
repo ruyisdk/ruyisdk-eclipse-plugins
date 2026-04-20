@@ -48,16 +48,16 @@ public class VenvWizard extends Wizard {
             });
         } catch (InvocationTargetException e) {
             StatusManager.getManager()
-                            .handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
-                                            "Failed to update package index; wizard will abort.", e.getCause()),
-                                            StatusManager.LOG | StatusManager.BLOCK);
+                    .handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
+                            "Failed to update package index; wizard will abort.", e.getCause()),
+                            StatusManager.LOG | StatusManager.BLOCK);
             return;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             StatusManager.getManager()
-                            .handle(new Status(IStatus.CANCEL, "org.ruyisdk.venv",
-                                            "Package index update was cancelled; wizard will abort.", e),
-                                            StatusManager.LOG | StatusManager.BLOCK);
+                    .handle(new Status(IStatus.CANCEL, "org.ruyisdk.venv",
+                            "Package index update was cancelled; wizard will abort.", e),
+                            StatusManager.LOG | StatusManager.BLOCK);
             return;
         }
 
@@ -94,15 +94,15 @@ public class VenvWizard extends Wizard {
             return true;
         } catch (InvocationTargetException e) {
             StatusManager.getManager()
-                            .handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
-                                            "Unable to complete virtual environment setup.", e.getCause()),
-                                            StatusManager.LOG | StatusManager.BLOCK);
+                    .handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
+                            "Unable to complete virtual environment setup.", e.getCause()),
+                            StatusManager.LOG | StatusManager.BLOCK);
             return false;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             StatusManager.getManager().handle(
-                            new Status(IStatus.CANCEL, "org.ruyisdk.venv", "Operation was cancelled.", e),
-                            StatusManager.LOG | StatusManager.BLOCK);
+                    new Status(IStatus.CANCEL, "org.ruyisdk.venv", "Operation was cancelled.", e),
+                    StatusManager.LOG | StatusManager.BLOCK);
             return false;
         }
     }

@@ -21,7 +21,7 @@ public class Activator extends AbstractUIPlugin {
     private RuyiCore ruyiCore; // 核心服务
 
     private static final PluginLogger LOGGER =
-                    new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
+            new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
     /**
      * Starts the plugin.

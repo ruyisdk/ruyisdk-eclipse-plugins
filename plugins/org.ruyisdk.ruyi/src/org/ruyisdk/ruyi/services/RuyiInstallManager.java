@@ -40,8 +40,8 @@ public final class RuyiInstallManager {
      * @param monitor progress monitor
      * @param listener installation listener
      */
-    public static void install(String destinationDirectory, String repoUrl, TelemetryMode telemetryMode,
-                    IProgressMonitor monitor, InstallationListener listener) {
+    public static void install(String destinationDirectory, String repoUrl,
+            TelemetryMode telemetryMode, IProgressMonitor monitor, InstallationListener listener) {
         SubMonitor subMonitor = SubMonitor.convert(monitor, "Installing Ruyi", 100);
 
         try {
@@ -61,7 +61,8 @@ public final class RuyiInstallManager {
         }
     }
 
-    private static void prepareInstallation(String destinationDirectory, InstallationListener listener) {
+    private static void prepareInstallation(String destinationDirectory,
+            InstallationListener listener) {
         final var destinationPath = Paths.get(destinationDirectory);
         listener.logMessage("Verifying installation directory: " + destinationPath);
         LOGGER.logInfo("Ruyi package manager install path: " + destinationPath);
@@ -95,23 +96,24 @@ public final class RuyiInstallManager {
         }
         long requiredSpaceBytes = 500L * 1024 * 1024;
         if (freeSpaceBytes < requiredSpaceBytes) {
-            BigDecimal requiredMb = BigDecimal.valueOf(requiredSpaceBytes).divide(BigDecimal.valueOf(1024L * 1024L), 1,
-                            RoundingMode.HALF_UP);
-            BigDecimal freeMb = BigDecimal.valueOf(freeSpaceBytes).divide(BigDecimal.valueOf(1024L * 1024L), 1,
-                            RoundingMode.HALF_UP);
+            BigDecimal requiredMb = BigDecimal.valueOf(requiredSpaceBytes)
+                    .divide(BigDecimal.valueOf(1024L * 1024L), 1, RoundingMode.HALF_UP);
+            BigDecimal freeMb = BigDecimal.valueOf(freeSpaceBytes)
+                    .divide(BigDecimal.valueOf(1024L * 1024L), 1, RoundingMode.HALF_UP);
 
-            throw RuyiInstallException.insufficientDiskSpace(requiredMb.stripTrailingZeros().toPlainString(),
-                            freeMb.stripTrailingZeros().toPlainString());
+            throw RuyiInstallException.insufficientDiskSpace(
+                    requiredMb.stripTrailingZeros().toPlainString(),
+                    freeMb.stripTrailingZeros().toPlainString());
         }
 
-        BigDecimal freeMb = BigDecimal.valueOf(freeSpaceBytes).divide(BigDecimal.valueOf(1024L * 1024L), 1,
-                        RoundingMode.HALF_UP);
-        listener.logMessage("磁盘空间充足 (可用: " + freeMb.toPlainString() + " MB)");
+        BigDecimal freeMb = BigDecimal.valueOf(freeSpaceBytes)
+                .divide(BigDecimal.valueOf(1024L * 1024L), 1, RoundingMode.HALF_UP);
+        listener.logMessage(String.format("磁盘空间充足 (可用: %s MB)", freeMb.toPlainString()));
         listener.progressChanged(10, "准备完成");
     }
 
     private static Path downloadRuyi(String destinationDirectory, IProgressMonitor monitor,
-                    InstallationListener listener) {
+            InstallationListener listener) {
         String archSuffix = SystemInfo.detectArchitecture().getSuffix();
         RuyiReleaseInfo latestRelease = RuyiApi.getLatestRelease(archSuffix);
         Path ruyiExecutablePath = Paths.get(destinationDirectory, "ruyi");
@@ -126,27 +128,28 @@ public final class RuyiInstallManager {
         for (int i = 0; i < downloadSources.length; i++) {
             String sourceName = i == 0 ? "镜像源" : "GitHub源";
             String ruyiDownloadUrl = downloadSources[i];
-            LOGGER.logInfo("Downloading Ruyi from: " + ruyiDownloadUrl + " to: " + ruyiExecutablePath);
+            LOGGER.logInfo(String.format("Downloading Ruyi from: %s to: %s", ruyiDownloadUrl,
+                    ruyiExecutablePath));
 
             try {
                 listener.logMessage(String.format("尝试从%s下载: %s", sourceName, ruyiDownloadUrl));
 
-                RuyiNetworkUtils.downloadFile(ruyiDownloadUrl, ruyiExecutablePath.toString(), monitor,
-                                (transferred, total) -> {
-                                    if (total <= 0) {
-                                        return;
-                                    }
+                RuyiNetworkUtils.downloadFile(ruyiDownloadUrl, ruyiExecutablePath.toString(),
+                        monitor, (transferred, total) -> {
+                            if (total <= 0) {
+                                return;
+                            }
 
-                                    int percent = (int) ((double) transferred / total * 100);
-                                    percent = Math.min(percent, 100);
+                            int percent = (int) ((double) transferred / total * 100);
+                            percent = Math.min(percent, 100);
 
-                                    if (percent > lastPercent[0]) {
-                                        monitor.worked(percent - lastPercent[0]);
-                                        lastPercent[0] = percent;
-                                    }
-                                    listener.progressChanged(percent, String.format("从%s下载中 (%d/%d KB)", sourceName,
-                                                    transferred / 1024, total / 1024));
-                                });
+                            if (percent > lastPercent[0]) {
+                                monitor.worked(percent - lastPercent[0]);
+                                lastPercent[0] = percent;
+                            }
+                            listener.progressChanged(percent, String.format("从%s下载中 (%d/%d KB)",
+                                    sourceName, transferred / 1024, total / 1024));
+                        });
 
                 if (lastPercent[0] < 100) {
                     monitor.worked(100 - lastPercent[0]);
@@ -170,11 +173,14 @@ public final class RuyiInstallManager {
             }
         }
 
-        throw RuyiInstallException.downloadFailed(String.format("所有下载尝试均失败。最后错误: %s",
-                        lastException != null ? lastException.getMessage() : "未知错误"), lastException);
+        throw RuyiInstallException.downloadFailed(
+                String.format("所有下载尝试均失败。最后错误: %s",
+                        lastException != null ? lastException.getMessage() : "未知错误"),
+                lastException);
     }
 
-    private static void setExecutablePermissions(Path executablePath, InstallationListener listener) {
+    private static void setExecutablePermissions(Path executablePath,
+            InstallationListener listener) {
         File file = executablePath.toFile();
 
         if (!file.exists()) {
@@ -192,14 +198,16 @@ public final class RuyiInstallManager {
         if (!success) {
             try {
                 Path filePath = file.toPath();
-                Set<PosixFilePermission> perms = new HashSet<>(Files.getPosixFilePermissions(filePath));
+                Set<PosixFilePermission> perms =
+                        new HashSet<>(Files.getPosixFilePermissions(filePath));
                 perms.add(PosixFilePermission.OWNER_EXECUTE);
                 perms.add(PosixFilePermission.GROUP_EXECUTE);
                 perms.add(PosixFilePermission.OTHERS_EXECUTE);
                 Files.setPosixFilePermissions(filePath, perms);
 
                 if (listener != null) {
-                    listener.logMessage("Successfully set executable permissions using POSIX API: " + executablePath);
+                    listener.logMessage("Successfully set executable permissions using POSIX API: "
+                            + executablePath);
                 }
             } catch (IOException | UnsupportedOperationException e) {
                 throw RuyiInstallException.permissionFailed(executablePath.toString(), e);
@@ -218,19 +226,22 @@ public final class RuyiInstallManager {
 
         final var version = RuyiCli.getInstalledVersion();
         if (version == null) {
-            throw RuyiInstallException.validationFailed("There are problems in the operation ruyi -V.");
+            throw RuyiInstallException
+                    .validationFailed("There are problems in the operation ruyi -V.");
         }
 
         listener.logMessage("Ruyi " + version.toString() + " install successful.");
     }
 
     private static void configureInstalledRuyi(String repoUrl, TelemetryMode telemetryMode,
-                    InstallationListener listener) {
+            InstallationListener listener) {
         listener.logMessage("Ruyi Config...");
 
         Objects.requireNonNull(repoUrl, "No repository configuration selected");
         RuyiCli.setRepoRemote(repoUrl);
-        listener.logMessage("ruyi config set repo.remote successful. \n repo.remote is:" + RuyiCli.getRepoRemote());
+        listener.logMessage(String.format("""
+            ruyi config set repo.remote successful.
+            repo.remote is: %s""", RuyiCli.getRepoRemote()));
 
         RuyiCli.updatePackageIndex();
         listener.logMessage("ruyi update successful");

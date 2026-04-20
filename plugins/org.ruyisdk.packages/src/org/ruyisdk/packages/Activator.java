@@ -15,7 +15,7 @@ public class Activator extends AbstractUIPlugin {
     private static Activator plugin;
 
     private static final PluginLogger LOGGER =
-                    new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
+            new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
     @Override
     public void start(BundleContext context) throws Exception {

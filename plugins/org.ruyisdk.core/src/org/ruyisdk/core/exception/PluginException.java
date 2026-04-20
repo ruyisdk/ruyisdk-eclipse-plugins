@@ -41,12 +41,14 @@ public class PluginException extends RuntimeException {
             return message;
         }
         final var exType = cause.getClass().getSimpleName();
-        final var msg = message + "\n" + exType;
-
         final var exMsg = cause.getMessage();
         if (exMsg != null) {
-            return msg + ": " + exMsg;
+            return String.format("""
+                %s
+                %s: %s""", message, exType, exMsg);
         }
-        return msg;
+        return String.format("""
+            %s
+            %s""", message, exType);
     }
 }

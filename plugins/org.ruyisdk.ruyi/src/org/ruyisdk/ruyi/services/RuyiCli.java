@@ -208,8 +208,8 @@ public class RuyiCli {
     public static List<ProfileInfo> listProfiles() {
         final var out = new ArrayList<ProfileInfo>();
         try {
-            var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true).list()
-                            .profiles().end().build();
+            var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                    .porcelain(true).list().profiles().end().build();
             var result = request.execute();
             var output = result.getOutput();
 
@@ -220,8 +220,10 @@ public class RuyiCli {
             // plain text parsing: lines like "wch-qingke-v2a (needs quirks: {'wch'})"
             // which quirks are in the form of a Python set literal.
             final var namePtn = Pattern.compile("^\\s*([^\\s(]+)", Pattern.CASE_INSENSITIVE);
-            final var quirksPtn = Pattern.compile("needs quirks:\\s*\\{([^}]*)\\}", Pattern.CASE_INSENSITIVE);
-            final var reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(output.getBytes())));
+            final var quirksPtn =
+                    Pattern.compile("needs quirks:\\s*\\{([^}]*)\\}", Pattern.CASE_INSENSITIVE);
+            final var reader = new BufferedReader(
+                    new InputStreamReader(new ByteArrayInputStream(output.getBytes())));
             String line;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
@@ -259,8 +261,8 @@ public class RuyiCli {
 
     /** Lists available news items using the ruyi CLI. */
     public static List<NewsListItemInfo> listNewsItems(boolean onlyUnread) {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true).news()
-                        .list(onlyUnread).end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(true).news().list(onlyUnread).end().build();
         final var result = request.execute();
         return parseNewsListFromString(result.getOutput());
     }
@@ -275,11 +277,11 @@ public class RuyiCli {
         if (idOrOrdinal == null || idOrOrdinal.isBlank()) {
             throw RuyiCliException.invalidArgument("Invalid news item ID or ordinal");
         }
-        // TODO: the 3-second timeout help us avoid hanging if the CLI gets stuck trying to read news
-        // content.
+        // TODO: the 3-second timeout help us avoid hanging if the CLI gets stuck trying to read
+        // news content.
         // The hang is due to a unresolved bug.
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true)
-                        .timeoutSeconds(3).news().read(idOrOrdinal).end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(true).timeoutSeconds(3).news().read(idOrOrdinal).end().build();
         final var result = request.execute();
         return parseNewsReadFromString(result.getOutput());
     }
@@ -424,7 +426,8 @@ public class RuyiCli {
      * @return command result with exit code and captured output
      */
     public static String runRuyiExperimental(List<String> args, File workingDirectory) {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
+        final var request =
+                RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
                         .args(args).experimental(true).workingDirectory(workingDirectory).build();
         return request.execute().getOutput();
     }
@@ -448,8 +451,8 @@ public class RuyiCli {
      *
      */
     public static void updatePackageIndex() {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true).update()
-                        .end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(true).update().end().build();
         request.execute();
     }
 
@@ -459,8 +462,8 @@ public class RuyiCli {
      * @return version or null if not available or command fails
      */
     public static RuyiVersion getInstalledVersion() {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
-                        .args("-V").build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(false).args("-V").build();
         final var result = request.execute();
         return parseInstalledVersion(result);
     }
@@ -486,8 +489,8 @@ public class RuyiCli {
      * @param remoteUrl remote repository URL
      */
     public static void setRepoRemote(String remoteUrl) {
-        RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false).config()
-                        .set("repo.remote", remoteUrl).end().build().execute();
+        RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
+                .config().set("repo.remote", remoteUrl).end().build().execute();
     }
 
     /**
@@ -496,8 +499,8 @@ public class RuyiCli {
      * @return repository URL or null if not available or command fails
      */
     public static String getRepoRemote() {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
-                        .config().get("repo.remote").end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(false).config().get("repo.remote").end().build();
         final var result = request.execute();
         return readFirstLine(result);
     }
@@ -508,8 +511,8 @@ public class RuyiCli {
      * @param branch branch name
      */
     public static void setRepoBranch(String branch) {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
-                        .config().set("repo.branch", branch).end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(false).config().set("repo.branch", branch).end().build();
         request.execute();
     }
 
@@ -519,8 +522,8 @@ public class RuyiCli {
      * @return branch name or null if not set
      */
     public static String getRepoBranch() {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
-                        .config().get("repo.branch").end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(false).config().get("repo.branch").end().build();
         final var result = request.execute();
         return readFirstLine(result);
     }
@@ -532,11 +535,11 @@ public class RuyiCli {
      */
     public static void setRepoLocal(String localPath) {
         if (localPath == null || localPath.isBlank()) {
-            RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false).config()
-                            .unset("repo.local").end().build().execute();
+            RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
+                    .config().unset("repo.local").end().build().execute();
         } else {
-            RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false).config()
-                            .set("repo.local", localPath).end().build().execute();
+            RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
+                    .config().set("repo.local", localPath).end().build().execute();
         }
     }
 
@@ -546,8 +549,8 @@ public class RuyiCli {
      * @return local path or null if not set
      */
     public static String getRepoLocal() {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
-                        .config().get("repo.local").end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(false).config().get("repo.local").end().build();
         final var result = request.execute();
         return readFirstLine(result);
     }
@@ -558,8 +561,9 @@ public class RuyiCli {
      * @param enabled true to include pre-release packages
      */
     public static void setPackagesPrereleases(boolean enabled) {
-        RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false).config()
-                        .set("packages.prereleases", enabled ? "true" : "false").end().build().execute();
+        RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
+                .config().set("packages.prereleases", enabled ? "true" : "false").end().build()
+                .execute();
     }
 
     /**
@@ -568,8 +572,8 @@ public class RuyiCli {
      * @return true if pre-releases enabled, false otherwise
      */
     public static boolean getPackagesPrereleases() {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
-                        .config().get("packages.prereleases").end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(false).config().get("packages.prereleases").end().build();
         final var result = request.execute();
         return "true".equals(readFirstLine(result));
     }
@@ -580,8 +584,8 @@ public class RuyiCli {
      * @param mode telemetry mode
      */
     public static void setTelemetry(TelemetryMode mode) {
-        final var telemetryBuilder = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
-                        .porcelain(false).telemetry();
+        final var telemetryBuilder = RuyiCliRequest.builder()
+                .ruyiInstallDir(requireInstallPathResult()).porcelain(false).telemetry();
         switch (mode) {
             case ON:
                 telemetryBuilder.consent();
@@ -606,8 +610,8 @@ public class RuyiCli {
      * @return the first line of telemetry status output or null if not available or command fails
      */
     public static String getTelemetryMode() {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
-                        .telemetry().status().end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(false).telemetry().status().end().build();
         final var result = request.execute();
         return readFirstLine(result);
     }
@@ -630,8 +634,8 @@ public class RuyiCli {
      *
      */
     public static void telemetryUpload() {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
-                        .telemetry().upload().end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(false).telemetry().upload().end().build();
         request.execute();
     }
 
@@ -645,8 +649,8 @@ public class RuyiCli {
         if (entity == null || entity.isBlank()) {
             throw RuyiCliException.invalidArgument("Invalid entity");
         }
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true)
-                        .experimental(true).list().relatedToEntity(entity).end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(true).experimental(true).list().relatedToEntity(entity).end().build();
         return request.execute().getOutput();
     }
 
@@ -656,8 +660,8 @@ public class RuyiCli {
      * @return command result with captured output
      */
     public static String listAllPackages() {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true)
-                        .experimental(true).list().nameContains("").end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(true).experimental(true).list().nameContains("").end().build();
         return request.execute().getOutput();
     }
 
@@ -671,8 +675,8 @@ public class RuyiCli {
         if (type == null || type.isBlank()) {
             throw RuyiCliException.invalidArgument("Invalid entity type");
         }
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true)
-                        .experimental(true).entity().list(type).end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(true).experimental(true).entity().list(type).end().build();
         return request.execute().getOutput();
     }
 
@@ -689,9 +693,9 @@ public class RuyiCli {
         }
         // Use the documented package atom syntax: name(version)
         // Example: ruyi install 'gnu-upstream(0.20231118.0)'
-        final var atom = name + "(" + version + ")";
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true)
-                        .install().atom(atom).end().build();
+        final var atom = String.format("%s(%s)", name, version);
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(true).install().atom(atom).end().build();
         request.execute();
     }
 
@@ -703,13 +707,13 @@ public class RuyiCli {
      * @param monitor progress monitor for cancellation (may be {@code null})
      */
     public static void installPackageStreaming(String packageRef, Consumer<String> lineCallback,
-                    IProgressMonitor monitor) {
+            IProgressMonitor monitor) {
         if (packageRef == null || packageRef.isBlank()) {
             throw RuyiCliException.invalidArgument("Invalid package reference");
         }
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
-                        .experimental(true).lineCallback(lineCallback).monitor(monitor).install()
-                        .atom(packageRef.trim()).end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(false).experimental(true).lineCallback(lineCallback).monitor(monitor)
+                .install().atom(packageRef.trim()).end().build();
         request.execute();
     }
 
@@ -721,20 +725,20 @@ public class RuyiCli {
      * @param lineCallback called for each output line (may be {@code null})
      * @param monitor progress monitor for cancellation (may be {@code null})
      */
-    public static void uninstallPackageStreaming(String packageRef, boolean assumeYes, Consumer<String> lineCallback,
-                    IProgressMonitor monitor) {
+    public static void uninstallPackageStreaming(String packageRef, boolean assumeYes,
+            Consumer<String> lineCallback, IProgressMonitor monitor) {
         if (packageRef == null || packageRef.isBlank()) {
             throw RuyiCliException.invalidArgument("Invalid package reference");
         }
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(false)
-                        .experimental(true).lineCallback(lineCallback).monitor(monitor).uninstall()
-                        .atom(packageRef.trim()).assumeYes(assumeYes).end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(false).experimental(true).lineCallback(lineCallback).monitor(monitor)
+                .uninstall().atom(packageRef.trim()).assumeYes(assumeYes).end().build();
         request.execute();
     }
 
     /**
-     * Create a virtual environment. All CLI argument construction stays here so callers pass structured
-     * values only.
+     * Create a virtual environment. All CLI argument construction stays here so callers pass
+     * structured values only.
      *
      * @param path destination filesystem path for the venv (required)
      * @param toolchainName toolchain package name (required)
@@ -743,26 +747,28 @@ public class RuyiCli {
      * @param emulatorName optional emulator package name (may be null)
      * @param emulatorVersion optional emulator version (may be null)
      */
-    public static void createVenv(String path, String toolchainName, String toolchainVersion, String profile,
-                    String emulatorName, String emulatorVersion) {
+    public static void createVenv(String path, String toolchainName, String toolchainVersion,
+            String profile, String emulatorName, String emulatorVersion) {
         if (path == null || path.isBlank()) {
             throw RuyiCliException.invalidArgument("Empty venv path");
         }
         if (toolchainName == null || toolchainName.isBlank() || toolchainVersion == null
-                        || toolchainVersion.isBlank()) {
+                || toolchainVersion.isBlank()) {
             throw RuyiCliException.invalidArgument("Invalid toolchain");
         }
         if (profile == null || profile.isBlank()) {
             throw RuyiCliException.invalidArgument("Invalid profile");
         }
         // Pass toolchain/emulator atoms using the documented parentheses syntax
-        final var toolchainAtom = toolchainName + "(" + toolchainVersion + ")";
+        final var toolchainAtom = String.format("%s(%s)", toolchainName, toolchainVersion);
         String emulatorAtom = null;
-        if (emulatorName != null && !emulatorName.isBlank() && emulatorVersion != null && !emulatorVersion.isBlank()) {
-            emulatorAtom = emulatorName + "(" + emulatorVersion + ")";
+        if (emulatorName != null && !emulatorName.isBlank() && emulatorVersion != null
+                && !emulatorVersion.isBlank()) {
+            emulatorAtom = String.format("%s(%s)", emulatorName, emulatorVersion);
         }
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true).venv()
-                        .profile(profile).dest(path).toolchain(toolchainAtom).emulator(emulatorAtom).end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(true).venv().profile(profile).dest(path).toolchain(toolchainAtom)
+                .emulator(emulatorAtom).end().build();
         request.execute();
     }
 
@@ -798,8 +804,8 @@ public class RuyiCli {
     /** Lists available toolchains as reported by the ruyi CLI. */
     public static List<ToolchainInfo> listToolchains() {
         final var out = new ArrayList<ToolchainInfo>();
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true).list()
-                        .toolchains().end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(true).list().toolchains().end().build();
         final var result = request.execute();
         final var output = result.getOutput();
         if (output == null || output.isEmpty()) {
@@ -860,8 +866,8 @@ public class RuyiCli {
     /** Lists available emulators as reported by the ruyi CLI. */
     public static List<EmulatorInfo> listEmulators() {
         final var out = new ArrayList<EmulatorInfo>();
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult()).porcelain(true).list()
-                        .emulators().end().build();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(true).list().emulators().end().build();
         final var result = request.execute();
         final var output = result.getOutput();
         if (output == null || output.isEmpty()) {
@@ -919,8 +925,8 @@ public class RuyiCli {
     }
 
     /**
-     * Extracts quirks (flavors) from the first version entry that contains the given metadata key (e.g.
-     * "toolchain" or "emulator") inside the {@code pm} object.
+     * Extracts quirks (flavors) from the first version entry that contains the given metadata key
+     * (e.g. "toolchain" or "emulator") inside the {@code pm} object.
      */
     private static List<String> extractPackageQuirks(JSONArray vers, String metadataKey) {
         if (vers == null || vers.length() == 0) {

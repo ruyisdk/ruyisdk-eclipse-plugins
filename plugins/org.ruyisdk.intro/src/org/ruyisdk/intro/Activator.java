@@ -13,7 +13,7 @@ public class Activator extends AbstractUIPlugin {
 
     public static final String PLUGIN_ID = "org.ruyisdk.intro"; // Updated Plugin ID
     private static final PluginLogger LOGGER =
-                    new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
+            new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
     private static Activator plugin;
 
     /**

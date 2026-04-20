@@ -130,8 +130,8 @@ public class PackageExplorerViewModel extends BaseViewModel {
     }
 
     /**
-     * Collect pending install/uninstall operations by comparing the user-requested check state against
-     * the actual installed state of every leaf node.
+     * Collect pending install/uninstall operations by comparing the user-requested check state
+     * against the actual installed state of every leaf node.
      */
     public List<PackageOperation> collectPendingOperations() {
         final var ops = new ArrayList<PackageOperation>();
@@ -189,8 +189,9 @@ public class PackageExplorerViewModel extends BaseViewModel {
 
     private void loadPackagesAsync(Runnable onFinished) {
         final var entityId = chosenDevice != null ? chosenDevice.getEntityId() : null;
-        final var jobLabel = chosenDevice != null ? "Loading packages for " + chosenDevice.getLabel()
-                        : "Loading all packages";
+        final var jobLabel = chosenDevice != null
+                ? String.format("Loading packages for %s", chosenDevice.getLabel())
+                : "Loading all packages";
 
         setPackagesLoading(true);
 
@@ -289,10 +290,10 @@ public class PackageExplorerViewModel extends BaseViewModel {
             var label = chosenDevice.getLabel();
             final var variantCount = chosenDevice.getRelatedRefs().size();
             if (variantCount > 0) {
-                label += " (" + variantCount + " variant" + (variantCount > 1 ? "s" : "") + ")";
+                label += String.format(" (%d variant(s))", variantCount);
             }
             label = label.replace("&", "&amp;").replace("<", "&lt;");
-            deviceInfoText = "Current device: <a>" + label + "</a>";
+            deviceInfoText = String.format("Current device: <a>%s</a>", label);
         }
         firePropertyChange(PROP_DEVICE_INFO_TEXT, old, deviceInfoText);
     }
@@ -308,7 +309,8 @@ public class PackageExplorerViewModel extends BaseViewModel {
             if (node.getPackageRef() != null) {
                 sb.append("Reference: ").append(node.getPackageRef()).append("\n");
             }
-            sb.append("Status: ").append(node.isDownloaded() ? "Installed" : "Not installed").append("\n");
+            sb.append("Status: ").append(node.isDownloaded() ? "Installed" : "Not installed")
+                    .append("\n");
         } else {
             sb.append("Name: ").append(node.getName()).append("\n");
             final var children = node.getChildren();

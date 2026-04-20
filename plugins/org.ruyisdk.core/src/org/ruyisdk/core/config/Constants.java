@@ -52,16 +52,19 @@ public final class Constants {
         public static final String MIRROR_IDE_RELEASES = MIRROR_BASE + "/ruyisdk/ide";
 
         /** GitHub URL for IDE packages releases. */
-        public static final String GITHUB_IDE_RELEASES = GITHUB_BASE + "/ruyisdk-eclipse-packages/releases";
+        public static final String GITHUB_IDE_RELEASES =
+                GITHUB_BASE + "/ruyisdk-eclipse-packages/releases";
 
         /** GitHub URL for IDE plugins releases. */
-        public static final String GITHUB_IDEPLUGINS_RELEASES = GITHUB_BASE + "/ruyisdk-eclipse-plugins/releases";
+        public static final String GITHUB_IDEPLUGINS_RELEASES =
+                GITHUB_BASE + "/ruyisdk-eclipse-plugins/releases";
 
         /** Main repository URL for packages index. */
         public static final String MAIN_REPO_URL = GITHUB_BASE + "/packages-index.git";
 
         /** Backup repository URL for packages index. */
-        public static final String BACKUP_REPO_URL = MIRROR_BASE + "/git/ruyisdk/packages-index.git";
+        public static final String BACKUP_REPO_URL =
+                MIRROR_BASE + "/git/ruyisdk/packages-index.git";
 
         /** Default branch name for the packages index repository. */
         public static final String DEFAULT_BRANCH = "main";
@@ -72,7 +75,8 @@ public final class Constants {
      */
     public static final class Ruyi {
         /**
-         * Default installation path for RuyiSDK. Default value: "~/.local/bin" (user-local binaries)
+         * Default installation path for RuyiSDK. Default value: "~/.local/bin" (user-local
+         * binaries)
          */
         public static String INSTALL_PATH = "~/.local/bin";
 

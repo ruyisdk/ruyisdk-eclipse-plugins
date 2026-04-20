@@ -63,7 +63,8 @@ public class PackageExplorerView extends ViewPart {
         createTreeView(sashForm);
 
         // Read-only info pane on the right
-        infoText = new Text(sashForm, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY | SWT.WRAP);
+        infoText = new Text(sashForm,
+                SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY | SWT.WRAP);
         infoText.setText(viewModel.getInfoPaneText());
 
         sashForm.setWeights(new int[] {70, 30});
@@ -129,7 +130,8 @@ public class PackageExplorerView extends ViewPart {
                 deviceInfoLink.setText(viewModel.getDeviceInfoText());
                 deviceInfoLink.setToolTipText("Click to select a different device");
                 deviceInfoLink.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
-                deviceInfoLink.addListener(SWT.Selection, event -> openDeviceSelectionDialog(parentShell));
+                deviceInfoLink.addListener(SWT.Selection,
+                        event -> openDeviceSelectionDialog(parentShell));
 
                 return wrapper;
             }
@@ -153,7 +155,7 @@ public class PackageExplorerView extends ViewPart {
             public void run() {
                 if (!Program.launch(viewModel.getPackageDownloadDir())) {
                     MessageDialog.openError(Display.getDefault().getActiveShell(), "Error",
-                                    "Cannot open compressed package download directory.");
+                            "Cannot open compressed package download directory.");
                 }
             }
         };
@@ -167,7 +169,7 @@ public class PackageExplorerView extends ViewPart {
             public void run() {
                 if (!Program.launch(viewModel.getImagesDownloadDir())) {
                     MessageDialog.openError(Display.getDefault().getActiveShell(), "Error",
-                                    "Cannot open image files download directory.");
+                            "Cannot open image files download directory.");
                 }
             }
         };
@@ -182,17 +184,18 @@ public class PackageExplorerView extends ViewPart {
                 performPackageOperations();
             }
         };
-        packageOperationAction.setToolTipText("Install checked packages and uninstall unchecked installed packages");
+        packageOperationAction.setToolTipText(
+                "Install checked packages and uninstall unchecked installed packages");
         toolBar.add(packageOperationAction);
 
         getViewSite().getActionBars().updateActionBars();
     }
 
     private void openDeviceSelectionDialog(Shell parentShell) {
-        final var dialogVm = new DeviceSelectionViewModel(viewModel.getDevices(), viewModel.getChosenDevice(),
-                        viewModel.getDeviceListErrorMessage());
+        final var dialogVm = new DeviceSelectionViewModel(viewModel.getDevices(),
+                viewModel.getChosenDevice(), viewModel.getDeviceListErrorMessage());
         final var dialog = new DeviceSelectionDialog(parentShell, dialogVm,
-                        (device, onDone) -> viewModel.setChosenDeviceAndReload(device, onDone));
+                (device, onDone) -> viewModel.setChosenDeviceAndReload(device, onDone));
         dialog.open();
     }
 
@@ -200,18 +203,19 @@ public class PackageExplorerView extends ViewPart {
         final var operations = viewModel.collectPendingOperations();
         if (operations.isEmpty()) {
             ScrollableMessageDialog.openInformation(Display.getDefault().getActiveShell(), "Info",
-                            "No changes to apply. Check packages to install, "
-                                            + "or uncheck installed packages to uninstall.");
+                    "No changes to apply. Check packages to install, "
+                            + "or uncheck installed packages to uninstall.");
             return;
         }
 
         final var message = viewModel.getConfirmationMessage(operations);
-        if (!ScrollableMessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Changes", message)) {
+        if (!ScrollableMessageDialog.openConfirm(Display.getDefault().getActiveShell(),
+                "Confirm Changes", message)) {
             return;
         }
 
-        final var operationVm = new PackageOperationViewModel(Display.getDefault()::asyncExec, operations,
-                        viewModel::refreshPackages);
+        final var operationVm = new PackageOperationViewModel(Display.getDefault()::asyncExec,
+                operations, viewModel::refreshPackages);
         final var workbenchShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
         final var dialog = new PackageOperationDialog(workbenchShell, operationVm);
         dialog.open();
@@ -258,7 +262,8 @@ public class PackageExplorerView extends ViewPart {
             @Override
             public String getText(Object element) {
                 if (element instanceof TreeNode node) {
-                    return node.getName() + (node.getDetails() != null ? " " + node.getDetails() : "");
+                    return node.getName()
+                            + (node.getDetails() != null ? " " + node.getDetails() : "");
                 }
                 return super.getText(element);
             }

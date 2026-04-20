@@ -32,12 +32,13 @@ public class DeviceProvisionService {
 
         final var properties = new HashMap<String, Object>();
         properties.put(ITerminalsConnectorConstants.PROP_DELEGATE_ID,
-                        "org.eclipse.tm.terminal.connector.process.launcher.process");
+                "org.eclipse.tm.terminal.connector.process.launcher.process");
         properties.put(ITerminalsConnectorConstants.PROP_TITLE, "Ruyi Device Provision");
         properties.put(ITerminalsConnectorConstants.PROP_FORCE_NEW, Boolean.FALSE);
         properties.put(ITerminalsConnectorConstants.PROP_PROCESS_PATH, "sh");
         properties.put(ITerminalsConnectorConstants.PROP_PROCESS_ARGS, cmdline.toString());
-        properties.put(ITerminalsConnectorConstants.PROP_PROCESS_WORKING_DIR, System.getProperty("user.home"));
+        properties.put(ITerminalsConnectorConstants.PROP_PROCESS_WORKING_DIR,
+                System.getProperty("user.home"));
 
         terminalService.openConsole(properties, null);
     }

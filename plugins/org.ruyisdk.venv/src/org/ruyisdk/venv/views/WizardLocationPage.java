@@ -110,14 +110,15 @@ public class WizardLocationPage extends WizardPage {
         final var nameObservable = WidgetProperties.text(SWT.Modify).observe(venvNameText);
         final var pathObservable = WidgetProperties.comboSelection().observe(venvPathCombo);
 
-        dbc.bindValue(pathObservable, BeanProperties.value(VenvWizardViewModel.class, "venvLocation", String.class)
-                        .observe(viewModel));
-        dbc.bindValue(nameObservable,
-                        BeanProperties.value(VenvWizardViewModel.class, "venvName", String.class).observe(viewModel));
+        dbc.bindValue(pathObservable, BeanProperties
+                .value(VenvWizardViewModel.class, "venvLocation", String.class).observe(viewModel));
+        dbc.bindValue(nameObservable, BeanProperties
+                .value(VenvWizardViewModel.class, "venvName", String.class).observe(viewModel));
         dbc.bindValue(WidgetProperties.text().observe(summaryText), BeanProperties
-                        .value(VenvWizardViewModel.class, "summaryText", String.class).observe(viewModel));
+                .value(VenvWizardViewModel.class, "summaryText", String.class).observe(viewModel));
 
-        ViewerSupport.bind(venvPathComboViewer, viewModel.getProjectRootPaths(), Properties.selfValue(String.class));
+        ViewerSupport.bind(venvPathComboViewer, viewModel.getProjectRootPaths(),
+                Properties.selfValue(String.class));
 
         browseButton.addListener(SWT.Selection, e -> {
             String selectedPath = new DirectoryDialog(getShell()).open();

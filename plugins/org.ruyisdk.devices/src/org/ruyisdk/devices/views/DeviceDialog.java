@@ -78,7 +78,8 @@ public class DeviceDialog extends TitleAreaDialog {
 
     @Override
     protected void okPressed() {
-        device = new Device(nameText.getText(), chipText.getText(), vendorText.getText(), versionText.getText(), false);
+        device = new Device(nameText.getText(), chipText.getText(), vendorText.getText(),
+                versionText.getText(), false);
         super.okPressed();
     }
 

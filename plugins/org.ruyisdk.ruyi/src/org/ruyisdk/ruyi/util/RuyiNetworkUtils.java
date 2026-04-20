@@ -36,8 +36,8 @@ public class RuyiNetworkUtils {
      * @param monitor progress monitor
      * @param progressCallback progress callback
      */
-    public static void downloadFile(String fileUrl, String destinationPath, IProgressMonitor monitor,
-                    BiConsumer<Long, Long> progressCallback) {
+    public static void downloadFile(String fileUrl, String destinationPath,
+            IProgressMonitor monitor, BiConsumer<Long, Long> progressCallback) {
         HttpURLConnection connection = null;
         InputStream input = null;
         OutputStream output = null;
@@ -56,7 +56,8 @@ public class RuyiNetworkUtils {
             }
 
             long fileSize = connection.getContentLengthLong();
-            // SubMonitor subMonitor = SubMonitor.convert(monitor, "Downloading " + url.getFile(), 100);
+            // SubMonitor subMonitor = SubMonitor.convert(monitor, "Downloading " + url.getFile(),
+            // 100);
 
             input = connection.getInputStream();
             output = new BufferedOutputStream(new FileOutputStream(destinationPath));
@@ -130,10 +131,12 @@ public class RuyiNetworkUtils {
 
             input = connection.getInputStream();
             StringBuilder content = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
 
             String line;
-            while ((line = reader.readLine()) != null && (monitor == null || !monitor.isCanceled())) {
+            while ((line = reader.readLine()) != null
+                    && (monitor == null || !monitor.isCanceled())) {
                 content.append(line).append("\n");
 
                 if (monitor != null) {
@@ -166,7 +169,8 @@ public class RuyiNetworkUtils {
      * @param monitor progress monitor
      * @return response string
      */
-    public static String postJson(String urlString, Map<String, Object> data, IProgressMonitor monitor) {
+    public static String postJson(String urlString, Map<String, Object> data,
+            IProgressMonitor monitor) {
         HttpURLConnection connection = null;
         OutputStream output = null;
         InputStream input = null;
@@ -204,10 +208,12 @@ public class RuyiNetworkUtils {
 
             input = connection.getInputStream();
             StringBuilder response = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+            BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
 
             String line;
-            while ((line = reader.readLine()) != null && (monitor == null || !monitor.isCanceled())) {
+            while ((line = reader.readLine()) != null
+                    && (monitor == null || !monitor.isCanceled())) {
                 response.append(line);
 
                 if (monitor != null) {
@@ -305,8 +311,9 @@ public class RuyiNetworkUtils {
         }
 
         private static String escapeJson(String str) {
-            return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\b", "\\b").replace("\f", "\\f")
-                            .replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
+            return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\b", "\\b")
+                    .replace("\f", "\\f").replace("\n", "\\n").replace("\r", "\\r")
+                    .replace("\t", "\\t");
         }
     }
 }

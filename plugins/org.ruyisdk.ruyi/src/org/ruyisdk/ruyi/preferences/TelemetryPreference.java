@@ -70,10 +70,13 @@ public class TelemetryPreference {
 
         // 创建一个Link控件来显示描述文本和链接
         Link link = new Link(group, SWT.WRAP);
-        String description = "RuyiSDK 遥测数据秉持最小化收集信息的原则，" + "尽可能避免收集用户个人身份信息，且采用匿名化方式收集信息"
-                        + "用于产品的运营和服务的提升。可前往 Windows > Preferences > Ruyi 中进行设置修改。详见";
-        String linkText = "<a href=\"https://ruyisdk.org/docs/legal/privacyPolicy\">RuyiSDK隐私政策</a>";
-        link.setText(description + " " + linkText);
+        String description = """
+            RuyiSDK 遥测数据秉持最小化收集信息的原则，\
+            尽可能避免收集用户个人身份信息，且采用匿名化方式收集信息\
+            用于产品的运营和服务的提升。可前往 Windows > Preferences > Ruyi 中进行设置修改。详见""";
+        String linkText =
+                "<a href=\"https://ruyisdk.org/docs/legal/privacyPolicy\">RuyiSDK隐私政策</a>";
+        link.setText(String.format("%s %s", description, linkText));
         // 设置Link控件的布局数据，控制宽度
         GridData linkLayoutData = new GridData(SWT.FILL, SWT.CENTER, true, false);
         linkLayoutData.widthHint = 400; // 设置固定宽度，根据需要调整

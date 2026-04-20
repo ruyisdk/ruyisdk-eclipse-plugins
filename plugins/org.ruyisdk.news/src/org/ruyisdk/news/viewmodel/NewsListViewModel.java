@@ -20,7 +20,8 @@ public class NewsListViewModel {
     private NewsFetchService service;
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    private final IObservableList<NewsItem> observableNewsList = new WritableList<>(new ArrayList<>(), NewsItem.class);
+    private final IObservableList<NewsItem> observableNewsList =
+            new WritableList<>(new ArrayList<>(), NewsItem.class);
 
     private class UpdatingState {
         private static final String notUpdated = "Not Updated, yet";
@@ -118,8 +119,8 @@ public class NewsListViewModel {
                 observableNewsList.clear();
                 if (result != null) {
                     observableNewsList.addAll(result);
-                    setInfoText(String.format(UpdatingState.updatedTemplate,
-                                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+                    setInfoText(String.format(UpdatingState.updatedTemplate, LocalDateTime.now()
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
                 } else {
                     setInfoText(UpdatingState.updateFailed);
                 }

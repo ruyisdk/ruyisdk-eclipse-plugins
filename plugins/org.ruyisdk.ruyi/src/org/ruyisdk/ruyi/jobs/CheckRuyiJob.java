@@ -41,8 +41,9 @@ public class CheckRuyiJob {
             RuyiVersion latest = getLatestRelease();
 
             if (latest != null && current.compareTo(latest) < 0) {
-                return CheckResult.needUpgrade(current, latest, String.format("New version available: %s (current: %s)",
-                                latest.toString(), current.toString()));
+                return CheckResult.needUpgrade(current, latest,
+                        String.format("New version available: %s (current: %s)", latest.toString(),
+                                current.toString()));
             }
 
             return CheckResult.ok();

@@ -17,8 +17,8 @@ public final class EntityInfoParser {
     }
 
     /**
-     * Parses raw CLI output into a list of {@link EntityInfo} objects, dispatching to the appropriate
-     * subclass based on {@code entity_type}.
+     * Parses raw CLI output into a list of {@link EntityInfo} objects, dispatching to the
+     * appropriate subclass based on {@code entity_type}.
      *
      * @param rawOutput the raw string output from the CLI command
      * @return list of parsed entity info objects; never {@code null}
@@ -89,15 +89,16 @@ public final class EntityInfoParser {
 
         return switch (entityType) {
             case "device" -> new DeviceEntityInfo(entityId, displayName, relatedRefs, reverseRefs);
-            case "device-variant" -> parseDeviceVariant(entityId, displayName, relatedRefs, reverseRefs, data);
+            case "device-variant" -> parseDeviceVariant(entityId, displayName, relatedRefs,
+                    reverseRefs, data);
             case "cpu" -> new CpuEntityInfo(entityId, displayName, relatedRefs, reverseRefs);
             case "uarch" -> parseUarch(entityId, displayName, relatedRefs, reverseRefs, data);
             default -> new EntityInfo(entityType, entityId, displayName, relatedRefs, reverseRefs);
         };
     }
 
-    private static DeviceVariantInfo parseDeviceVariant(String entityId, String displayName, List<String> relatedRefs,
-                    List<String> reverseRefs, JSONObject data) {
+    private static DeviceVariantInfo parseDeviceVariant(String entityId, String displayName,
+            List<String> relatedRefs, List<String> reverseRefs, JSONObject data) {
         String variantId = null;
         String variantName = null;
         if (data != null) {
@@ -107,11 +108,12 @@ public final class EntityInfoParser {
                 variantName = dvObj.optString("variant_name", null);
             }
         }
-        return new DeviceVariantInfo(entityId, displayName, relatedRefs, reverseRefs, variantId, variantName);
+        return new DeviceVariantInfo(entityId, displayName, relatedRefs, reverseRefs, variantId,
+                variantName);
     }
 
-    private static UarchEntityInfo parseUarch(String entityId, String displayName, List<String> relatedRefs,
-                    List<String> reverseRefs, JSONObject data) {
+    private static UarchEntityInfo parseUarch(String entityId, String displayName,
+            List<String> relatedRefs, List<String> reverseRefs, JSONObject data) {
         String arch = null;
         String isa = null;
         if (data != null) {

@@ -94,11 +94,13 @@ public class VenvDetectionService {
     }
 
     /** Creates a new venv via the Ruyi CLI. */
-    public void createVenv(String path, String toolchainName, String toolchainVersion, String profile,
-                    String emulatorName, String emulatorVersion) {
-        LOGGER.logInfo("Creating venv: path=" + path + ", profile=" + profile + ", toolchain=" + toolchainName + ":"
-                        + toolchainVersion + ", emulator=" + emulatorName + ":" + emulatorVersion);
-        RuyiCli.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
+    public void createVenv(String path, String toolchainName, String toolchainVersion,
+            String profile, String emulatorName, String emulatorVersion) {
+        LOGGER.logInfo(String.format(
+                "Creating venv: path=%s, profile=%s, toolchain=%s:%s, emulator=%s:%s", path,
+                profile, toolchainName, toolchainVersion, emulatorName, emulatorVersion));
+        RuyiCli.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName,
+                emulatorVersion);
         refreshWorkspaceProjects(null);
         LOGGER.logInfo("Venv creation finished: path=" + path);
     }
@@ -124,8 +126,8 @@ public class VenvDetectionService {
                         return;
                     }
                     final var cfg = parseVenvConfigBestEffort(toml);
-                    final var venv = Venv.createForProject(childDir.toString(), cfg.profile, cfg.sysroot,
-                                    projectPath.toString());
+                    final var venv = Venv.createForProject(childDir.toString(), cfg.profile,
+                            cfg.sysroot, projectPath.toString());
 
                     // Derive toolchain path and prefix from venv's bin directory
                     final var toolchainInfo = deriveToolchainInfo(childDir);
@@ -147,7 +149,8 @@ public class VenvDetectionService {
      * Detects project venvs asynchronously for the provided project roots and passes them to the
      * callback.
      */
-    public void detectProjectVenvsAsync(List<String> projectRootPaths, Consumer<List<Venv>> callback) {
+    public void detectProjectVenvsAsync(List<String> projectRootPaths,
+            Consumer<List<Venv>> callback) {
         final var detectJob = Job.create("Detecting virtual environments", monitor -> {
             LOGGER.logInfo("Detecting project venvs (async)");
 
@@ -165,12 +168,14 @@ public class VenvDetectionService {
     }
 
     /**
-     * Deletes venv directories asynchronously and reports completion or errors through the callback.
+     * Deletes venv directories asynchronously and reports completion or errors through the
+     * callback.
      */
-    public void deleteVenvDirectoriesAsync(List<String> venvDirectoryPaths, Consumer<Exception> callback) {
+    public void deleteVenvDirectoriesAsync(List<String> venvDirectoryPaths,
+            Consumer<Exception> callback) {
         final var deleteJob = Job.create("Deleting virtual environments", monitor -> {
             LOGGER.logInfo("Deleting venv directories: count="
-                            + (venvDirectoryPaths == null ? 0 : venvDirectoryPaths.size()));
+                    + (venvDirectoryPaths == null ? 0 : venvDirectoryPaths.size()));
             try {
                 final var venvDirectories = toPathList(venvDirectoryPaths);
                 if (venvDirectories != null) {
@@ -213,7 +218,8 @@ public class VenvDetectionService {
     }
 
     /**
-     * Derives toolchain bin path and prefix by scanning the venv's bin directory for a GCC executable.
+     * Derives toolchain bin path and prefix by scanning the venv's bin directory for a GCC
+     * executable.
      */
     private static DerivedToolchainInfo deriveToolchainInfo(Path venvPath) {
         if (venvPath == null) {
@@ -317,14 +323,16 @@ public class VenvDetectionService {
             Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
                 /** {@inheritDoc} */
                 @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                        throws IOException {
                     Files.deleteIfExists(file);
                     return FileVisitResult.CONTINUE;
                 }
 
                 /** {@inheritDoc} */
                 @Override
-                public FileVisitResult postVisitDirectory(Path directory, IOException exc) throws IOException {
+                public FileVisitResult postVisitDirectory(Path directory, IOException exc)
+                        throws IOException {
                     if (exc != null) {
                         throw exc;
                     }
