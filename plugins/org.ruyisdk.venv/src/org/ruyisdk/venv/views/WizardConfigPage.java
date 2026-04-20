@@ -80,15 +80,26 @@ public class WizardConfigPage extends WizardPage {
 
     private void createLayouts(Composite parent) {
         container = new Composite(parent, SWT.NONE);
-        container.setLayout(new GridLayout(1, false));
+        {
+            final var gridLayout = new GridLayout(2, false);
+            gridLayout.makeColumnsEqualWidth = true;
+            gridLayout.horizontalSpacing = 16;
+            container.setLayout(gridLayout);
+        }
 
         // Refresh button row
         {
             final var refreshComposite = new Composite(container, SWT.NONE);
-            refreshComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-            final var refreshLayout = new GridLayout(2, false);
-            refreshLayout.marginWidth = 0;
-            refreshComposite.setLayout(refreshLayout);
+            {
+                final var gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+                gridData.horizontalSpan = 2;
+                refreshComposite.setLayoutData(gridData);
+            }
+            {
+                final var gridLayout = new GridLayout(2, false);
+                gridLayout.marginWidth = 0;
+                refreshComposite.setLayout(gridLayout);
+            }
 
             final var hintLabel = new Label(refreshComposite, SWT.NONE);
             hintLabel.setText("If lists are empty, update the package index first.");
@@ -105,43 +116,59 @@ public class WizardConfigPage extends WizardPage {
             });
         }
 
-        profileComposite = new Composite(container, SWT.NONE);
-        profileComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        final var leftColumn = new Composite(container, SWT.NONE);
+        leftColumn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         {
-            var gridLayout = new GridLayout(1, false);
+            final var gridLayout = new GridLayout(1, false);
+            gridLayout.marginWidth = 0;
+            leftColumn.setLayout(gridLayout);
+        }
+
+        final var rightColumn = new Composite(container, SWT.NONE);
+        rightColumn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        {
+            final var gridLayout = new GridLayout(1, false);
+            gridLayout.marginWidth = 0;
+            rightColumn.setLayout(gridLayout);
+        }
+
+        profileComposite = new Composite(leftColumn, SWT.NONE);
+        profileComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        {
+            final var gridLayout = new GridLayout(1, false);
             gridLayout.marginWidth = 0;
             profileComposite.setLayout(gridLayout);
         }
 
-        toolchainComposite = new Composite(container, SWT.NONE);
-        toolchainComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        toolchainComposite = new Composite(rightColumn, SWT.NONE);
+        toolchainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         {
-            var gridLayout = new GridLayout(2, false);
+            final var gridLayout = new GridLayout(2, false);
             gridLayout.marginWidth = 0;
             toolchainComposite.setLayout(gridLayout);
         }
 
-        emulatorHeader = new Composite(container, SWT.NONE);
-        emulatorHeader.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        emulatorHeader = new Composite(rightColumn, SWT.NONE);
+        emulatorHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         {
-            var gridLayout = new GridLayout(2, false);
+            final var gridLayout = new GridLayout(2, false);
             gridLayout.marginWidth = 0;
             emulatorHeader.setLayout(gridLayout);
         }
 
-        emulatorComposite = new Composite(container, SWT.NONE);
-        emulatorComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        emulatorComposite = new Composite(rightColumn, SWT.NONE);
+        emulatorComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         {
-            var gridLayout = new GridLayout(2, false);
+            final var gridLayout = new GridLayout(2, false);
             gridLayout.marginWidth = 0;
             emulatorComposite.setLayout(gridLayout);
         }
 
-        sysrootGroup = new Group(container, SWT.NONE);
+        sysrootGroup = new Group(leftColumn, SWT.NONE);
         sysrootGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         sysrootGroup.setText("");
         {
-            var gridLayout = new GridLayout(3, false);
+            final var gridLayout = new GridLayout(3, false);
             gridLayout.marginWidth = 0;
             sysrootGroup.setLayout(gridLayout);
         }
@@ -158,7 +185,7 @@ public class WizardConfigPage extends WizardPage {
             profileTableViewer = new TableViewer(profileComposite, SWT.BORDER | SWT.FULL_SELECTION);
             final var profileTable = profileTableViewer.getTable();
             {
-                final var gridData = new GridData(GridData.FILL_HORIZONTAL);
+                final var gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
                 gridData.heightHint = 150;
                 profileTable.setLayoutData(gridData);
             }

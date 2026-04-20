@@ -121,7 +121,9 @@ public class WizardLocationPage extends WizardPage {
                 Properties.selfValue(String.class));
 
         browseButton.addListener(SWT.Selection, e -> {
-            String selectedPath = new DirectoryDialog(getShell()).open();
+            final var directoryDialog = new DirectoryDialog(getShell());
+            directoryDialog.setFilterPath(venvPathCombo.getText());
+            final var selectedPath = directoryDialog.open();
             if (selectedPath != null) {
                 venvPathCombo.setText(selectedPath);
             }
