@@ -240,7 +240,7 @@ public class VenvView extends ViewPart {
                 venvListViewModel.onDeleteSelectedVenvDirectories(err -> {
                     if (err != null) {
                         MessageDialog.openError(container.getShell(), "Delete virtual environment failed",
-                                        "Failed to delete:\n\n" + err.getMessage());
+                                        err.getMessage());
                     }
                 });
             }
