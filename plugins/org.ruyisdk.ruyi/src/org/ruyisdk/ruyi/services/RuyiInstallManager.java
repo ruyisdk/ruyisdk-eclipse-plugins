@@ -52,7 +52,7 @@ public final class RuyiInstallManager {
             listener.logMessage("Setting executable permissions...");
             setExecutablePermissions(ruyiExecutablePath, listener);
 
-            validateInstallation(listener);
+            validateInstallation(destinationDirectory, listener);
             listener.logMessage("Installation completed successfully");
 
             configureInstalledRuyi(repoUrl, telemetryMode, listener);
@@ -221,10 +221,10 @@ public final class RuyiInstallManager {
         }
     }
 
-    private static void validateInstallation(InstallationListener listener) {
+    private static void validateInstallation(String installDir, InstallationListener listener) {
         listener.logMessage("Validating installation...");
 
-        final var version = RuyiCli.getInstalledVersion();
+        final var version = RuyiCli.getInstalledVersion(installDir);
         if (version == null) {
             throw RuyiInstallException
                     .validationFailed("There are problems in the operation ruyi -V.");

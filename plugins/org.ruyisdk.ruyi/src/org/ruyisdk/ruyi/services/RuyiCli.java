@@ -462,8 +462,18 @@ public class RuyiCli {
      * @return version or null if not available or command fails
      */
     public static RuyiVersion getInstalledVersion() {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
-                .porcelain(false).args("-V").build();
+        return getInstalledVersion(requireInstallPathResult());
+    }
+
+    /**
+     * Gets installed Ruyi version from the specified install directory.
+     *
+     * @param installDir directory containing the ruyi binary
+     * @return version or null if not available or command fails
+     */
+    public static RuyiVersion getInstalledVersion(String installDir) {
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(installDir).porcelain(false)
+                .args("-V").build();
         final var result = request.execute();
         return parseInstalledVersion(result);
     }
