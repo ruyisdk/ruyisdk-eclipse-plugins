@@ -8,6 +8,7 @@ import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.SelectObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -26,6 +27,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.ruyisdk.core.exception.PluginException;
+import org.ruyisdk.ruyi.services.PackageIndexUpdater;
 import org.ruyisdk.venv.model.Emulator;
 import org.ruyisdk.venv.model.Profile;
 import org.ruyisdk.venv.model.Toolchain;
@@ -78,6 +81,29 @@ public class WizardConfigPage extends WizardPage {
     private void createLayouts(Composite parent) {
         container = new Composite(parent, SWT.NONE);
         container.setLayout(new GridLayout(1, false));
+
+        // Refresh button row
+        {
+            final var refreshComposite = new Composite(container, SWT.NONE);
+            refreshComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+            final var refreshLayout = new GridLayout(2, false);
+            refreshLayout.marginWidth = 0;
+            refreshComposite.setLayout(refreshLayout);
+
+            final var hintLabel = new Label(refreshComposite, SWT.NONE);
+            hintLabel.setText("If lists are empty, update the package index first.");
+            hintLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+            final var refreshButton = new Button(refreshComposite, SWT.PUSH);
+            refreshButton.setText("Update Package Index");
+            refreshButton.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false));
+            refreshButton.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    performUpdateAndRefresh();
+                }
+            });
+        }
 
         profileComposite = new Composite(container, SWT.NONE);
         profileComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -581,5 +607,25 @@ public class WizardConfigPage extends WizardPage {
         if (getWizard() != null && getWizard().getContainer() != null) {
             getWizard().getContainer().updateButtons();
         }
+    }
+
+    private void performUpdateAndRefresh() {
+        try {
+            PackageIndexUpdater.updateWithProgress(getShell());
+        } catch (PluginException e) {
+            final var msg = "Failed to update the package index";
+            MessageDialog.openError(getShell(), msg, String.format("""
+                Unable to update the Ruyi package index.
+
+                %s""", e.getMessage()));
+            return;
+        }
+
+        viewModel.loadAll();
+        profileTableViewer.setInput(viewModel.getProfiles());
+        toolchainNamesViewer.setInput(viewModel.getToolchains());
+        toolchainVersionsViewer.setInput(List.of());
+        emulatorNamesViewer.setInput(viewModel.getEmulators());
+        emulatorVersionsViewer.setInput(List.of());
     }
 }
