@@ -1,6 +1,5 @@
 package org.ruyisdk.ruyi.preferences;
 
-import java.io.IOException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -75,10 +74,8 @@ public class RuyiInstallPathPreference {
 
     /**
      * Saves install path.
-     *
-     * @throws IOException if save fails
      */
-    public void saveInstallPath() throws IOException {
+    public void saveInstallPath() {
         String newPath = ruyiInstallPathText.getText();
         RuyiProperties.setInstallPath(newPath);
     }

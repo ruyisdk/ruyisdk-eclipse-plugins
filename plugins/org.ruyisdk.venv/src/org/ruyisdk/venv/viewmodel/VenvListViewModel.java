@@ -236,8 +236,12 @@ public class VenvListViewModel {
         detectionService.detectProjectVenvsAsync(projectRootPaths, result -> {
             observableVenvList.getRealm().asyncExec(() -> {
                 observableVenvList.clear();
-                observableVenvList.addAll(result);
-                LOGGER.logInfo("Venv list refreshed; count=" + result.size());
+                if (result != null) {
+                    observableVenvList.addAll(result);
+                    LOGGER.logInfo("Venv list refreshed; count=" + result.size());
+                } else {
+                    LOGGER.logError("Venv list failed to refresh");
+                }
                 updateHasOpenProjects();
                 setFetching(false);
             });

@@ -1,6 +1,5 @@
 package org.ruyisdk.ruyi.services;
 
-import java.io.IOException;
 import java.util.HashMap;
 import org.eclipse.tm.terminal.view.core.TerminalServiceFactory;
 import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnectorConstants;
@@ -11,15 +10,13 @@ import org.eclipse.tm.terminal.view.core.interfaces.constants.ITerminalsConnecto
 public class DeviceProvisionService {
     /**
      * Launches `ruyi device provision` in Eclipse built-in terminal. The terminal will be reused.
-     *
-     * @throws IOException if terminal launch fails
      */
-    public void launchProvisionWizard() throws IOException {
+    public void launchProvisionWizard() {
         final var ruyiExecutable = toSingleQuoted(RuyiCli.getResolvedExecutablePath());
 
         final var terminalService = TerminalServiceFactory.getService();
         if (terminalService == null) {
-            throw new IOException("Eclipse terminal service is unavailable");
+            throw RuyiCliException.terminalUnavailable();
         }
 
         final var cmdline = new StringBuilder();

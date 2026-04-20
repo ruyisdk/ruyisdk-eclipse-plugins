@@ -2,6 +2,7 @@ package org.ruyisdk.intro;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Locale;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -50,7 +51,7 @@ public class OpenBrowserHandler extends AbstractHandler {
             // First level: Java standard API (most concise)
             java.awt.Desktop.getDesktop().browse(new URI(url));
             return;
-        } catch (Exception e) {
+        } catch (IOException | URISyntaxException e) {
             LOGGER.logWarning("Java Desktop open failed", e);
         }
 

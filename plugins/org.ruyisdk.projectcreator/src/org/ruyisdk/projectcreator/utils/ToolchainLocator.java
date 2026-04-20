@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.packages.JsonParser;
 import org.ruyisdk.projectcreator.Activator;
@@ -37,11 +38,8 @@ public class ToolchainLocator {
             LOGGER.logInfo("Preparing to call JsonParser.findInstalledToolchainForBoard...");
             toolchainName = JsonParser.findInstalledToolchainForBoard(boardModel);
             LOGGER.logInfo("Successfully called JsonParser. Returned toolchainName: " + toolchainName);
-        } catch (NoClassDefFoundError e) {
-            LOGGER.logError("Failed to find or load class", e);
-            return null;
-        } catch (Throwable t) {
-            LOGGER.logError("An unexpected error or exception occurred", t);
+        } catch (PluginException e) {
+            LOGGER.logError("Failed to find installed toolchain for board: " + boardModel, e);
             return null;
         }
 

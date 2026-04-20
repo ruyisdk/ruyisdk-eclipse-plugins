@@ -18,9 +18,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.ruyisdk.core.exception.RuyiConfigException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.services.RuyiCli;
 import org.ruyisdk.venv.Activator;
@@ -66,43 +66,28 @@ public class VenvDetectionService {
 
     /** Returns the list of known profiles from the Ruyi CLI. */
     public List<RuyiCli.ProfileInfo> listProfiles() {
-        try {
-            return RuyiCli.listProfiles();
-        } catch (Exception e) {
-            LOGGER.logError("Failed to list profiles", e);
-            return new ArrayList<>();
-        }
+        return RuyiCli.listProfiles();
     }
 
     /** Returns the list of known toolchains from the Ruyi CLI. */
     public List<RuyiCli.ToolchainInfo> listToolchains() {
-        try {
-            return RuyiCli.listToolchains();
-        } catch (Exception e) {
-            LOGGER.logError("Failed to list toolchains", e);
-            return new ArrayList<>();
-        }
+        return RuyiCli.listToolchains();
     }
 
     /** Returns the list of known emulators from the Ruyi CLI. */
     public List<RuyiCli.EmulatorInfo> listEmulators() {
-        try {
-            return RuyiCli.listEmulators();
-        } catch (Exception e) {
-            LOGGER.logError("Failed to list emulators", e);
-            return new ArrayList<>();
-        }
+        return RuyiCli.listEmulators();
     }
 
     /** Updates the local package index via the Ruyi CLI. */
-    public void updateIndex() throws Exception {
+    public void updateIndex() {
         LOGGER.logInfo("Updating Ruyi package index");
         RuyiCli.updatePackageIndex();
         LOGGER.logInfo("Ruyi package index update finished successfully");
     }
 
     /** Installs a package via the Ruyi CLI. */
-    public void installPackage(String name, String version) throws Exception {
+    public void installPackage(String name, String version) {
         LOGGER.logInfo("Installing package: name=" + name + ", version=" + version);
         RuyiCli.installPackage(name, version);
         LOGGER.logInfo("Package install finished: name=" + name + ", version=" + version);
@@ -110,7 +95,7 @@ public class VenvDetectionService {
 
     /** Creates a new venv via the Ruyi CLI. */
     public void createVenv(String path, String toolchainName, String toolchainVersion, String profile,
-                    String emulatorName, String emulatorVersion) throws Exception {
+                    String emulatorName, String emulatorVersion) {
         LOGGER.logInfo("Creating venv: path=" + path + ", profile=" + profile + ", toolchain=" + toolchainName + ":"
                         + toolchainVersion + ", emulator=" + emulatorName + ":" + emulatorVersion);
         RuyiCli.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
@@ -149,7 +134,7 @@ public class VenvDetectionService {
 
                     out.add(venv);
                 });
-            } catch (Exception e) {
+            } catch (IOException e) {
                 // ignore per-project failures
                 LOGGER.logError("Failed to scan project for venv config: path=" + projectPath, e);
             }
@@ -166,25 +151,22 @@ public class VenvDetectionService {
         final var detectJob = Job.create("Detecting virtual environments", monitor -> {
             LOGGER.logInfo("Detecting project venvs (async)");
 
-            List<Venv> result;
             try {
                 final var projectPaths = toPathList(projectRootPaths);
-                result = detectProjectVenvs(projectPaths);
-            } catch (Exception e) {
-                LOGGER.logError("Failed to detect project venvs", e);
-                result = List.of();
-            }
-            LOGGER.logInfo("Project venv detection finished: count=" + result.size());
-
-            if (callback != null) {
+                final var result = detectProjectVenvs(projectPaths);
+                LOGGER.logInfo("Project venv detection finished: count=" + result.size());
                 callback.accept(result);
+                return Status.OK_STATUS;
+            } catch (Exception e) {
+                return Status.error("Failed to detect project venvs", e);
             }
-            return Status.OK_STATUS;
         });
         detectJob.schedule();
     }
 
-    /** Deletes venv directories asynchronously and reports completion through the callback. */
+    /**
+     * Deletes venv directories asynchronously and reports completion or errors through the callback.
+     */
     public void deleteVenvDirectoriesAsync(List<String> venvDirectoryPaths, Consumer<Exception> callback) {
         final var deleteJob = Job.create("Deleting virtual environments", monitor -> {
             LOGGER.logInfo("Deleting venv directories: count="
@@ -199,17 +181,12 @@ public class VenvDetectionService {
 
                     refreshWorkspaceProjects(monitor);
                 }
-                if (callback != null) {
-                    callback.accept(null);
-                }
                 LOGGER.logInfo("Venv directories deletion finished");
+                callback.accept(null);
                 return Status.OK_STATUS;
             } catch (Exception e) {
-                LOGGER.logError("Failed to delete venv directories", e);
-                if (callback != null) {
-                    callback.accept(e);
-                }
-                return new Status(IStatus.ERROR, "org.ruyisdk.venv", "Failed to delete virtual environment", e);
+                callback.accept(e);
+                return Status.CANCEL_STATUS; // avoid Eclipse error dialog
             }
         });
         deleteJob.schedule();
@@ -262,7 +239,7 @@ public class VenvDetectionService {
                     return new DerivedToolchainInfo(binDir.toString(), prefix);
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             // ignore scan failures
             LOGGER.logError("Failed to list entries in dir: path=" + binDir, e);
         }
@@ -307,7 +284,7 @@ public class VenvDetectionService {
                     sysroot = val;
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             // ignore parse failures
             LOGGER.logWarning("Failed to parse venv config: path=" + tomlPath, e);
         }
@@ -329,31 +306,35 @@ public class VenvDetectionService {
         return s;
     }
 
-    private static void deleteDirectoryRecursively(Path dir) throws IOException {
+    private static void deleteDirectoryRecursively(Path dir) {
         if (dir == null) {
             return;
         }
         if (!Files.exists(dir)) {
             return;
         }
-        Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
-            /** {@inheritDoc} */
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.deleteIfExists(file);
-                return FileVisitResult.CONTINUE;
-            }
-
-            /** {@inheritDoc} */
-            @Override
-            public FileVisitResult postVisitDirectory(Path directory, IOException exc) throws IOException {
-                if (exc != null) {
-                    throw exc;
+        try {
+            Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
+                /** {@inheritDoc} */
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.deleteIfExists(file);
+                    return FileVisitResult.CONTINUE;
                 }
-                Files.deleteIfExists(directory);
-                return FileVisitResult.CONTINUE;
-            }
-        });
+
+                /** {@inheritDoc} */
+                @Override
+                public FileVisitResult postVisitDirectory(Path directory, IOException exc) throws IOException {
+                    if (exc != null) {
+                        throw exc;
+                    }
+                    Files.deleteIfExists(directory);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            throw RuyiConfigException.deleteFailed(dir.toString(), e);
+        }
     }
 
     private static void refreshWorkspaceProjects(IProgressMonitor monitor) {

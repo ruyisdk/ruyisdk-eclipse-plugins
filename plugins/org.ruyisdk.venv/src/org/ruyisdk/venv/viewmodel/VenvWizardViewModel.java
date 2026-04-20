@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.ruyisdk.ruyi.services.RuyiCliException;
 import org.ruyisdk.venv.model.Emulator;
 import org.ruyisdk.venv.model.Profile;
 import org.ruyisdk.venv.model.Toolchain;
@@ -148,7 +149,7 @@ public class VenvWizardViewModel {
         return sb.toString();
     }
 
-    private void refreshLists() throws Exception {
+    private void refreshLists() {
         service.updateIndex();
 
         profiles.clear();
@@ -224,39 +225,39 @@ public class VenvWizardViewModel {
     }
 
     /** Updates the CLI index and refreshes all view model data. */
-    public void refreshAll() throws Exception {
+    public void refreshAll() {
         refreshLists();
         filterPackagesBySelectedProfile();
         recomputeDerivedState();
     }
 
-    private void installToolchain(String name, String version) throws Exception {
+    private void installToolchain(String name, String version) {
         service.installPackage(name, version);
     }
 
     /** Installs the currently-selected toolchain package. */
-    public void installToolchain() throws Exception {
+    public void installToolchain() {
         if (selectedToolchainIndex < 0 || selectedToolchainIndex >= toolchains.size()
                         || selectedToolchainVersionIndex < 0) {
-            throw new IllegalArgumentException("No toolchain selected");
+            throw RuyiCliException.invalidArgument("No toolchain selected");
         }
         final var name = toolchains.get(selectedToolchainIndex).getName();
         final var version = toolchains.get(selectedToolchainIndex).getVersions().get(selectedToolchainVersionIndex);
         installToolchain(name, version);
     }
 
-    private void installEmulator(String name, String version) throws Exception {
+    private void installEmulator(String name, String version) {
         service.installPackage(name, version);
     }
 
     /** Installs the currently-selected emulator package when enabled. */
-    public void installEmulator() throws Exception {
+    public void installEmulator() {
         if (!emulatorEnabled) {
-            throw new IllegalArgumentException("Emulator disabled");
+            throw RuyiCliException.invalidArgument("Emulator disabled");
         }
         if (selectedEmulatorIndex < 0 || selectedEmulatorIndex >= emulators.size()
                         || selectedEmulatorVersionIndex < 0) {
-            throw new IllegalArgumentException("Emulator enabled but not selected");
+            throw RuyiCliException.invalidArgument("Emulator enabled but not selected");
         }
         final var name = emulators.get(selectedEmulatorIndex).getName();
         final var version = emulators.get(selectedEmulatorIndex).getVersions().get(selectedEmulatorVersionIndex);
@@ -264,24 +265,24 @@ public class VenvWizardViewModel {
     }
 
     private void createVenv(String path, String toolchainName, String toolchainVersion, String profile,
-                    String emulatorName, String emulatorVersion) throws Exception {
+                    String emulatorName, String emulatorVersion) {
         service.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName, emulatorVersion);
     }
 
     /** Creates a virtual environment using the current wizard selections. */
-    public void createVenv() throws Exception {
+    public void createVenv() {
         final var parent = this.venvLocation;
         if (parent == null || parent.isBlank()) {
-            throw new IllegalArgumentException("Venv parent path is empty");
+            throw RuyiCliException.invalidArgument("Venv parent path is empty");
         }
         final var name = this.venvName;
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Venv name is empty");
+            throw RuyiCliException.invalidArgument("Venv name is empty");
         }
 
         if (selectedToolchainIndex < 0 || selectedToolchainIndex >= toolchains.size()
                         || selectedToolchainVersionIndex < 0) {
-            throw new IllegalArgumentException("No toolchain selected");
+            throw RuyiCliException.invalidArgument("No toolchain selected");
         }
         final var toolchainName = toolchains.get(selectedToolchainIndex).getName();
         final var toolchainVersion =
@@ -297,7 +298,7 @@ public class VenvWizardViewModel {
         if (emulatorEnabled) {
             if (selectedEmulatorIndex < 0 || selectedEmulatorIndex >= emulators.size()
                             || selectedEmulatorVersionIndex < 0) {
-                throw new IllegalArgumentException("Emulator enabled but not selected");
+                throw RuyiCliException.invalidArgument("Emulator enabled but not selected");
             }
             emulatorName = emulators.get(selectedEmulatorIndex).getName();
             emulatorVersion = emulators.get(selectedEmulatorIndex).getVersions().get(selectedEmulatorVersionIndex);

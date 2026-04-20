@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Properties;
 import org.ruyisdk.core.basedir.XdgDirs;
 import org.ruyisdk.core.config.Constants;
+import org.ruyisdk.core.exception.RuyiConfigException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.devices.Activator;
 import org.ruyisdk.devices.model.Device;
@@ -104,7 +105,7 @@ public class PropertiesService {
 
             LOGGER.logInfo("Devices is successfully stored to file :" + FILE_PATH.toString());
         } catch (IOException e) {
-            LOGGER.logError("Failed to store devices to properties file: " + FILE_PATH.toString(), e);
+            throw RuyiConfigException.saveFailed("devices properties: " + FILE_PATH, e);
         }
     }
 }

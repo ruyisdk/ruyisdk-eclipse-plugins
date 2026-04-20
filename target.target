@@ -30,6 +30,18 @@
 					<type>jar</type>
 				</dependency>
 				<dependency>
+					<groupId>net.bytebuddy</groupId>
+					<artifactId>byte-buddy</artifactId>
+					<version>1.17.8</version>
+					<type>jar</type>
+				</dependency>
+				<dependency>
+					<groupId>org.assertj</groupId>
+					<artifactId>assertj-core</artifactId>
+					<version>4.0.0-M1</version>
+					<type>jar</type>
+				</dependency>
+				<dependency>
 					<groupId>org.commonmark</groupId>
 					<artifactId>commonmark-ext-gfm-tables</artifactId>
 					<version>0.27.1</version>

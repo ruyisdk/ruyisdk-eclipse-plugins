@@ -13,10 +13,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.services.RuyiCli;
-import org.ruyisdk.ruyi.services.RuyiCliException;
 
 /**
  * Preference page for Ruyi's configuration.
@@ -54,9 +54,16 @@ public class ConfigPreferencePage extends PreferencePage implements IWorkbenchPr
         final var localLabel = new Label(localGroup, SWT.NONE);
         localLabel.setText("Checkout path:");
 
-        final var localValue = RuyiCli.getRepoLocal();
+        String localValue;
+        try {
+            localValue = RuyiCli.getRepoLocal();
+            localValue = localValue != null && !localValue.isBlank() ? localValue.trim() : "";
+        } catch (PluginException e) {
+            LOGGER.logWarning("Use default local repository location due to error", e);
+            localValue = "";
+        }
         localPathText = new Text(localGroup, SWT.BORDER);
-        localPathText.setText(localValue != null && !localValue.isBlank() ? localValue.trim() : "");
+        localPathText.setText(localValue);
         localPathText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         final var browseButton = new Button(localGroup, SWT.PUSH);
@@ -117,15 +124,11 @@ public class ConfigPreferencePage extends PreferencePage implements IWorkbenchPr
 
     @Override
     public boolean performOk() {
-        try {
-            RuyiCli.setRepoRemote(repoPreference.getSelectedUrl());
-            RuyiCli.setRepoBranch(repoPreference.getBranch());
-            RuyiCli.setRepoLocal(localPathText.getText().trim());
-            RuyiCli.setPackagesPrereleases(prereleasesCheckbox.getSelection());
-            RuyiCli.setTelemetry(telemetryPreference.getTelemetryMode());
-        } catch (RuyiCliException e) {
-            LOGGER.logError("Failed to apply Ruyi config", e);
-        }
+        RuyiCli.setRepoRemote(repoPreference.getSelectedUrl());
+        RuyiCli.setRepoBranch(repoPreference.getBranch());
+        RuyiCli.setRepoLocal(localPathText.getText().trim());
+        RuyiCli.setPackagesPrereleases(prereleasesCheckbox.getSelection());
+        RuyiCli.setTelemetry(telemetryPreference.getTelemetryMode());
         return true;
     }
 }

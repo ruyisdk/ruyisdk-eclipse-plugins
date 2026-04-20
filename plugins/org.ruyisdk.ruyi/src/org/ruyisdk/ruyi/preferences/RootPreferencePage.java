@@ -1,6 +1,5 @@
 package org.ruyisdk.ruyi.preferences;
 
-import java.io.IOException;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -12,15 +11,11 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.ruyisdk.core.util.PluginLogger;
-import org.ruyisdk.ruyi.Activator;
 
 /**
  * Root preference page for RuyiSDK.
  */
 public class RootPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
-    private static final PluginLogger LOGGER = Activator.getLogger();
-
     private AutomaticCheckPreference automaticCheckPreference;
     private RuyiInstallPathPreference installPreference;
 
@@ -72,13 +67,8 @@ public class RootPreferencePage extends PreferencePage implements IWorkbenchPref
 
     @Override
     public boolean performOk() {
-        try {
-            automaticCheckPreference.setAutomaticDetection();
-            installPreference.saveInstallPath();
-        } catch (IOException e) {
-            LOGGER.logError("Failed to save preferences", e);
-            return false;
-        }
+        automaticCheckPreference.setAutomaticDetection();
+        installPreference.saveInstallPath();
         return true;
     }
 }

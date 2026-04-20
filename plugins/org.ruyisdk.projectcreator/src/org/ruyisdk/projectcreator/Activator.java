@@ -35,38 +35,34 @@ public class Activator extends AbstractUIPlugin {
     public void start(BundleContext context) throws Exception {
         super.start(context);
         plugin = this;
-        try {
-            getBundle().loadClass("org.ruyisdk.projectcreator.builder.MakefileBuilder");
-            IWorkspace workspace = ResourcesPlugin.getWorkspace();
-            buildListener = event -> {
-                switch (event.getType()) {
-                    case IResourceChangeEvent.PRE_BUILD:
-                        if (event.getSource() instanceof IProject) {
-                            IProject project = (IProject) event.getSource();
-                            LOGGER.logInfo("Building project: " + project.getName());
-                            try {
-                                IProjectDescription desc = project.getDescription();
-                                ICommand[] commands = desc.getBuildSpec();
-                                LOGGER.logInfo("Project builders:");
-                                for (ICommand cmd : commands) {
-                                    LOGGER.logInfo("  - " + cmd.getBuilderName());
-                                }
-                            } catch (CoreException e) {
-                                LOGGER.logError("Failed to add Makefile builder: " + e.getMessage(), e);
+        getBundle().loadClass("org.ruyisdk.projectcreator.builder.MakefileBuilder");
+        IWorkspace workspace = ResourcesPlugin.getWorkspace();
+        buildListener = event -> {
+            switch (event.getType()) {
+                case IResourceChangeEvent.PRE_BUILD:
+                    if (event.getSource() instanceof IProject) {
+                        IProject project = (IProject) event.getSource();
+                        LOGGER.logInfo("Building project: " + project.getName());
+                        try {
+                            IProjectDescription desc = project.getDescription();
+                            ICommand[] commands = desc.getBuildSpec();
+                            LOGGER.logInfo("Project builders:");
+                            for (ICommand cmd : commands) {
+                                LOGGER.logInfo("  - " + cmd.getBuilderName());
                             }
+                        } catch (CoreException e) {
+                            LOGGER.logError("Failed to add Makefile builder: " + e.getMessage(), e);
                         }
-                        break;
-                    default:
-                        break;
-                }
-            };
-            workspace.addResourceChangeListener(buildListener, IResourceChangeEvent.PRE_BUILD
-                            | IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_DELETE);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        };
+        workspace.addResourceChangeListener(buildListener, IResourceChangeEvent.PRE_BUILD
+                        | IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_DELETE);
 
-            LOGGER.logInfo("Build listener registered successfully");
-        } catch (Exception e) {
-            LOGGER.logError("Error during plugin initialization", e);
-        }
+        LOGGER.logInfo("Build listener registered successfully");
     }
 
     /**

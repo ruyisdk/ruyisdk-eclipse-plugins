@@ -14,6 +14,7 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -143,7 +144,7 @@ public final class WorkspaceProjectsMonitor {
     public void dispose() {
         try {
             ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
             // ignore
         }
         debounceJob.cancel();
@@ -164,7 +165,7 @@ public final class WorkspaceProjectsMonitor {
                     return true;
                 }
             }
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
             LOGGER.logWarning("Failed to get workspace projects", e);
         }
         return false;
@@ -206,7 +207,7 @@ public final class WorkspaceProjectsMonitor {
                 }
                 out.add(Path.of(loc.toOSString()));
             }
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
             LOGGER.logWarning("Failed to get workspace projects", e);
         }
         out.removeIf(Objects::isNull);
@@ -258,7 +259,7 @@ public final class WorkspaceProjectsMonitor {
                 }
                 return true;
             });
-        } catch (Exception ex) {
+        } catch (CoreException ex) {
             LOGGER.logWarning("Failed to visit workspace delta for workspace projects monitor", ex);
             shouldRefresh.set(true);
         }

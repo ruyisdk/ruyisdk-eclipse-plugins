@@ -10,12 +10,16 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.ruyisdk.core.config.Constants;
+import org.ruyisdk.core.exception.PluginException;
+import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.services.RuyiCli;
 
 /**
  * Preference component for remote repository selection.
  */
 public class RepoConfigPreference {
+    private static final PluginLogger LOGGER = Activator.getLogger();
 
     private final Composite parent;
     private Button githubRadio;
@@ -46,11 +50,15 @@ public class RepoConfigPreference {
     }
 
     private void createControls(Composite container) {
-        var currentUrl = RuyiCli.getRepoRemote();
-        if (currentUrl == null || currentUrl.isBlank()) {
+        String currentUrl;
+        try {
+            currentUrl = RuyiCli.getRepoRemote();
+            currentUrl = currentUrl != null && !currentUrl.isBlank() ? currentUrl.trim()
+                            : Constants.NetAddress.MAIN_REPO_URL;
+        } catch (PluginException e) {
+            LOGGER.logWarning("Use default repository URL due to error", e);
             currentUrl = Constants.NetAddress.MAIN_REPO_URL;
         }
-        currentUrl = currentUrl.trim();
 
         final var isGithub = currentUrl.equals(Constants.NetAddress.MAIN_REPO_URL);
         final var isIscas = currentUrl.equals(Constants.NetAddress.BACKUP_REPO_URL);
@@ -103,10 +111,17 @@ public class RepoConfigPreference {
         final var branchLabel = new Label(container, SWT.NONE);
         branchLabel.setText("Branch:");
 
-        final var branchValue = RuyiCli.getRepoBranch();
+        String branchValue;
+        try {
+            branchValue = RuyiCli.getRepoBranch();
+            branchValue = branchValue != null && !branchValue.isBlank() ? branchValue.trim()
+                            : Constants.NetAddress.DEFAULT_BRANCH;
+        } catch (PluginException e) {
+            LOGGER.logWarning("Use default branch due to error.", e);
+            branchValue = Constants.NetAddress.DEFAULT_BRANCH;
+        }
         branchText = new Text(container, SWT.BORDER);
-        branchText.setText(branchValue != null && !branchValue.isBlank() ? branchValue.trim()
-                        : Constants.NetAddress.DEFAULT_BRANCH);
+        branchText.setText(branchValue);
         branchText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
     }
 

@@ -34,6 +34,8 @@ public class RuyiCore {
                 CheckResult result = new CheckRuyiJob().runCheck(monitor);
                 handleCheckResult(result);
                 return Status.OK_STATUS;
+            } catch (Exception e) {
+                return Status.error("Automatic environment check failed", e);
             } finally {
                 isChecking = false;
             }
@@ -60,9 +62,13 @@ public class RuyiCore {
      */
     public void runManualCheck() {
         Job.create("Manual Ruyi Check", monitor -> {
-            CheckResult result = new CheckRuyiJob().runCheck(monitor);
-            handleCheckResult(result);
-            return Status.OK_STATUS;
+            try {
+                CheckResult result = new CheckRuyiJob().runCheck(monitor);
+                handleCheckResult(result);
+                return Status.OK_STATUS;
+            } catch (Exception e) {
+                return Status.error("Manual check failed", e);
+            }
         }).schedule();
     }
 

@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.devices.Activator;
 import org.ruyisdk.devices.model.Device;
@@ -211,7 +212,7 @@ public class DevicePreferencePage extends PreferencePage implements IWorkbenchPr
         try {
             deviceService.saveDevices();
             return true;
-        } catch (Exception e) {
+        } catch (PluginException e) {
             LOGGER.logError("Failed to save devices to properties file", e);
             setErrorMessage("保存失败: " + e.getMessage());
             return false;

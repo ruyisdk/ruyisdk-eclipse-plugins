@@ -1,7 +1,6 @@
 package org.ruyisdk.ruyi.services;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 
 /**
  * An immutable, executable request to the Ruyi CLI.
@@ -52,34 +50,20 @@ public class RuyiCliRequest {
      * Executes this request against the Ruyi CLI.
      *
      * @return the execution result
-     * @throws RuyiCliException if the command fails, times out, or is cancelled
      */
-    public RuyiExecResult execute() throws RuyiCliException {
+    public RuyiExecResult execute() {
         if (ruyiInstallDir == null || ruyiInstallDir.isBlank()) {
             throw RuyiCliException.ruyiNotFound();
         }
 
         final var cmdArgs = buildCommandArgs();
         final var cmdString = buildCommandString(cmdArgs);
-        try {
-            final var result = RuyiCliExecutor.execute(ruyiInstallDir, environment, workingDirectory, lineCallback,
-                            monitor, timeoutSeconds, cmdArgs.toArray(new String[0]));
-            if (result.getExitCode() != 0) {
-                // Check if the output indicates a timeout
-                if (result.getOutput() != null && result.getOutput().contains("ruyi command timed out")) {
-                    throw RuyiCliException.timeout(timeoutSeconds);
-                }
-                throw RuyiCliException.executionFailed(result.getOutput(), cmdString);
-            }
-            return result;
-        } catch (IOException e) {
-            throw RuyiCliException.ioError(e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw RuyiCliException.cancelled();
-        } catch (OperationCanceledException e) {
-            throw RuyiCliException.cancelled();
+        final var result = RuyiCliExecutor.execute(ruyiInstallDir, environment, workingDirectory, lineCallback, monitor,
+                        timeoutSeconds, cmdArgs.toArray(new String[0]));
+        if (result.getExitCode() != 0) {
+            throw RuyiCliException.executionFailed(cmdString, result.getExitCode(), result.getOutput());
         }
+        return result;
     }
 
     private List<String> buildCommandArgs() {

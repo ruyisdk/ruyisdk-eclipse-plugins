@@ -1,7 +1,6 @@
 package org.ruyisdk.ruyi.jobs;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.ruyisdk.core.ruyi.model.CheckResult;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
 import org.ruyisdk.core.util.PluginLogger;
@@ -47,12 +46,6 @@ public class CheckRuyiJob {
             }
 
             return CheckResult.ok();
-        } catch (OperationCanceledException e) {
-            LOGGER.logInfo("Version check cancelled");
-            throw e;
-        } catch (Exception e) {
-            LOGGER.logError("Version check failed", e);
-            throw new RuntimeException("Check failed: " + e.getMessage(), e);
         } finally {
             monitor.done();
         }

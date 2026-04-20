@@ -14,9 +14,8 @@ public class PackageTree {
      *
      * @param entityId device entity ID to filter by, or {@code null} for all packages
      * @return the root {@link TreeNode} of the parsed tree
-     * @throws Exception if the CLI call or JSON parsing fails
      */
-    public static TreeNode loadPackages(String entityId) throws Exception {
+    public static TreeNode loadPackages(String entityId) {
         final String output;
         if (entityId != null) {
             output = RuyiCli.listRelatedToEntity("device:" + entityId);

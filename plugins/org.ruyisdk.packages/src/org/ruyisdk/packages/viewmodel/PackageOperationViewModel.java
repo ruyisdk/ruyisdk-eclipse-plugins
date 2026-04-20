@@ -60,6 +60,7 @@ public class PackageOperationViewModel extends BaseViewModel {
         appendOutput("Starting operations...\n\n");
 
         job = Job.create("Package Operations", monitor -> {
+            // All exceptions are caught and reported via "onStepFailed"
             runner.run(operations, new PackageOperationRunner.OperationCallback() {
                 @Override
                 public void onStepStart(int index, int total, PackageOperation op) {

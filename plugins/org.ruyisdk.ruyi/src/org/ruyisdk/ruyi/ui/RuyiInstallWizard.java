@@ -1,6 +1,5 @@
 package org.ruyisdk.ruyi.ui;
 
-import java.io.IOException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -19,6 +18,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
@@ -179,7 +179,7 @@ public class RuyiInstallWizard extends Wizard {
         private void setAutomaticDetection() {
             try {
                 RuyiProperties.setAutomaticDetection(!dontCheckAgainCheckbox.getSelection());
-            } catch (IOException e) {
+            } catch (PluginException e) {
                 LOGGER.logError("Failed to save automatic detection setting", e);
             }
         }
@@ -272,11 +272,7 @@ public class RuyiInstallWizard extends Wizard {
         }
 
         public void saveConfig() {
-            try {
-                installPref.saveInstallPath();
-            } catch (IOException e) {
-                LOGGER.logError("Failed to save install path", e);
-            }
+            installPref.saveInstallPath();
         }
     }
 

@@ -8,6 +8,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.NotEnabledException;
+import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.SWT;
@@ -58,66 +62,57 @@ public class CustomIntroPart implements IIntroPart {
         parent.setLayout(new FillLayout());
         browser = new Browser(parent, SWT.NONE);
 
-        try {
-            Bundle bundle = Activator.getDefault() != null ? Activator.getDefault().getBundle()
-                            : FrameworkUtil.getBundle(getClass());
-            if (bundle == null) {
-                browser.setText("<html><body><h1>Error: Plugin bundle could not be determined.</h1></body></html>");
-                return;
-            }
+        Bundle bundle = Activator.getDefault() != null ? Activator.getDefault().getBundle()
+                        : FrameworkUtil.getBundle(getClass());
+        if (bundle == null) {
+            browser.setText("<html><body><h1>Error: Plugin bundle could not be determined.</h1></body></html>");
+            return;
+        }
 
-            List<String> resourcePaths = Arrays.asList("html/welcome.html", "html/style.css", "icons/ruyi_logo.png",
-                            "icons/icon_new.png", "icons/icon_open.png", "icons/icon_settings.png",
-                            "icons/icon_matrix.png", "icons/icon_docs.png", "icons/icon_discussions.png"
-            // Add all other images referenced in welcome.html here
-            );
+        List<String> resourcePaths = Arrays.asList("html/welcome.html", "html/style.css", "icons/ruyi_logo.png",
+                        "icons/icon_new.png", "icons/icon_open.png", "icons/icon_settings.png", "icons/icon_matrix.png",
+                        "icons/icon_docs.png", "icons/icon_discussions.png"
+        // Add all other images referenced in welcome.html here
+        );
 
-            URL resolvedWelcomePageUrl = null;
+        URL resolvedWelcomePageUrl = null;
 
-            for (String resourcePath : resourcePaths) {
-                URL bundleUrl = FileLocator.find(bundle, new Path(resourcePath), null);
-                if (bundleUrl != null) {
-                    try {
-                        URL fileUrl = FileLocator.toFileURL(bundleUrl);
-                        if (resourcePath.equals("html/welcome.html")) {
-                            resolvedWelcomePageUrl = fileUrl;
-                        }
-                    } catch (IOException ioException) {
-                        if (resourcePath.equals("html/welcome.html")) {
-                            String errorMessage = ioException.getMessage();
-                            String safeErrorMessage = (errorMessage == null) ? "An unknown error occurred."
-                                            : escapeHtml(errorMessage);
-                            String errorHtml = "<html><body>"
-                                            + "<h1>Error: Could not resolve welcome.html to a file URL.</h1>" + "<p>"
-                                            + safeErrorMessage + "</p></body></html>";
-                            browser.setText(errorHtml);
-                            return;
-                        }
-                        // For other resources, we might log this error but not necessarily stop loading the intro
-                    }
-                } else {
+        for (String resourcePath : resourcePaths) {
+            URL bundleUrl = FileLocator.find(bundle, new Path(resourcePath), null);
+            if (bundleUrl != null) {
+                try {
+                    URL fileUrl = FileLocator.toFileURL(bundleUrl);
                     if (resourcePath.equals("html/welcome.html")) {
-                        browser.setText("<html><body><h1>Error: welcome.html not found in bundle.</h1></body></html>");
+                        resolvedWelcomePageUrl = fileUrl;
+                    }
+                } catch (IOException ioException) {
+                    if (resourcePath.equals("html/welcome.html")) {
+                        String errorMessage = ioException.getMessage();
+                        String safeErrorMessage = (errorMessage == null) ? "An unknown error occurred."
+                                        : escapeHtml(errorMessage);
+                        String errorHtml =
+                                        "<html><body>" + "<h1>Error: Could not resolve welcome.html to a file URL.</h1>"
+                                                        + "<p>" + safeErrorMessage + "</p></body></html>";
+                        browser.setText(errorHtml);
                         return;
                     }
-                    // For other resources, we might log this error
+                    // For other resources, we might log this error but not necessarily stop loading the intro
                 }
-            }
-
-            if (resolvedWelcomePageUrl != null) {
-                browser.setUrl(resolvedWelcomePageUrl.toExternalForm());
             } else {
-                String errorMsg = "<html><body>" + "<h1>Error: Welcome page URL could not be determined "
-                                + "after resource processing.</h1></body></html>";
-                browser.setText(errorMsg);
+                if (resourcePath.equals("html/welcome.html")) {
+                    browser.setText("<html><body><h1>Error: welcome.html not found in bundle.</h1></body></html>");
+                    return;
+                }
+                // For other resources, we might log this error
             }
+        }
 
-        } catch (Exception e) {
-            String errorMessage = e.getMessage();
-            String safeErrorMessage = (errorMessage == null) ? "An unknown error occurred." : escapeHtml(errorMessage);
-            browser.setText("<html><body><h1>Error loading welcome page.</h1><p>" + safeErrorMessage
-                            + "</p></body></html>");
-            // Consider proper logging for 'e' here using Activator or ILog
+        if (resolvedWelcomePageUrl != null) {
+            browser.setUrl(resolvedWelcomePageUrl.toExternalForm());
+        } else {
+            String errorMsg = "<html><body>" + "<h1>Error: Welcome page URL could not be determined "
+                            + "after resource processing.</h1></body></html>";
+            browser.setText(errorMsg);
         }
 
         browser.addLocationListener(new LocationListener() {
@@ -153,7 +148,7 @@ public class CustomIntroPart implements IIntroPart {
                                 handlerService.executeCommand(commandId, null);
                             }
                         }
-                    } catch (Exception e) {
+                    } catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e) {
                         LOGGER.logError("Failed to execute command: " + commandId, e);
                     }
                     event.doit = false;
