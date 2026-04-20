@@ -221,8 +221,9 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
                 if (toolchainPrefixName == null) {
                     toolchainPrefixName = "riscv64-unknown-elf";
-                    LOGGER.logWarning("Failed to infer toolchain prefix name from '"
-                            + toolchainRootPath + "', using default value: " + toolchainPrefixName);
+                    LOGGER.logWarning(String.format(
+                            "Failed to infer toolchain prefix name from '%s', using default value: %s",
+                            toolchainRootPath, toolchainPrefixName));
                 }
 
                 StringBuilder sb = new StringBuilder();

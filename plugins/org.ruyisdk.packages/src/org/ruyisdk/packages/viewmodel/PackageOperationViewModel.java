@@ -65,8 +65,8 @@ public class PackageOperationViewModel extends BaseViewModel {
                 @Override
                 public void onStepStart(int index, int total, PackageOperation op) {
                     final var action = op.uninstall() ? "Uninstalling" : "Installing";
-                    final var text = "[" + (index + 1) + "/" + total + "] " + action + " \""
-                            + op.packageRef() + "\"...\n";
+                    final var text = String.format("[%d/%d] %s \"%s\"...%n", index + 1, total,
+                            action, op.packageRef());
                     appendOutput(text);
                 }
 

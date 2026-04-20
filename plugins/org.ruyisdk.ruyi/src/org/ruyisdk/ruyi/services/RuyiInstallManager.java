@@ -108,7 +108,7 @@ public final class RuyiInstallManager {
 
         BigDecimal freeMb = BigDecimal.valueOf(freeSpaceBytes)
                 .divide(BigDecimal.valueOf(1024L * 1024L), 1, RoundingMode.HALF_UP);
-        listener.logMessage("磁盘空间充足 (可用: " + freeMb.toPlainString() + " MB)");
+        listener.logMessage(String.format("磁盘空间充足 (可用: %s MB)", freeMb.toPlainString()));
         listener.progressChanged(10, "准备完成");
     }
 
@@ -128,8 +128,8 @@ public final class RuyiInstallManager {
         for (int i = 0; i < downloadSources.length; i++) {
             String sourceName = i == 0 ? "镜像源" : "GitHub源";
             String ruyiDownloadUrl = downloadSources[i];
-            LOGGER.logInfo(
-                    "Downloading Ruyi from: " + ruyiDownloadUrl + " to: " + ruyiExecutablePath);
+            LOGGER.logInfo(String.format("Downloading Ruyi from: %s to: %s", ruyiDownloadUrl,
+                    ruyiExecutablePath));
 
             try {
                 listener.logMessage(String.format("尝试从%s下载: %s", sourceName, ruyiDownloadUrl));
@@ -239,8 +239,9 @@ public final class RuyiInstallManager {
 
         Objects.requireNonNull(repoUrl, "No repository configuration selected");
         RuyiCli.setRepoRemote(repoUrl);
-        listener.logMessage("ruyi config set repo.remote successful. \n repo.remote is:"
-                + RuyiCli.getRepoRemote());
+        listener.logMessage(String.format("""
+            ruyi config set repo.remote successful.
+            repo.remote is: %s""", RuyiCli.getRepoRemote()));
 
         RuyiCli.updatePackageIndex();
         listener.logMessage("ruyi update successful");

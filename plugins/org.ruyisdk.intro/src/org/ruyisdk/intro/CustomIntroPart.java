@@ -93,9 +93,11 @@ public class CustomIntroPart implements IIntroPart {
                         String safeErrorMessage =
                                 (errorMessage == null) ? "An unknown error occurred."
                                         : escapeHtml(errorMessage);
-                        String errorHtml = "<html><body>"
-                                + "<h1>Error: Could not resolve welcome.html to a file URL.</h1>"
-                                + "<p>" + safeErrorMessage + "</p></body></html>";
+                        String errorHtml = String.format("""
+                            <html><body>
+                            <h1>Error: Could not resolve welcome.html to a file URL.</h1>
+                            <p>%s</p>
+                            </body></html>""", safeErrorMessage);
                         browser.setText(errorHtml);
                         return;
                     }
@@ -115,9 +117,11 @@ public class CustomIntroPart implements IIntroPart {
         if (resolvedWelcomePageUrl != null) {
             browser.setUrl(resolvedWelcomePageUrl.toExternalForm());
         } else {
-            String errorMsg =
-                    "<html><body>" + "<h1>Error: Welcome page URL could not be determined "
-                            + "after resource processing.</h1></body></html>";
+            String errorMsg = """
+                <html><body>
+                <h1>Error: Welcome page URL could not be determined \
+                after resource processing.</h1>
+                </body></html>""";
             browser.setText(errorMsg);
         }
 

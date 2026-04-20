@@ -69,7 +69,7 @@ public class RuyiVersion implements Comparable<RuyiVersion> {
 
     @Override
     public String toString() {
-        return major + "." + minor + "." + patch;
+        return String.format("%d.%d.%d", major, minor, patch);
     }
 
     /**

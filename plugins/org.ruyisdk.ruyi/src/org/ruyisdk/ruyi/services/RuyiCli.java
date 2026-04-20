@@ -694,7 +694,7 @@ public class RuyiCli {
         }
         // Use the documented package atom syntax: name(version)
         // Example: ruyi install 'gnu-upstream(0.20231118.0)'
-        final var atom = name + "(" + version + ")";
+        final var atom = String.format("%s(%s)", name, version);
         final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
                 .porcelain(true).install().atom(atom).end().build();
         request.execute();
@@ -761,11 +761,11 @@ public class RuyiCli {
             throw RuyiCliException.invalidArgument("Invalid profile");
         }
         // Pass toolchain/emulator atoms using the documented parentheses syntax
-        final var toolchainAtom = toolchainName + "(" + toolchainVersion + ")";
+        final var toolchainAtom = String.format("%s(%s)", toolchainName, toolchainVersion);
         String emulatorAtom = null;
         if (emulatorName != null && !emulatorName.isBlank() && emulatorVersion != null
                 && !emulatorVersion.isBlank()) {
-            emulatorAtom = emulatorName + "(" + emulatorVersion + ")";
+            emulatorAtom = String.format("%s(%s)", emulatorName, emulatorVersion);
         }
         final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
                 .porcelain(true).venv().profile(profile).dest(path).toolchain(toolchainAtom)

@@ -232,12 +232,17 @@ public class VenvView extends ViewPart {
 
                 final String message;
                 if (venvPaths.size() == 1) {
-                    message = "This will delete the whole directory of the virtual environment:\n\n"
-                            + venvPaths.get(0) + "\n\nContinue?";
+                    message = String.format("""
+                        This will delete the whole directory of the virtual environment:
+                        %s
+
+                        Continue?""", venvPaths.get(0));
                 } else {
-                    message =
-                            "This will delete the whole directories of the selected virtual environments:\n\n"
-                                    + String.join("\n", venvPaths) + "\n\nContinue?";
+                    message = String.format("""
+                        This will delete the whole directories of the selected virtual environments:
+                        %s
+
+                        Continue?""", String.join("\n", venvPaths));
                 }
 
                 final var confirmDeletion = MessageDialog.openConfirm(container.getShell(),

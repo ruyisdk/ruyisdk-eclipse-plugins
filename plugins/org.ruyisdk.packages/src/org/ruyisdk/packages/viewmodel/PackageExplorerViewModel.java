@@ -290,10 +290,10 @@ public class PackageExplorerViewModel extends BaseViewModel {
             var label = chosenDevice.getLabel();
             final var variantCount = chosenDevice.getRelatedRefs().size();
             if (variantCount > 0) {
-                label += " (" + variantCount + " variant" + (variantCount > 1 ? "s" : "") + ")";
+                label += String.format(" (%d variant(s))", variantCount);
             }
             label = label.replace("&", "&amp;").replace("<", "&lt;");
-            deviceInfoText = "Current device: <a>" + label + "</a>";
+            deviceInfoText = String.format("Current device: <a>%s</a>", label);
         }
         firePropertyChange(PROP_DEVICE_INFO_TEXT, old, deviceInfoText);
     }

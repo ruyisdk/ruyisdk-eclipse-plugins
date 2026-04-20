@@ -69,7 +69,7 @@ public class JsonParser {
 
                 boolean isDownloaded = versionObject.getBoolean("is_installed", false);
 
-                final var packageRef = name + "(" + semver + ")";
+                final var packageRef = String.format("%s(%s)", name, semver);
                 final var versionNode = new TreeNode(semver + remark, null, packageRef);
                 versionNode.setLeaf(true);
                 versionNode.setDownloaded(isDownloaded);
