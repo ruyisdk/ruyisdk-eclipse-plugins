@@ -21,18 +21,19 @@ public class NewsFetchService {
             try {
                 final var result = RuyiCli.readNewsItem(id);
                 if (result == null) {
-                    throw new Exception("timed out");
+                    final var msg = "News item not found: id=" + id;
+                    LOGGER.logError(msg);
+                    errorCallback.accept(msg);
+                    return Status.CANCEL_STATUS; // avoid Eclipse error dialog
                 }
                 final var content = result.getContent() == null ? "" : result.getContent();
                 LOGGER.logInfo("Fetched news details: id=" + id + ", length=" + content.length());
                 callback.accept(content);
                 return Status.OK_STATUS;
             } catch (Exception e) {
-                LOGGER.logError("Failed to fetch news details: id=" + id, e);
-                final var msg = e.getMessage() == null ? "Failed to read news details" : e.getMessage();
-                if (errorCallback != null) {
-                    errorCallback.accept(msg);
-                }
+                final var msg = "Failed to read news details: id=" + id;
+                LOGGER.logError(msg, e);
+                errorCallback.accept(msg);
                 return Status.CANCEL_STATUS; // avoid Eclipse error dialog
             }
         });

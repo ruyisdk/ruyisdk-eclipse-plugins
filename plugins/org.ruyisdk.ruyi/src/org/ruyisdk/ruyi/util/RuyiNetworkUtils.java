@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -18,6 +17,7 @@ import java.util.function.BiConsumer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
+import org.ruyisdk.ruyi.services.RuyiApiException;
 
 /**
  * Network utility methods for Ruyi.
@@ -35,11 +35,9 @@ public class RuyiNetworkUtils {
      * @param destinationPath destination path
      * @param monitor progress monitor
      * @param progressCallback progress callback
-     * @throws IOException if download fails
-     * @throws URISyntaxException if URL is invalid
      */
     public static void downloadFile(String fileUrl, String destinationPath, IProgressMonitor monitor,
-                    BiConsumer<Long, Long> progressCallback) throws IOException, URISyntaxException {
+                    BiConsumer<Long, Long> progressCallback) {
         HttpURLConnection connection = null;
         InputStream input = null;
         OutputStream output = null;
@@ -54,7 +52,7 @@ public class RuyiNetworkUtils {
 
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new IOException("Server returned HTTP " + responseCode + ": " + connection.getResponseMessage());
+                throw RuyiApiException.unexpectedStatusCode(responseCode);
             }
 
             long fileSize = connection.getContentLengthLong();
@@ -87,8 +85,12 @@ public class RuyiNetworkUtils {
 
             // if (subMonitor.isCanceled()) {
             if (monitor.isCanceled()) {
-                throw new InterruptedIOException("Download cancelled by user");
+                throw RuyiApiException.cancelled();
             }
+        } catch (URISyntaxException e) {
+            throw RuyiApiException.invalidArgument("Invalid URL: " + fileUrl);
+        } catch (IOException e) {
+            throw RuyiApiException.ioError(e);
         } finally {
             closeQuietly(input);
             closeQuietly(output);
@@ -107,11 +109,8 @@ public class RuyiNetworkUtils {
      * @param urlString URL string
      * @param monitor progress monitor
      * @return string content
-     * @throws IOException if fetch fails
-     * @throws URISyntaxException if URL is invalid
      */
-    public static String fetchStringContent(String urlString, IProgressMonitor monitor)
-                    throws IOException, URISyntaxException {
+    public static String fetchStringContent(String urlString, IProgressMonitor monitor) {
         HttpURLConnection connection = null;
         InputStream input = null;
 
@@ -126,7 +125,7 @@ public class RuyiNetworkUtils {
 
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new IOException("HTTP request failed with code: " + responseCode);
+                throw RuyiApiException.unexpectedStatusCode(responseCode);
             }
 
             input = connection.getInputStream();
@@ -143,10 +142,14 @@ public class RuyiNetworkUtils {
             }
 
             if (monitor != null && monitor.isCanceled()) {
-                throw new InterruptedIOException("Operation cancelled by user");
+                throw RuyiApiException.cancelled();
             }
 
             return content.toString();
+        } catch (URISyntaxException e) {
+            throw RuyiApiException.invalidArgument("Invalid URL: " + urlString);
+        } catch (IOException e) {
+            throw RuyiApiException.ioError(e);
         } finally {
             closeQuietly(input);
             if (connection != null) {
@@ -162,11 +165,8 @@ public class RuyiNetworkUtils {
      * @param data data to post
      * @param monitor progress monitor
      * @return response string
-     * @throws IOException if post fails
-     * @throws URISyntaxException if URL is invalid
      */
-    public static String postJson(String urlString, Map<String, Object> data, IProgressMonitor monitor)
-                    throws IOException, URISyntaxException {
+    public static String postJson(String urlString, Map<String, Object> data, IProgressMonitor monitor) {
         HttpURLConnection connection = null;
         OutputStream output = null;
         InputStream input = null;
@@ -199,7 +199,7 @@ public class RuyiNetworkUtils {
 
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new IOException("HTTP request failed with code: " + responseCode);
+                throw RuyiApiException.unexpectedStatusCode(responseCode);
             }
 
             input = connection.getInputStream();
@@ -216,10 +216,14 @@ public class RuyiNetworkUtils {
             }
 
             if (monitor != null && monitor.isCanceled()) {
-                throw new InterruptedIOException("Operation cancelled by user");
+                throw RuyiApiException.cancelled();
             }
 
             return response.toString();
+        } catch (URISyntaxException e) {
+            throw RuyiApiException.invalidArgument("Invalid URL: " + urlString);
+        } catch (IOException e) {
+            throw RuyiApiException.ioError(e);
         } finally {
             closeQuietly(output);
             closeQuietly(input);
@@ -246,7 +250,7 @@ public class RuyiNetworkUtils {
             connection.setRequestMethod("HEAD");
             int responseCode = connection.getResponseCode();
             return (200 <= responseCode && responseCode <= 399);
-        } catch (Exception e) {
+        } catch (IOException | URISyntaxException e) {
             return false;
         } finally {
             if (connection != null) {

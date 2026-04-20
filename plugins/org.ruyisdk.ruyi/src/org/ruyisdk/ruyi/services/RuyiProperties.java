@@ -9,6 +9,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Properties;
 import org.ruyisdk.core.basedir.XdgDirs;
 import org.ruyisdk.core.config.Constants;
+import org.ruyisdk.core.exception.RuyiConfigException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
@@ -42,7 +43,7 @@ public class RuyiProperties {
                     saveConfig();
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | RuyiConfigException e) {
             LOGGER.logError("Failed to init config directory", e);
         }
     }
@@ -61,7 +62,7 @@ public class RuyiProperties {
     }
 
     // 初始化默认配置
-    private static void initDefaultConfig() throws IOException {
+    private static void initDefaultConfig() {
         Properties defaults = new Properties();
         defaults.setProperty("automatic.detection", "on");
         defaults.setProperty("ruyi.install.path", RuyiFileUtils.getDefaultInstallPath().toString());
@@ -71,14 +72,16 @@ public class RuyiProperties {
     }
 
     // 修改saveConfig方法使其能接受Properties参数
-    private static synchronized void saveConfig(Properties propsToSave) throws IOException {
+    private static synchronized void saveConfig(Properties propsToSave) {
         try (OutputStream os = Files.newOutputStream(FILE_PATH, StandardOpenOption.CREATE,
                         StandardOpenOption.TRUNCATE_EXISTING)) {
             propsToSave.store(os, "Ruyi Configuration");
+        } catch (IOException e) {
+            throw RuyiConfigException.saveFailed("config: " + FILE_PATH, e);
         }
     }
 
-    private static synchronized void saveConfig() throws IOException {
+    private static synchronized void saveConfig() {
         saveConfig(props); // 重用上面的方法
     }
 
@@ -98,9 +101,8 @@ public class RuyiProperties {
      * Sets automatic detection.
      *
      * @param enabled true to enable
-     * @throws IOException if save fails
      */
-    public static void setAutomaticDetection(boolean enabled) throws IOException {
+    public static void setAutomaticDetection(boolean enabled) {
         props.setProperty("automatic.detection", enabled ? "on" : "off");
         saveConfig();
     }
@@ -119,9 +121,8 @@ public class RuyiProperties {
      * Sets install path.
      *
      * @param path install path
-     * @throws IOException if save fails
      */
-    public static void setInstallPath(String path) throws IOException {
+    public static void setInstallPath(String path) {
         props.setProperty("ruyi.install.path", path != null ? path : "");
         saveConfig();
     }

@@ -7,8 +7,10 @@ Bundle-Vendor: ISCAS
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.ruyisdk.ruyi.tests
 Require-Bundle: 
+ assertj-core,
  wrapped.junit.junit,
  org.ruyisdk.core,
  org.ruyisdk.packages,
  org.ruyisdk.ruyi,
+ json,
  wrapped.org.hamcrest.hamcrest-core

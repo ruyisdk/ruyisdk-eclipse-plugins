@@ -12,7 +12,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.packages.JsonParser;
 import org.ruyisdk.projectcreator.Activator;
 
 /**
@@ -111,7 +113,11 @@ public class BuildPropertyPage extends PropertyPage implements IWorkbenchPropert
             } else {
 
                 profile = boardModel;
-                toolchain = org.ruyisdk.packages.JsonParser.findInstalledToolchainForBoard(boardModel);
+                try {
+                    toolchain = JsonParser.findInstalledToolchainForBoard(boardModel);
+                } catch (PluginException e) {
+                    toolchain = null;
+                }
                 if (toolchain == null || toolchain.trim().isEmpty()) {
                     if ("milkv-duo".equals(boardModel)) {
                         toolchain = "gnu-milkv-milkv-duo-elf-bin";

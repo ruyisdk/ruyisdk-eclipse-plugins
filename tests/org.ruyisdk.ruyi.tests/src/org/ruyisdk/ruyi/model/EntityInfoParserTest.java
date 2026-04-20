@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.json.JSONException;
 import org.junit.Test;
 
 /**
@@ -256,15 +257,20 @@ public class EntityInfoParserTest {
     }
 
     @Test
-    public void parseAllTolerablyHandlesTruncatedJson() {
-        // Second object is truncated — first should still parse
+    public void parseAllThrowsOnTruncatedJson() {
+        // Second object is truncated — JSONTokener throws on malformed input
         String json = """
                         {"ty":"entitylistoutput-v1","entity_type":"device","entity_id":"good","display_name":"Good","related_refs":[],"reverse_refs":[]}{"ty":"entitylistoutput-v1","entity_type":"device","entity_id":"bad","displ
                         """;
-        List<EntityInfo> result = EntityInfoParser.parseAll(json);
-        assertNotNull(result);
-        assertTrue(result.size() >= 1);
-        assertEquals("good", result.get(0).getEntityId());
+        JSONException ex = null;
+        try {
+            EntityInfoParser.parseAll(json);
+        } catch (JSONException e) {
+            ex = e;
+        }
+        assertNotNull("Expected JSONException for truncated JSON", ex);
+        assertTrue("Message should mention unterminated string: " + ex.getMessage(),
+                        ex.getMessage().contains("Unterminated string"));
     }
 
     // ------------------------------------------------------------------

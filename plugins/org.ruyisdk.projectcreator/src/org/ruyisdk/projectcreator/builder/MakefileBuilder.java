@@ -23,11 +23,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.packages.JsonParser;
 import org.ruyisdk.projectcreator.Activator;
+import org.ruyisdk.projectcreator.RuyiProjectException;
 import org.ruyisdk.ruyi.services.RuyiCli;
-import org.ruyisdk.ruyi.services.RuyiCliException;
 
 /**
  * Builder for Makefile projects.
@@ -119,10 +120,13 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
             String resultMessage = "Build finished with exit code: " + exitCode;
             logToFile(project, resultMessage);
 
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             final var errorMessage = "Build failed with exception";
             LOGGER.logError("MakefileBuilder: " + errorMessage, e);
             logToFile(project, errorMessage + ": " + e.getMessage());
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
         } finally {
             logToFile(project, "=== Build finished at " + new Date() + " ===");
             project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
@@ -138,14 +142,18 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
      * @param gccPath The path to the gcc compiler
      * @param project The project
      * @return The appropriate CFLAGS for the toolchain
-     * @throws CoreException if board model is not set
      */
-    private String determineCorrectCflags(String gccPath, IProject project) throws CoreException {
+    private String determineCorrectCflags(String gccPath, IProject project) {
         // Base CFLAGS that are always included
         String cflags = "-Wall -O2";
 
         // Get the board model to provide more specific flags
-        String boardModel = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
+        String boardModel;
+        try {
+            boardModel = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
+        } catch (CoreException e) {
+            throw RuyiProjectException.propertyAccessFailed(BOARD_MODEL_PROPERTY, e);
+        }
         if (boardModel == null || boardModel.trim().isEmpty()) {
             return cflags; // Return default flags if board model is not available
         }
@@ -197,7 +205,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
         return null;
     }
 
-    private void ensureRuyiVenv(IProject project) throws CoreException {
+    private void ensureRuyiVenv(IProject project) {
         File projectLocation = project.getLocation().toFile();
         File venvDir = new File(projectLocation, RUYI_VENV_DIR);
 
@@ -208,8 +216,12 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
 
         logToFile(project, "Ruyi virtual environment not found. Creating...");
 
-        String venvCommand =
-                        project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, RUYI_VENV_CMD_PROPERTY));
+        String venvCommand;
+        try {
+            venvCommand = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, RUYI_VENV_CMD_PROPERTY));
+        } catch (CoreException e) {
+            throw RuyiProjectException.propertyAccessFailed(RUYI_VENV_CMD_PROPERTY, e);
+        }
         final var useCustomCommand = !(venvCommand == null || venvCommand.trim().isEmpty());
         String boardModel = null;
         String toolchain = null;
@@ -217,12 +229,21 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
 
         if (!useCustomCommand) {
             logToFile(project, "No custom venv command found, generating default command...");
-            boardModel = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
-            if (boardModel == null) {
-                throw new CoreException(
-                                new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Board model not set for project."));
+            try {
+                boardModel = project
+                                .getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
+            } catch (CoreException e) {
+                throw RuyiProjectException.propertyAccessFailed(BOARD_MODEL_PROPERTY, e);
             }
-            toolchain = JsonParser.findInstalledToolchainForBoard(boardModel);
+            if (boardModel == null) {
+                throw RuyiProjectException.propertyMissing(BOARD_MODEL_PROPERTY);
+            }
+            try {
+                toolchain = JsonParser.findInstalledToolchainForBoard(boardModel);
+            } catch (PluginException e) {
+                logToFile(project, "Failed to find installed toolchain for board: " + e.getMessage());
+                toolchain = null;
+            }
             if (toolchain == null || toolchain.trim().isEmpty()) {
                 if ("milkv-duo".equals(boardModel)) {
                     toolchain = "gnu-milkv-milkv-duo-elf-bin";
@@ -247,15 +268,10 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
 
         logToFile(project, "Executing: ruyi " + String.join(" ", ruyiArgs));
 
-        try {
-            final var output = RuyiCli.runRuyiExperimental(ruyiArgs, projectLocation);
+        final var output = RuyiCli.runRuyiExperimental(ruyiArgs, projectLocation);
 
-            if (output != null && !output.isBlank()) {
-                logToFile(project, "[ruyi venv] " + output);
-            }
-        } catch (RuyiCliException e) {
-            throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-                            "Failed to create Ruyi virtual environment: " + e.getMessage(), e));
+        if (output != null && !output.isBlank()) {
+            logToFile(project, "[ruyi venv] " + output);
         }
     }
 

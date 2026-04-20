@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.ruyisdk.core.ruyi.model.RuyiReleaseInfo;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
@@ -26,9 +28,8 @@ public class RuyiApi {
      *
      * @param osArch 系统架构 (x86_64/aarch64/riscv64)
      * @return 结构化版本信息
-     * @throws RuyiApiException 当API请求或数据处理失败时抛出
      */
-    public static RuyiReleaseInfo getLatestRelease(String osArch) throws RuyiApiException {
+    public static RuyiReleaseInfo getLatestRelease(String osArch) {
         try {
             JSONObject response = sendGetRequest("/releases/latest-pm");
             JSONObject stable = response.getJSONObject("channels").getJSONObject("stable");
@@ -40,7 +41,7 @@ public class RuyiApi {
 
             JSONObject downloads = stable.getJSONObject("download_urls");
             if (!downloads.has(platformKey)) {
-                throw new RuyiApiException("Unsupported architecture: " + osArch);
+                throw RuyiApiException.invalidArgument("Unsupported architecture: " + osArch);
             }
 
             // 构建版本信息对象
@@ -53,12 +54,12 @@ public class RuyiApi {
             return new RuyiReleaseInfo(RuyiVersion.parse(version), stable.getString("channel"), filename, urls[0],
                             urls[1]);
 
-        } catch (Exception e) {
-            throw new RuyiApiException("Failed to get release info: " + e.getMessage(), e);
+        } catch (JSONException e) {
+            throw RuyiApiException.jsonError(e);
         }
     }
 
-    private static JSONObject sendGetRequest(String path) throws IOException, URISyntaxException {
+    private static JSONObject sendGetRequest(String path) {
         HttpURLConnection conn = null;
         BufferedReader reader = null;
 
@@ -69,7 +70,7 @@ public class RuyiApi {
             conn.setReadTimeout(TIMEOUT);
 
             if (conn.getResponseCode() != 200) {
-                throw new IOException("HTTP " + conn.getResponseCode());
+                throw RuyiApiException.unexpectedStatusCode(conn.getResponseCode());
             }
 
             reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -80,9 +81,17 @@ public class RuyiApi {
             }
 
             return new JSONObject(response.toString());
+        } catch (URISyntaxException | MalformedURLException e) {
+            throw RuyiApiException.invalidArgument(path);
+        } catch (IOException e) {
+            throw RuyiApiException.ioError(e);
         } finally {
             if (reader != null) {
-                reader.close();
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    // ignore
+                }
             }
             if (conn != null) {
                 conn.disconnect();

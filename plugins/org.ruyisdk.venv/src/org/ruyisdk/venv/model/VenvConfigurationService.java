@@ -1,18 +1,20 @@
 package org.ruyisdk.venv.model;
 
+import java.io.IOException;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
+import org.eclipse.cdt.managedbuilder.core.BuildException;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IToolChain;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.ruyisdk.core.util.PluginLogger;
@@ -127,9 +129,6 @@ public class VenvConfigurationService {
         } catch (CoreException e) {
             LOGGER.logError("Failed to apply CDT configuration: project=" + projectPath, e);
             return new ApplyResult(false, "Failed to apply CDT configuration: " + e.getMessage());
-        } catch (Exception e) {
-            LOGGER.logError("Unexpected error applying venv configuration: project=" + projectPath, e);
-            return new ApplyResult(false, "Unexpected error: " + e.getMessage());
         }
     }
 
@@ -203,7 +202,7 @@ public class VenvConfigurationService {
             if (option != null) {
                 config.setOption(toolChain, option, value);
             }
-        } catch (Exception e) {
+        } catch (BuildException e) {
             // Option doesn't exist or can't be set for this toolchain type - ignore
             LOGGER.logWarning("Could not set toolchain option: " + optionId, e);
         }
@@ -212,12 +211,16 @@ public class VenvConfigurationService {
     /** Applies the venv configuration to the project asynchronously. */
     public void applyToProjectAsync(Venv venv, Consumer<ApplyResult> callback) {
         final var applyJob = Job.create("Applying venv configuration to CDT project", monitor -> {
-            final var result = applyToProject(venv);
-            if (callback != null) {
+            try {
+                final var result = applyToProject(venv);
                 callback.accept(result);
+                return result.isSuccess() ? Status.OK_STATUS : Status.warning(result.getMessage());
+            } catch (Exception e) {
+                final var msg = "Failed to apply venv configuration";
+                LOGGER.logError(msg, e);
+                callback.accept(new ApplyResult(false, msg));
+                return Status.CANCEL_STATUS; // avoid Eclipse error dialog
             }
-            return result.isSuccess() ? Status.OK_STATUS
-                            : new Status(IStatus.WARNING, Activator.PLUGIN_ID, result.getMessage());
         });
         applyJob.schedule();
     }
@@ -257,13 +260,14 @@ public class VenvConfigurationService {
         }
         try {
             return Paths.get(pathString).toRealPath();
-        } catch (Exception e) {
-            // Fall back to normalized path if real path resolution fails (e.g., path doesn't exist)
-            try {
-                return Paths.get(pathString).normalize().toAbsolutePath();
-            } catch (Exception e2) {
-                return null;
-            }
+        } catch (IOException e) {
+            LOGGER.logWarning("Could not resolve real path for: " + pathString, e);
         }
+        try {
+            return Paths.get(pathString).normalize().toAbsolutePath();
+        } catch (InvalidPathException e) {
+            LOGGER.logWarning("Could not normalize path for: " + pathString, e);
+        }
+        return null;
     }
 }

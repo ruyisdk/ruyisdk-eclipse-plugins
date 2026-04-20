@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.ruyisdk.packages.model.PackageOperation;
+import org.ruyisdk.ruyi.services.RuyiCliException;
 
 /**
  * Unit tests for {@link PackageOperationRunner} covering streaming output sequencing, failure
@@ -61,7 +63,7 @@ public class PackageOperationRunnerTest {
         PackageOperationRunner.PackageInstaller installer = (op, lineCallback) -> {
             lineCallback.accept("output");
             if ("bad(1.0)".equals(op.packageRef())) {
-                throw new RuntimeException("install failed");
+                throw RuyiCliException.executionFailed("install bad(1.0)", 1, "install failed");
             }
         };
 
@@ -78,7 +80,11 @@ public class PackageOperationRunnerTest {
         assertTrue(events.contains("onStepDone:0"));
 
         // Second step fails
-        assertTrue(events.contains("onStepFailed:1:install failed"));
+        Assertions.assertThat(events).anySatisfy(e -> Assertions.assertThat(e).startsWith("""
+        onStepFailed:1:org.ruyisdk.ruyi.services.RuyiCliException: ruyi command execution failed with code: 1
+        Command: install bad(1.0)
+        CLI Output:
+        install failed"""));
 
         // Third step still runs (runner does not abort on failure)
         assertTrue(events.contains("onStepStart:2:3:after(1.0)"));

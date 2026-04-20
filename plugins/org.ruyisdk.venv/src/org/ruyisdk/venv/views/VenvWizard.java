@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.statushandlers.StatusManager;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.venv.viewmodel.VenvWizardViewModel;
 
 /**
@@ -40,7 +41,7 @@ public class VenvWizard extends Wizard {
                 monitor.beginTask("Updating package index...", 100);
                 try {
                     viewModel.refreshAll();
-                } catch (Exception e) {
+                } catch (PluginException e) {
                     throw new InvocationTargetException(e);
                 }
                 monitor.worked(100);
@@ -86,7 +87,7 @@ public class VenvWizard extends Wizard {
 
                     monitor.subTask("create venv");
                     viewModel.createVenv();
-                } catch (Exception e) {
+                } catch (PluginException e) {
                     throw new InvocationTargetException(e);
                 }
             });

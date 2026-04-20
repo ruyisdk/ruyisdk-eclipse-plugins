@@ -16,9 +16,8 @@ public class DeviceList {
      * Loads all device entities from the Ruyi CLI, sorted case-insensitively by label.
      *
      * @return sorted list of device entities
-     * @throws Exception if the CLI call or parsing fails
      */
-    public static List<DeviceEntityInfo> loadDevices() throws Exception {
+    public static List<DeviceEntityInfo> loadDevices() {
         final var output = RuyiCli.listEntitiesByType("device");
         final var devices = EntityInfoParser.parseDeviceEntities(output);
         devices.sort(Comparator.comparing(DeviceEntityInfo::getLabel, String.CASE_INSENSITIVE_ORDER));

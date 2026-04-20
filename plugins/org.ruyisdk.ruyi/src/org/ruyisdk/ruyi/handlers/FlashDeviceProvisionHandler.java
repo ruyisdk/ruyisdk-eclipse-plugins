@@ -5,6 +5,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.services.DeviceProvisionService;
@@ -21,7 +22,7 @@ public class FlashDeviceProvisionHandler extends AbstractHandler {
             new DeviceProvisionService().launchProvisionWizard();
             LOGGER.logInfo("Flash device (device provision) command launched in built-in terminal");
             return null;
-        } catch (Exception e) {
+        } catch (PluginException e) {
             final var msg = "Failed to launch flash device (device provision) command";
             LOGGER.logError(msg, e);
             final var shell = HandlerUtil.getActiveShell(event);

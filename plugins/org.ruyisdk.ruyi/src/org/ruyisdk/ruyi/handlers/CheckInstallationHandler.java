@@ -3,6 +3,7 @@ package org.ruyisdk.ruyi.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.core.RuyiCore;
@@ -23,7 +24,7 @@ public class CheckInstallationHandler extends AbstractHandler {
             ruyiCore.runManualCheck();
             LOGGER.logInfo("Ruyi activated successfully");
             return null;
-        } catch (Exception e) {
+        } catch (PluginException e) {
             LOGGER.logError("Failed to execute check installation command", e);
             throw new ExecutionException("Check installation failed", e);
         }

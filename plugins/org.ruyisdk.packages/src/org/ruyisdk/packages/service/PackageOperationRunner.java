@@ -23,9 +23,8 @@ public class PackageOperationRunner {
          *
          * @param op the operation to execute
          * @param lineCallback called for each line of process output
-         * @throws Exception if the operation fails
          */
-        void execute(PackageOperation op, Consumer<String> lineCallback) throws Exception;
+        void execute(PackageOperation op, Consumer<String> lineCallback);
     }
 
     /** Default installer that delegates to {@link RuyiCli}. */
@@ -94,7 +93,7 @@ public class PackageOperationRunner {
                 installer.execute(op, callback::onOutputLine);
                 callback.onStepDone(i);
             } catch (Exception e) {
-                callback.onStepFailed(i, e.getMessage());
+                callback.onStepFailed(i, e.toString());
             }
         }
         callback.onAllFinished(cancelFlag.getAsBoolean());

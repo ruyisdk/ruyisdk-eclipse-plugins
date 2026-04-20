@@ -1,10 +1,10 @@
 package org.ruyisdk.ruyi.preferences;
 
-import java.io.IOException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
 import org.ruyisdk.ruyi.services.RuyiProperties;
@@ -66,7 +66,7 @@ public class AutomaticCheckPreference {
     public void setAutomaticDetection() {
         try {
             RuyiProperties.setAutomaticDetection(automaticCheckCheckbox.getSelection());
-        } catch (IOException e) {
+        } catch (PluginException e) {
             LOGGER.logError("Failed to save automatic detection setting", e);
         }
     }

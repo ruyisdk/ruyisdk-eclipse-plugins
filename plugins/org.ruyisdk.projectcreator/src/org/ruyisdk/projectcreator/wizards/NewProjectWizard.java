@@ -30,8 +30,10 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
+import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.projectcreator.Activator;
+import org.ruyisdk.projectcreator.RuyiProjectException;
 import org.ruyisdk.projectcreator.natures.MyProjectNature;
 import org.ruyisdk.projectcreator.utils.ToolchainLocator;
 
@@ -101,7 +103,7 @@ public class NewProjectWizard extends Wizard implements INewWizard {
                 try {
                     // 2. Pass CFLAGS to the createProject method
                     createProject(projectName, boardModel, toolchainPath, cflags, finalTemplateName, monitor);
-                } catch (CoreException | IOException e) {
+                } catch (PluginException e) {
                     throw new InvocationTargetException(e);
                 } finally {
                     monitor.done();
@@ -137,47 +139,50 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 
     // 3. Update method signature to accept CFLAGS
     private void createProject(String projectName, String boardModel, String toolchainPath, String cflags,
-                    String templateName, IProgressMonitor monitor) throws CoreException, IOException {
-        monitor.beginTask("Creating project " + projectName, 4);
+                    String templateName, IProgressMonitor monitor) {
+        try {
+            monitor.beginTask("Creating project " + projectName, 4);
 
-        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+            IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 
-        project.create(monitor);
-        project.open(monitor);
-        monitor.worked(1);
+            project.create(monitor);
+            project.open(monitor);
+            monitor.worked(1);
 
-        IProjectDescription description = project.getDescription();
+            IProjectDescription description = project.getDescription();
 
-        description.setBuildSpec(new ICommand[0]);
+            description.setBuildSpec(new ICommand[0]);
 
-        description.setNatureIds(new String[] {MyProjectNature.NATURE_ID});
+            description.setNatureIds(new String[] {MyProjectNature.NATURE_ID});
 
-        project.setDescription(description, monitor);
-        monitor.worked(1);
-        // 4. Pass CFLAGS to the copyTemplateFiles method
-        copyTemplateFiles(project, templateName, toolchainPath, cflags, monitor);
-        monitor.worked(1);
+            project.setDescription(description, monitor);
+            monitor.worked(1);
+            // 4. Pass CFLAGS to the copyTemplateFiles method
+            copyTemplateFiles(project, templateName, toolchainPath, cflags, monitor);
+            monitor.worked(1);
 
-        project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "boardModel"), boardModel);
-        project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "toolchainPath"), toolchainPath);
-        project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "buildCmd"), "make");
-        // 5. Save CFLAGS as a persistent property
-        project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "cflags"), cflags);
-        // refresh the project to ensure all changes are applied
-        project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
-        monitor.worked(1);
+            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "boardModel"), boardModel);
+            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "toolchainPath"), toolchainPath);
+            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "buildCmd"), "make");
+            // 5. Save CFLAGS as a persistent property
+            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "cflags"), cflags);
+            // refresh the project to ensure all changes are applied
+            project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+            monitor.worked(1);
+        } catch (CoreException e) {
+            throw RuyiProjectException.creationFailed(projectName, e);
+        }
     }
 
     // 6. Update method signature to accept CFLAGS
     private void copyTemplateFiles(IProject project, String templateName, String toolchainRootPath, String cflags,
-                    IProgressMonitor monitor) throws CoreException, IOException {
+                    IProgressMonitor monitor) {
         Bundle bundle = Activator.getDefault().getBundle();
         String templatePath = "/templates/" + templateName;
         Enumeration<URL> entries = bundle.findEntries(templatePath, "*", true);
 
         if (entries == null) {
-            throw new CoreException(
-                            new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Template not found: " + templatePath));
+            throw RuyiProjectException.templateNotFound(templatePath);
         }
 
         while (entries.hasMoreElements()) {
@@ -192,7 +197,11 @@ public class NewProjectWizard extends Wizard implements INewWizard {
             if (entryPath.endsWith("/")) {
                 IFolder folder = project.getFolder(targetPath);
                 if (!folder.exists()) {
-                    folder.create(true, true, monitor);
+                    try {
+                        folder.create(true, true, monitor);
+                    } catch (CoreException e) {
+                        throw RuyiProjectException.folderCreationFailed(targetPath, e);
+                    }
                 }
                 continue;
             }
@@ -219,6 +228,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
                         line = line.replace("__CFLAGS_OPTIONS__", cflags); // 7. Replace CFLAGS placeholder
                         sb.append(line).append(System.lineSeparator());
                     }
+                } catch (IOException e) {
+                    throw RuyiProjectException.fileReadFailed("Makefile", e);
                 }
 
                 String finalContent = sb.toString();
@@ -229,6 +240,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
                     } else {
                         file.create(newContentStream, true, monitor);
                     }
+                } catch (IOException | CoreException e) {
+                    throw RuyiProjectException.fileWriteFailed("Makefile", e);
                 }
 
             } else {
@@ -238,6 +251,8 @@ public class NewProjectWizard extends Wizard implements INewWizard {
                     } else {
                         file.create(is, true, monitor);
                     }
+                } catch (IOException | CoreException e) {
+                    throw RuyiProjectException.fileCopyFailed(entryPath, e);
                 }
             }
         }

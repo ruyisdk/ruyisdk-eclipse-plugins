@@ -1,11 +1,13 @@
 package org.ruyisdk.ruyi.services;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import org.ruyisdk.core.exception.PluginException;
 
 /**
  * Exception thrown when a Ruyi CLI operation fails.
  */
-public class RuyiCliException extends Exception {
+public class RuyiCliException extends PluginException {
     private static final long serialVersionUID = 1L;
 
     private RuyiCliException(String message) {
@@ -22,12 +24,13 @@ public class RuyiCliException extends Exception {
     }
 
     /** CLI command returned non-zero exit code. CLI output is included in the message. */
-    public static RuyiCliException executionFailed(String output, String commandHint) {
-        final var sb = new StringBuilder("ruyi command execution failed: ").append(commandHint);
-        if (output != null && !output.isBlank()) {
-            sb.append("\n\nCLI Output:\n").append(output);
-        }
-        return new RuyiCliException(sb.toString());
+    public static RuyiCliException executionFailed(String commandHint, int exitCode, String output) {
+        final var message = String.format("""
+            ruyi command execution failed with code: %d
+            Command: %s
+            CLI Output:
+            %s""", exitCode, commandHint, output);
+        return new RuyiCliException(message);
     }
 
     /** Invalid argument provided to CLI. */
@@ -48,5 +51,15 @@ public class RuyiCliException extends Exception {
     /** I/O error during CLI execution. */
     public static RuyiCliException ioError(IOException cause) {
         return new RuyiCliException("I/O error during ruyi command execution", cause);
+    }
+
+    /** {@link ExecutionException} during CLI execution. */
+    public static RuyiCliException executionError(ExecutionException e) {
+        return new RuyiCliException("Unexpected error during ruyi command execution", e.getCause());
+    }
+
+    /** Eclipse terminal service is not available. */
+    public static RuyiCliException terminalUnavailable() {
+        return new RuyiCliException("Eclipse terminal service is unavailable");
     }
 }

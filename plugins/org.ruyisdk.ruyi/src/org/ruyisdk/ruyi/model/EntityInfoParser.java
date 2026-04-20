@@ -160,28 +160,24 @@ public final class EntityInfoParser {
         if (input == null || input.isBlank()) {
             return out;
         }
-        try {
-            final var t = new JSONTokener(input);
-            while (true) {
-                final var c = t.nextClean();
-                if (c == 0) {
-                    break;
-                }
-                t.back();
-                final var v = t.nextValue();
-                if (v instanceof JSONObject) {
-                    out.add((JSONObject) v);
-                } else if (v instanceof JSONArray arr) {
-                    for (int i = 0; i < arr.length(); i++) {
-                        final var el = arr.get(i);
-                        if (el instanceof JSONObject) {
-                            out.add((JSONObject) el);
-                        }
+        final var t = new JSONTokener(input);
+        while (true) {
+            final var c = t.nextClean();
+            if (c == 0) {
+                break;
+            }
+            t.back();
+            final var v = t.nextValue();
+            if (v instanceof JSONObject) {
+                out.add((JSONObject) v);
+            } else if (v instanceof JSONArray arr) {
+                for (int i = 0; i < arr.length(); i++) {
+                    final var el = arr.get(i);
+                    if (el instanceof JSONObject) {
+                        out.add((JSONObject) el);
                     }
                 }
             }
-        } catch (Exception e) {
-            // partial parse is fine — return what we have so far
         }
         return out;
     }

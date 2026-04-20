@@ -92,13 +92,15 @@ public class PackageExplorerViewModel extends BaseViewModel {
 
     /** Kick off initial data loading (packages + device list). */
     public void initialize() {
-        loadPackagesAsync(null);
+        loadPackagesAsync(() -> {
+        });
         loadDevicesAsync();
     }
 
     /** Reload the package list for the currently chosen device. */
     public void refreshPackages() {
-        loadPackagesAsync(null);
+        loadPackagesAsync(() -> {
+        });
     }
 
     /**
@@ -196,9 +198,7 @@ public class PackageExplorerViewModel extends BaseViewModel {
             if (monitor.isCanceled()) {
                 uiExecutor.accept(() -> {
                     setPackagesLoading(false);
-                    if (onFinished != null) {
-                        onFinished.run();
-                    }
+                    onFinished.run();
                 });
                 return Status.CANCEL_STATUS;
             }
@@ -209,9 +209,7 @@ public class PackageExplorerViewModel extends BaseViewModel {
                 if (monitor.isCanceled()) {
                     uiExecutor.accept(() -> {
                         setPackagesLoading(false);
-                        if (onFinished != null) {
-                            onFinished.run();
-                        }
+                        onFinished.run();
                     });
                     return Status.CANCEL_STATUS;
                 }
@@ -221,9 +219,7 @@ public class PackageExplorerViewModel extends BaseViewModel {
                         setPackageRoot(root);
                     } finally {
                         setPackagesLoading(false);
-                        if (onFinished != null) {
-                            onFinished.run();
-                        }
+                        onFinished.run();
                     }
                 });
 
@@ -233,9 +229,7 @@ public class PackageExplorerViewModel extends BaseViewModel {
                 uiExecutor.accept(() -> {
                     setPackagesLoading(false);
                     firePropertyChange(PROP_ERROR, null, "Failed to load packages: " + msg);
-                    if (onFinished != null) {
-                        onFinished.run();
-                    }
+                    onFinished.run();
                 });
                 return Status.CANCEL_STATUS; // avoid Eclipse error dialog
             }
@@ -255,7 +249,7 @@ public class PackageExplorerViewModel extends BaseViewModel {
             } catch (Exception e) {
                 final var msg = e.getMessage();
                 uiExecutor.accept(() -> setDeviceListErrorMessage(msg));
-                return Status.CANCEL_STATUS; // avoid Eclipse error dialog
+                return Status.error("Failed to load device data: " + msg, e);
             }
         });
         job.schedule();

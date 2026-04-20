@@ -6,7 +6,6 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
-import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.packages.model.TreeNode;
 import org.ruyisdk.ruyi.services.RuyiCli;
 
@@ -14,7 +13,6 @@ import org.ruyisdk.ruyi.services.RuyiCli;
  * JSON parser for package tree data.
  */
 public class JsonParser {
-    private static final PluginLogger LOGGER = Activator.getLogger();
 
     /**
      * Parses raw porcelain CLI output into a tree structure. Each non-empty line that starts with '{'
@@ -24,7 +22,7 @@ public class JsonParser {
      * @param rootLabel label for root node
      * @return parsed tree node
      */
-    public static TreeNode parseRawOutput(String rawOutput, String rootLabel) throws Exception {
+    public static TreeNode parseRawOutput(String rawOutput, String rootLabel) {
         final var root = new TreeNode(rootLabel, null);
         if (rawOutput == null || rawOutput.isEmpty()) {
             return root;
@@ -104,56 +102,50 @@ public class JsonParser {
 
         String entity = boardName.startsWith("device:") ? boardName : "device:" + boardName;
 
-        try {
-            final var rawJson = RuyiCli.listRelatedToEntity(entity).replace("\n", "").replace("\r", "");
-            if (rawJson.trim().isEmpty()) {
-                return null; // No output from ruyi
-            }
-            // The output is a stream of JSON objects, wrap it to be a valid JSON array.
-            String jsonData = "[" + rawJson.replace("}{", "},{") + "]";
+        final var rawJson = RuyiCli.listRelatedToEntity(entity).replace("\n", "").replace("\r", "");
+        if (rawJson.trim().isEmpty()) {
+            return null; // No output from ruyi
+        }
+        // The output is a stream of JSON objects, wrap it to be a valid JSON array.
+        String jsonData = "[" + rawJson.replace("}{", "},{") + "]";
 
-            // Parse the JSON to find the toolchain
-            try (JsonReader reader = Json.createReader(new StringReader(jsonData))) {
-                JsonArray jsonArray = reader.readArray();
-                for (JsonValue value : jsonArray) {
-                    if (value.getValueType() != JsonValue.ValueType.OBJECT) {
+        // Parse the JSON to find the toolchain
+        try (JsonReader reader = Json.createReader(new StringReader(jsonData))) {
+            JsonArray jsonArray = reader.readArray();
+            for (JsonValue value : jsonArray) {
+                if (value.getValueType() != JsonValue.ValueType.OBJECT) {
+                    continue;
+                }
+
+                JsonObject pkgObject = (JsonObject) value;
+                String category = pkgObject.getString("category", "");
+
+                if ("toolchain".equals(category)) {
+                    JsonArray versions = pkgObject.getJsonArray("vers");
+                    if (versions == null) {
                         continue;
                     }
 
-                    JsonObject pkgObject = (JsonObject) value;
-                    String category = pkgObject.getString("category", "");
-
-                    if ("toolchain".equals(category)) {
-                        JsonArray versions = pkgObject.getJsonArray("vers");
-                        if (versions == null) {
-                            continue;
-                        }
-
-                        for (JsonValue verValue : versions) {
-                            JsonObject verObject = (JsonObject) verValue;
-                            if (verObject.getBoolean("is_installed", false)) {
-                                // Extract the full package name from the install command
-                                // to match the expected format.
-                                if (verObject.containsKey("install_command")) {
-                                    String installCommand = verObject.getString("install_command");
-                                    int lastSpace = installCommand.lastIndexOf(' ');
-                                    if (lastSpace != -1) {
-                                        return installCommand.substring(lastSpace + 1);
-                                    }
+                    for (JsonValue verValue : versions) {
+                        JsonObject verObject = (JsonObject) verValue;
+                        if (verObject.getBoolean("is_installed", false)) {
+                            // Extract the full package name from the install command
+                            // to match the expected format.
+                            if (verObject.containsKey("install_command")) {
+                                String installCommand = verObject.getString("install_command");
+                                int lastSpace = installCommand.lastIndexOf(' ');
+                                if (lastSpace != -1) {
+                                    return installCommand.substring(lastSpace + 1);
                                 }
-                                // Fallback if install_command is missing
-                                String pkgName = pkgObject.getString("name");
-                                String pkgVersion = verObject.getString("semver");
-                                return pkgName + "-" + pkgVersion;
                             }
+                            // Fallback if install_command is missing
+                            String pkgName = pkgObject.getString("name");
+                            String pkgVersion = verObject.getString("semver");
+                            return pkgName + "-" + pkgVersion;
                         }
                     }
                 }
             }
-
-        } catch (Exception e) {
-            LOGGER.logError("Failed to find installed toolchain for board: " + boardName, e);
-            return null;
         }
 
         return null; // No installed toolchain found

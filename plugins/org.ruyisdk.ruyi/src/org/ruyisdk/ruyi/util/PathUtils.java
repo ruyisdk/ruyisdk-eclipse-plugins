@@ -1,7 +1,7 @@
 package org.ruyisdk.ruyi.util;
 
-import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -38,7 +38,7 @@ public class PathUtils {
             Path path = Paths.get(rawPath).toAbsolutePath().normalize();
             // 统一去除末尾斜杠
             return path.toString().replaceAll("/+$", "");
-        } catch (Exception e) {
+        } catch (InvalidPathException e) {
             // 如果路径无效，返回原始值（标准化后）
             return rawPath.replaceAll("/+$", "");
         }
@@ -48,9 +48,8 @@ public class PathUtils {
      * 获取用户shell配置文件路径.
      *
      * @return shell配置文件路径
-     * @throws IOException if file access fails
      */
-    public static Path detectShellConfigFile() throws IOException {
+    public static Path detectShellConfigFile() {
         String userHome = System.getProperty("user.home");
         String[] candidates = {".bashrc", ".zshrc", ".bash_profile", ".profile"};
 
