@@ -61,11 +61,17 @@ public class TelemetryPreference {
         label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         // Combo for telemetry mode
+        int telemetryIndex;
+        try {
+            telemetryIndex = getTelemetrySelectionIndex();
+        } catch (Exception e) {
+            telemetryIndex = 0; // default to ON
+        }
         telemetryCombo = new Combo(comboContainer, SWT.DROP_DOWN | SWT.READ_ONLY);
         telemetryCombo.setItems(new String[] {"Enabled: Send anonymous usage data",
                 "Local only: Analyze data locally only", "Disabled: No data collection"});
         // Set default selection
-        telemetryCombo.select(getTelemetrySelectionIndex());
+        telemetryCombo.select(telemetryIndex);
         telemetryCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
         // 创建一个Link控件来显示描述文本和链接
