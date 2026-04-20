@@ -21,8 +21,6 @@ public final class PackageIndexUpdater {
      * parented at the given shell.
      *
      * @param shell parent shell for the progress dialog
-     * @throws PluginException if the underlying CLI invocation fails or the operation is
-     *         interrupted
      */
     public static void updateWithProgress(Shell shell) {
         try {
