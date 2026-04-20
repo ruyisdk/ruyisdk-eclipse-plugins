@@ -36,8 +36,10 @@ public class VenvListViewModel {
 
     private final VenvDetectionService detectionService;
     private final VenvConfigurationService configService;
-    private final IObservableList<Venv> observableVenvList = new WritableList<>(new ArrayList<>(), Venv.class);
-    private final IObservableList<Venv> selectedVenvs = new WritableList<>(new ArrayList<>(), Venv.class);
+    private final IObservableList<Venv> observableVenvList =
+            new WritableList<>(new ArrayList<>(), Venv.class);
+    private final IObservableList<Venv> selectedVenvs =
+            new WritableList<>(new ArrayList<>(), Venv.class);
     private final WorkspaceProjectsMonitor workspaceProjectsMonitor;
     private final WorkspaceProjectsMonitor.Listener workspaceProjectsListener = (event) -> {
         if (event == null || disposed) {
@@ -67,7 +69,8 @@ public class VenvListViewModel {
      * @param detectionService the venv detection service
      * @param configService the configuration service
      */
-    public VenvListViewModel(VenvDetectionService detectionService, VenvConfigurationService configService) {
+    public VenvListViewModel(VenvDetectionService detectionService,
+            VenvConfigurationService configService) {
         this.detectionService = detectionService;
         this.configService = configService;
 
@@ -299,14 +302,16 @@ public class VenvListViewModel {
     public void onApplySelectedVenvConfig(Consumer<VenvConfigurationService.ApplyResult> callback) {
         if (busy) {
             if (callback != null) {
-                callback.accept(new VenvConfigurationService.ApplyResult(false, "Operation in progress"));
+                callback.accept(
+                        new VenvConfigurationService.ApplyResult(false, "Operation in progress"));
             }
             return;
         }
 
         if (selectedVenvs.size() != 1) {
             if (callback != null) {
-                callback.accept(new VenvConfigurationService.ApplyResult(false, "No venv selected"));
+                callback.accept(
+                        new VenvConfigurationService.ApplyResult(false, "No venv selected"));
             }
             return;
         }
@@ -334,7 +339,8 @@ public class VenvListViewModel {
         if (newValue.equals(this.tableAreaMessage)) {
             return;
         }
-        pcs.firePropertyChange("tableAreaMessage", this.tableAreaMessage, this.tableAreaMessage = newValue);
+        pcs.firePropertyChange("tableAreaMessage", this.tableAreaMessage,
+                this.tableAreaMessage = newValue);
     }
 
     private void updateTableAreaPresentation() {

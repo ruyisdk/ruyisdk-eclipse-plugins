@@ -26,7 +26,7 @@ public class PathUtils {
         }
 
         return Arrays.stream(currentPath.split(":")).map(PathUtils::normalizePath)
-                        .anyMatch(p -> p.equals(normalizedPath));
+                .anyMatch(p -> p.equals(normalizedPath));
     }
 
     /**

@@ -25,15 +25,16 @@ public class DeviceVariantInfo extends EntityInfo {
      * @param variantId the short variant id, e.g. {@code "8g"}
      * @param variantName the human-readable variant name, e.g. {@code "8G RAM"}
      */
-    public DeviceVariantInfo(String entityId, String displayName, List<String> relatedRefs, List<String> reverseRefs,
-                    String variantId, String variantName) {
+    public DeviceVariantInfo(String entityId, String displayName, List<String> relatedRefs,
+            List<String> reverseRefs, String variantId, String variantName) {
         super("device-variant", entityId, displayName, relatedRefs, reverseRefs);
         this.variantId = variantId;
         this.variantName = variantName;
     }
 
     /**
-     * Returns the short variant id, e.g. {@code "8g"}, {@code "64m"}, {@code "sd"}, {@code "generic"}.
+     * Returns the short variant id, e.g. {@code "8g"}, {@code "64m"}, {@code "sd"},
+     * {@code "generic"}.
      */
     public String getVariantId() {
         return variantId;

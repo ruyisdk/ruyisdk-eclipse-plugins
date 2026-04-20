@@ -23,7 +23,8 @@ public class RuyiFileUtils {
 
         // 处理 ~ 和 ~user 形式的路径
         if (ruyiDefaultInstallDir.startsWith("~")) {
-            ruyiDefaultInstallDir = ruyiDefaultInstallDir.replaceFirst("^~", System.getProperty("user.home"));
+            ruyiDefaultInstallDir =
+                    ruyiDefaultInstallDir.replaceFirst("^~", System.getProperty("user.home"));
         }
 
         // 使用NIO API解析路径（自动处理跨平台分隔符）

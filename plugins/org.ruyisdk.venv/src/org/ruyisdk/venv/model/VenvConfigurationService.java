@@ -61,7 +61,8 @@ public class VenvConfigurationService {
             return new ApplyResult(false, "Venv is null");
         }
 
-        LOGGER.logInfo("Applying venv configuration: venv=" + venv.getPath() + ", project=" + venv.getProjectPath());
+        LOGGER.logInfo("Applying venv configuration: venv=" + venv.getPath() + ", project="
+                + venv.getProjectPath());
 
         final var projectPath = venv.getProjectPath();
         if (projectPath == null || projectPath.isBlank()) {
@@ -83,7 +84,8 @@ public class VenvConfigurationService {
             final var projectDesc = coreModel.getProjectDescription(project, true);
 
             if (projectDesc == null) {
-                return new ApplyResult(false, "Project has no CDT configuration: " + project.getName());
+                return new ApplyResult(false,
+                        "Project has no CDT configuration: " + project.getName());
             }
 
             // Configure all build configurations
@@ -140,19 +142,21 @@ public class VenvConfigurationService {
         // Set RUYI_VENV
         final var venvPath = venv.getPath();
         if (venvPath != null && !venvPath.isEmpty()) {
-            contribEnv.addVariable(ENV_RUYI_VENV, venvPath, IEnvironmentVariable.ENVVAR_REPLACE, null, configDesc);
+            contribEnv.addVariable(ENV_RUYI_VENV, venvPath, IEnvironmentVariable.ENVVAR_REPLACE,
+                    null, configDesc);
         }
 
         // Prepend toolchain bin directory to PATH so build tools are found
         final var toolchainPath = venv.getToolchainPath();
         if (toolchainPath != null && !toolchainPath.isEmpty()) {
             contribEnv.addVariable("PATH", toolchainPath, IEnvironmentVariable.ENVVAR_PREPEND,
-                            System.getProperty("path.separator"), configDesc);
+                    System.getProperty("path.separator"), configDesc);
         }
     }
 
     /** Configures Cross GCC toolchain prefix settings. */
-    private void configureCrossGccToolchain(IProject project, ICConfigurationDescription configDesc, Venv venv) {
+    private void configureCrossGccToolchain(IProject project, ICConfigurationDescription configDesc,
+            Venv venv) {
         final var buildInfo = ManagedBuildManager.getBuildInfo(project);
         if (buildInfo == null) {
             return;
@@ -179,15 +183,18 @@ public class VenvConfigurationService {
         }
 
         // Set the command prefix option on the toolchain
-        // Eclipse Embedded CDT uses this to build the full command (prefix + gcc, prefix + g++, etc.)
+        // Eclipse Embedded CDT uses this to build the full command (prefix + gcc, prefix + g++,
+        // etc.)
         final var toolchainPrefix = venv.getToolchainPrefix();
         if (toolchainPrefix != null && !toolchainPrefix.isEmpty()) {
             // Cross GCC uses prefix with trailing dash
-            final var prefixWithDash = toolchainPrefix.endsWith("-") ? toolchainPrefix : toolchainPrefix + "-";
+            final var prefixWithDash =
+                    toolchainPrefix.endsWith("-") ? toolchainPrefix : toolchainPrefix + "-";
 
             // Set Eclipse Embedded CDT RISC-V toolchain prefix
             setToolChainOptionBySuperClassId(config, toolChain,
-                            "ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.prefix", prefixWithDash);
+                    "ilg.gnumcueclipse.managedbuild.cross.riscv.option.command.prefix",
+                    prefixWithDash);
         }
 
         // Save managed build info changes
@@ -195,8 +202,8 @@ public class VenvConfigurationService {
     }
 
     /** Sets a toolchain option by super class ID if it exists. */
-    private void setToolChainOptionBySuperClassId(IConfiguration config, IToolChain toolChain, String optionId,
-                    String value) {
+    private void setToolChainOptionBySuperClassId(IConfiguration config, IToolChain toolChain,
+            String optionId, String value) {
         try {
             final var option = toolChain.getOptionBySuperClassId(optionId);
             if (option != null) {

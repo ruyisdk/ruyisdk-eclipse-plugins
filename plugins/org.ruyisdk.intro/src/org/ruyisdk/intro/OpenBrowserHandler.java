@@ -22,7 +22,8 @@ public class OpenBrowserHandler extends AbstractHandler {
 
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
-        // Extract target type from command ID (eg:"org.ruyisdk.intro.openBrowser.docs" get the "docs" )
+        // Extract target type from command ID (eg:"org.ruyisdk.intro.openBrowser.docs" get the
+        // "docs" )
         String command = event.getCommand().getId();
         String target = command.substring(command.lastIndexOf('.') + 1);
 

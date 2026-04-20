@@ -48,7 +48,8 @@ public class RuyiProjectException extends PluginException {
 
     /** Failed to read a persistent project property. */
     public static RuyiProjectException propertyAccessFailed(String property, Throwable cause) {
-        return new RuyiProjectException("Failed to retrieve " + property + " from project properties", cause);
+        return new RuyiProjectException(
+                "Failed to retrieve " + property + " from project properties", cause);
     }
 
     /** A required persistent project property is not set. */

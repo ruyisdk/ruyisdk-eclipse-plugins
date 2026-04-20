@@ -45,7 +45,8 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
     public static final String RUYI_VENV_CMD_PROPERTY = "ruyiVenvCmd";
 
     @Override
-    protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor) throws CoreException {
+    protected IProject[] build(int kind, Map<String, String> args, IProgressMonitor monitor)
+            throws CoreException {
         IProject project = getProject();
         final File projectLocation = project.getLocation().toFile();
 
@@ -62,7 +63,8 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
         ensureRuyiVenv(project);
 
         // 2. Get the build command (e.g., "make")
-        String buildCommand = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY));
+        String buildCommand = project
+                .getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY));
         if (buildCommand == null || buildCommand.trim().isEmpty()) {
             buildCommand = "make";
         }
@@ -73,8 +75,8 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
         File venvBinDir = new File(projectLocation, RUYI_VENV_DIR + "/bin");
         String gccPath = findRiscvGcc(venvBinDir);
         if (gccPath == null) {
-            String errorMsg =
-                            "Could not find RISC-V GCC in Ruyi virtual environment at: " + venvBinDir.getAbsolutePath();
+            String errorMsg = "Could not find RISC-V GCC in Ruyi virtual environment at: "
+                    + venvBinDir.getAbsolutePath();
             logToFile(project, errorMsg);
             throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, errorMsg));
         }
@@ -97,9 +99,10 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
             commands.add("bash");
             commands.add("-c");
 
-            String makeCmd = String.format("cd %s && %s CC=%s/%s-gcc OBJCOPY=%s/%s-objcopy 'CFLAGS=%s'",
-                            projectLocation.getAbsolutePath(), buildCommand, venvBinDir.getAbsolutePath(), prefix,
-                            venvBinDir.getAbsolutePath(), prefix, cflags);
+            String makeCmd = String.format(
+                    "cd %s && %s CC=%s/%s-gcc OBJCOPY=%s/%s-objcopy 'CFLAGS=%s'",
+                    projectLocation.getAbsolutePath(), buildCommand, venvBinDir.getAbsolutePath(),
+                    prefix, venvBinDir.getAbsolutePath(), prefix, cflags);
 
             commands.add(makeCmd);
 
@@ -109,7 +112,8 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
             processBuilder.redirectErrorStream(true);
 
             Process process = processBuilder.start();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            try (BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     LOGGER.logInfo("MakefileBuilder: " + line);
@@ -150,7 +154,8 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
         // Get the board model to provide more specific flags
         String boardModel;
         try {
-            boardModel = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
+            boardModel = project.getPersistentProperty(
+                    new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
         } catch (CoreException e) {
             throw RuyiProjectException.propertyAccessFailed(BOARD_MODEL_PROPERTY, e);
         }
@@ -218,7 +223,8 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
 
         String venvCommand;
         try {
-            venvCommand = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, RUYI_VENV_CMD_PROPERTY));
+            venvCommand = project.getPersistentProperty(
+                    new QualifiedName(Activator.PLUGIN_ID, RUYI_VENV_CMD_PROPERTY));
         } catch (CoreException e) {
             throw RuyiProjectException.propertyAccessFailed(RUYI_VENV_CMD_PROPERTY, e);
         }
@@ -230,8 +236,8 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
         if (!useCustomCommand) {
             logToFile(project, "No custom venv command found, generating default command...");
             try {
-                boardModel = project
-                                .getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
+                boardModel = project.getPersistentProperty(
+                        new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
             } catch (CoreException e) {
                 throw RuyiProjectException.propertyAccessFailed(BOARD_MODEL_PROPERTY, e);
             }
@@ -241,7 +247,8 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
             try {
                 toolchain = JsonParser.findInstalledToolchainForBoard(boardModel);
             } catch (PluginException e) {
-                logToFile(project, "Failed to find installed toolchain for board: " + e.getMessage());
+                logToFile(project,
+                        "Failed to find installed toolchain for board: " + e.getMessage());
                 toolchain = null;
             }
             if (toolchain == null || toolchain.trim().isEmpty()) {
@@ -263,7 +270,9 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
             logToFile(project, "Using custom ruyi venv command from project properties.");
             // Strip leading "ruyi" token if present since runExperimental prepends it.
             List<String> tokens = List.of(DebugPlugin.parseArguments(venvCommand.trim()));
-            ruyiArgs = (!tokens.isEmpty() && "ruyi".equals(tokens.get(0))) ? tokens.subList(1, tokens.size()) : tokens;
+            ruyiArgs = (!tokens.isEmpty() && "ruyi".equals(tokens.get(0)))
+                    ? tokens.subList(1, tokens.size())
+                    : tokens;
         }
 
         logToFile(project, "Executing: ruyi " + String.join(" ", ruyiArgs));
@@ -304,7 +313,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
                 }
             }
             try (FileWriter writer = new FileWriter(logFile.getLocation().toFile(), true);
-                            PrintWriter printWriter = new PrintWriter(writer)) {
+                    PrintWriter printWriter = new PrintWriter(writer)) {
                 printWriter.println(message);
             }
         } catch (IOException | CoreException e) {

@@ -49,7 +49,7 @@ class ScrollableMessageDialog extends Dialog {
         composite.setLayout(new GridLayout(1, false));
 
         final var text = new Text(composite,
-                        SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY | SWT.WRAP);
+                SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY | SWT.WRAP);
         text.setText(message);
 
         final var gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -85,6 +85,7 @@ class ScrollableMessageDialog extends Dialog {
      * @return {@code true} if the user pressed OK, {@code false} otherwise.
      */
     static boolean openConfirm(Shell parent, String title, String message) {
-        return new ScrollableMessageDialog(parent, title, message, CONFIRM).open() == IDialogConstants.OK_ID;
+        return new ScrollableMessageDialog(parent, title, message, CONFIRM)
+                .open() == IDialogConstants.OK_ID;
     }
 }

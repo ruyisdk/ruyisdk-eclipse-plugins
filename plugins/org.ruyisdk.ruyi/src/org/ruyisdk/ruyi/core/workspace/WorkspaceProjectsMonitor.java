@@ -220,7 +220,7 @@ public final class WorkspaceProjectsMonitor {
         }
         installed = true;
         ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener,
-                        IResourceChangeEvent.POST_CHANGE);
+                IResourceChangeEvent.POST_CHANGE);
     }
 
     private void resourceChanged(IResourceChangeEvent e) {

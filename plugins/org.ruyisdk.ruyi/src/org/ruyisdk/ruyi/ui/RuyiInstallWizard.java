@@ -109,7 +109,8 @@ public class RuyiInstallWizard extends Wizard {
         public CheckResultPage(Mode mode) {
             super("checkResultPage");
             this.mode = mode;
-            setTitle(mode == Mode.INSTALL ? "Ruyi Installation Required" : "Ruyi Upgrade Available");
+            setTitle(
+                    mode == Mode.INSTALL ? "Ruyi Installation Required" : "Ruyi Upgrade Available");
             // setDescription("Review the detection results before proceeding");
         }
 
@@ -121,9 +122,10 @@ public class RuyiInstallWizard extends Wizard {
             // 信息展示区域
             Label infoLabel = new Label(container, SWT.WRAP);
             infoLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-            String showtext = mode == Mode.INSTALL ? "Ruyi package manager (ruyi command) not detected.  \n"
-                            : String.format("New Ruyi version %s available (current: %s).  \n", newVersion,
-                                            currentVersion);
+            String showtext =
+                    mode == Mode.INSTALL ? "Ruyi package manager (ruyi command) not detected.  \n"
+                            : String.format("New Ruyi version %s available (current: %s).  \n",
+                                    newVersion, currentVersion);
             infoLabel.setText(showtext);
 
 
@@ -192,9 +194,11 @@ public class RuyiInstallWizard extends Wizard {
 
         public PreparePage(Mode mode) {
             super("welcomePage");
-            setTitle(mode == Mode.INSTALL ? "Welcome to Ruyi Installation" : "Welcome to Ruyi Upgrade");
-            setDescription(mode == Mode.INSTALL ? "This wizard will guide you through the Ruyi installation process"
-                            : "This wizard will upgrade your Ruyi installation to the latest version");
+            setTitle(mode == Mode.INSTALL ? "Welcome to Ruyi Installation"
+                    : "Welcome to Ruyi Upgrade");
+            setDescription(mode == Mode.INSTALL
+                    ? "This wizard will guide you through the Ruyi installation process"
+                    : "This wizard will upgrade your Ruyi installation to the latest version");
         }
 
         @Override
@@ -288,7 +292,7 @@ public class RuyiInstallWizard extends Wizard {
             this.mode = mode;
             setTitle(mode == Mode.INSTALL ? "Installing Ruyi" : "Upgrading Ruyi");
             setDescription(mode == Mode.INSTALL ? "Please wait while Ruyi is being installed"
-                            : "Upgrading to the latest version...");
+                    : "Upgrading to the latest version...");
             setPageComplete(false);
         }
 
@@ -312,7 +316,8 @@ public class RuyiInstallWizard extends Wizard {
         }
 
         private void startInstallation() {
-            ConfigurationPage configPage = (ConfigurationPage) getWizard().getPage("configurationPage");
+            ConfigurationPage configPage =
+                    (ConfigurationPage) getWizard().getPage("configurationPage");
             configPage.saveConfig();
 
             // prepare for worker thread
@@ -320,7 +325,8 @@ public class RuyiInstallWizard extends Wizard {
             final var selectedUrl = configPage.getSelectedUrl();
             final var telemetryMode = configPage.getTelemetryMode();
 
-            progressComp.appendLog("Starting " + (mode == Mode.INSTALL ? "installation" : "upgrade") + "...");
+            progressComp.appendLog(
+                    "Starting " + (mode == Mode.INSTALL ? "installation" : "upgrade") + "...");
 
             final var installationJob = Job.create("Ruyi " + mode.name(), monitor -> {
                 try {
@@ -335,7 +341,8 @@ public class RuyiInstallWizard extends Wizard {
                             appendLog(message);
                         }
                     };
-                    RuyiInstallManager.install(installPath, selectedUrl, telemetryMode, monitor, listener);
+                    RuyiInstallManager.install(installPath, selectedUrl, telemetryMode, monitor,
+                            listener);
 
                     Display.getDefault().asyncExec(() -> {
                         progressComp.appendLog("Operation completed successfully!");
@@ -378,7 +385,7 @@ public class RuyiInstallWizard extends Wizard {
             this.mode = mode;
             setTitle("Operation Complete");
             setDescription(mode == Mode.INSTALL ? "Ruyi has been successfully installed"
-                            : "Ruyi has been upgraded successfully");
+                    : "Ruyi has been upgraded successfully");
         }
 
         @Override

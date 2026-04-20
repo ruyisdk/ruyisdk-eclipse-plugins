@@ -20,11 +20,13 @@ public class RuyiCliException extends PluginException {
 
     /** Ruyi executable not found. */
     public static RuyiCliException ruyiNotFound() {
-        return new RuyiCliException("ruyi executable not found in configured or default install path");
+        return new RuyiCliException(
+                "ruyi executable not found in configured or default install path");
     }
 
     /** CLI command returned non-zero exit code. CLI output is included in the message. */
-    public static RuyiCliException executionFailed(String commandHint, int exitCode, String output) {
+    public static RuyiCliException executionFailed(String commandHint, int exitCode,
+            String output) {
         final var message = String.format("""
             ruyi command execution failed with code: %d
             Command: %s
@@ -40,7 +42,8 @@ public class RuyiCliException extends PluginException {
 
     /** Operation timed out. */
     public static RuyiCliException timeout(int timeoutSeconds) {
-        return new RuyiCliException("ruyi command timed out after " + timeoutSeconds + " second(s)");
+        return new RuyiCliException(
+                "ruyi command timed out after " + timeoutSeconds + " second(s)");
     }
 
     /** Operation was cancelled. */

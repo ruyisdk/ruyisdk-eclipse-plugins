@@ -51,15 +51,16 @@ public class BuildPropertyPage extends PropertyPage implements IWorkbenchPropert
         try {
             IProject project = getElement().getAdapter(IProject.class);
 
-            String buildCmd = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY));
+            String buildCmd = project.getPersistentProperty(
+                    new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY));
             if (buildCmd != null) {
                 buildCommandText.setText(buildCmd);
             } else {
                 buildCommandText.setText("make");
             }
 
-            String venvCmd = project
-                            .getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, RUYI_VENV_CMD_PROPERTY));
+            String venvCmd = project.getPersistentProperty(
+                    new QualifiedName(Activator.PLUGIN_ID, RUYI_VENV_CMD_PROPERTY));
             if (venvCmd != null && !venvCmd.trim().isEmpty()) {
                 ruyiVenvCmdText.setText(venvCmd);
             } else {
@@ -77,11 +78,13 @@ public class BuildPropertyPage extends PropertyPage implements IWorkbenchPropert
         try {
             IProject project = getElement().getAdapter(IProject.class);
 
-            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY),
-                            buildCommandText.getText().trim());
+            project.setPersistentProperty(
+                    new QualifiedName(Activator.PLUGIN_ID, BUILD_CMD_PROPERTY),
+                    buildCommandText.getText().trim());
 
-            project.setPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, RUYI_VENV_CMD_PROPERTY),
-                            ruyiVenvCmdText.getText().trim());
+            project.setPersistentProperty(
+                    new QualifiedName(Activator.PLUGIN_ID, RUYI_VENV_CMD_PROPERTY),
+                    ruyiVenvCmdText.getText().trim());
         } catch (CoreException e) {
             return false;
         }
@@ -100,8 +103,8 @@ public class BuildPropertyPage extends PropertyPage implements IWorkbenchPropert
     private String generateDefaultVenvCommand() {
         try {
             IProject project = getElement().getAdapter(IProject.class);
-            String boardModel =
-                            project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
+            String boardModel = project.getPersistentProperty(
+                    new QualifiedName(Activator.PLUGIN_ID, BOARD_MODEL_PROPERTY));
 
             String toolchain;
             String profile;

@@ -22,7 +22,8 @@ import org.ruyisdk.devices.model.Device;
  */
 public class PropertiesService {
     private static final PluginLogger LOGGER = Activator.getLogger();
-    private static final Path FILE_PATH = Paths.get(XdgDirs.getConfigDir(Constants.AppInfo.AppDir).toString(),
+    private static final Path FILE_PATH =
+            Paths.get(XdgDirs.getConfigDir(Constants.AppInfo.AppDir).toString(),
                     Constants.ConfigFile.DeviceProperties); // devices.properties
     private static final String DEFAULT_DEVICE_KEY = "default_device";
 

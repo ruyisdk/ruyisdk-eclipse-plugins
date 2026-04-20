@@ -13,7 +13,8 @@ import org.ruyisdk.ruyi.services.RuyiCli;
 public class PackageOperationRunner {
 
     /**
-     * Abstraction over CLI install/uninstall so that the runner can be tested without {@link RuyiCli}.
+     * Abstraction over CLI install/uninstall so that the runner can be tested without
+     * {@link RuyiCli}.
      */
     @FunctionalInterface
     public interface PackageInstaller {
@@ -74,14 +75,15 @@ public class PackageOperationRunner {
     }
 
     /**
-     * Runs all operations in order. Checks {@code cancelFlag} between operations; a running operation
-     * is not interrupted.
+     * Runs all operations in order. Checks {@code cancelFlag} between operations; a running
+     * operation is not interrupted.
      *
      * @param operations the operations to execute
      * @param callback progress callback
      * @param cancelFlag supplier returning {@code true} when cancellation has been requested
      */
-    public void run(List<PackageOperation> operations, OperationCallback callback, BooleanSupplier cancelFlag) {
+    public void run(List<PackageOperation> operations, OperationCallback callback,
+            BooleanSupplier cancelFlag) {
         for (int i = 0; i < operations.size(); i++) {
             if (cancelFlag.getAsBoolean()) {
                 break;

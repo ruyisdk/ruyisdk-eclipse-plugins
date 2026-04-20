@@ -58,10 +58,11 @@ public class RuyiCliRequest {
 
         final var cmdArgs = buildCommandArgs();
         final var cmdString = buildCommandString(cmdArgs);
-        final var result = RuyiCliExecutor.execute(ruyiInstallDir, environment, workingDirectory, lineCallback, monitor,
-                        timeoutSeconds, cmdArgs.toArray(new String[0]));
+        final var result = RuyiCliExecutor.execute(ruyiInstallDir, environment, workingDirectory,
+                lineCallback, monitor, timeoutSeconds, cmdArgs.toArray(new String[0]));
         if (result.getExitCode() != 0) {
-            throw RuyiCliException.executionFailed(cmdString, result.getExitCode(), result.getOutput());
+            throw RuyiCliException.executionFailed(cmdString, result.getExitCode(),
+                    result.getOutput());
         }
         return result;
     }
@@ -180,7 +181,8 @@ public class RuyiCliRequest {
         }
 
         /**
-         * Enables or disables experimental mode by setting the RUYI_EXPERIMENTAL environment variable.
+         * Enables or disables experimental mode by setting the RUYI_EXPERIMENTAL environment
+         * variable.
          *
          * @param value if true, enable experimental mode
          * @return this builder
@@ -285,8 +287,9 @@ public class RuyiCliRequest {
     }
 
     /**
-     * Builder for news commands (list, read). Only contains Ruyi-specific options. Non-Ruyi settings
-     * (environment, lineCallback, etc.) must be configured on the parent Builder before calling this.
+     * Builder for news commands (list, read). Only contains Ruyi-specific options. Non-Ruyi
+     * settings (environment, lineCallback, etc.) must be configured on the parent Builder before
+     * calling this.
      */
     public static class NewsCommandBuilder {
         private final Builder parent;
@@ -358,9 +361,9 @@ public class RuyiCliRequest {
     }
 
     /**
-     * Builder for list commands (profiles, toolchains, emulators). Only contains Ruyi-specific options.
-     * Non-Ruyi settings (environment, lineCallback, etc.) must be configured on the parent Builder
-     * before calling this.
+     * Builder for list commands (profiles, toolchains, emulators). Only contains Ruyi-specific
+     * options. Non-Ruyi settings (environment, lineCallback, etc.) must be configured on the parent
+     * Builder before calling this.
      */
     public static class ListCommandBuilder {
         private final Builder parent;
@@ -448,7 +451,8 @@ public class RuyiCliRequest {
 
     /**
      * Builder for install commands. Only contains Ruyi-specific options. Non-Ruyi settings
-     * (environment, lineCallback, etc.) must be configured on the parent Builder before calling this.
+     * (environment, lineCallback, etc.) must be configured on the parent Builder before calling
+     * this.
      */
     public static class InstallCommandBuilder {
         private final Builder parent;
@@ -528,7 +532,8 @@ public class RuyiCliRequest {
 
     /**
      * Builder for uninstall commands. Only contains Ruyi-specific options. Non-Ruyi settings
-     * (environment, lineCallback, etc.) must be configured on the parent Builder before calling this.
+     * (environment, lineCallback, etc.) must be configured on the parent Builder before calling
+     * this.
      */
     public static class UninstallCommandBuilder {
         private final Builder parent;
@@ -577,8 +582,9 @@ public class RuyiCliRequest {
     }
 
     /**
-     * Builder for venv commands. Only contains Ruyi-specific options. Non-Ruyi settings (environment,
-     * lineCallback, etc.) must be configured on the parent Builder before calling this.
+     * Builder for venv commands. Only contains Ruyi-specific options. Non-Ruyi settings
+     * (environment, lineCallback, etc.) must be configured on the parent Builder before calling
+     * this.
      */
     public static class VenvCommandBuilder {
         private final Builder parent;
@@ -767,7 +773,8 @@ public class RuyiCliRequest {
 
     /**
      * Builder for telemetry commands. Only contains Ruyi-specific options. Non-Ruyi settings
-     * (environment, lineCallback, etc.) must be configured on the parent Builder before calling this.
+     * (environment, lineCallback, etc.) must be configured on the parent Builder before calling
+     * this.
      */
     public static class TelemetryCommandBuilder {
         private final Builder parent;
@@ -842,8 +849,9 @@ public class RuyiCliRequest {
     }
 
     /**
-     * Builder for update commands. Only contains Ruyi-specific options. Non-Ruyi settings (environment,
-     * lineCallback, etc.) must be configured on the parent Builder before calling this.
+     * Builder for update commands. Only contains Ruyi-specific options. Non-Ruyi settings
+     * (environment, lineCallback, etc.) must be configured on the parent Builder before calling
+     * this.
      */
     public static class UpdateCommandBuilder {
         private final Builder parent;
@@ -864,8 +872,9 @@ public class RuyiCliRequest {
     }
 
     /**
-     * Builder for entity commands. Only contains Ruyi-specific options. Non-Ruyi settings (environment,
-     * lineCallback, etc.) must be configured on the parent Builder before calling this.
+     * Builder for entity commands. Only contains Ruyi-specific options. Non-Ruyi settings
+     * (environment, lineCallback, etc.) must be configured on the parent Builder before calling
+     * this.
      */
     public static class EntityCommandBuilder {
         private final Builder parent;

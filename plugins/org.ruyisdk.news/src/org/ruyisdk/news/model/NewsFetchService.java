@@ -15,7 +15,8 @@ public class NewsFetchService {
     private static final PluginLogger LOGGER = Activator.getLogger();
 
     /** Fetches news details asynchronously with an optional error callback. */
-    public void fetchNewsDetailsAsync(String id, Consumer<String> callback, Consumer<String> errorCallback) {
+    public void fetchNewsDetailsAsync(String id, Consumer<String> callback,
+            Consumer<String> errorCallback) {
         final var fetchJob = Job.create("Fetching News Details", monitor -> {
             LOGGER.logInfo("Fetching news details: id=" + id);
             try {
@@ -64,7 +65,8 @@ public class NewsFetchService {
                     final var id = item.getId() == null ? "" : item.getId();
                     newsList.add(new NewsItem(ord, title, id, unread));
                 }
-                LOGGER.logInfo("Fetched news list: count=" + newsList.size() + ", unread=" + unreadCount);
+                LOGGER.logInfo(
+                        "Fetched news list: count=" + newsList.size() + ", unread=" + unreadCount);
                 newsList.sort(Comparator.comparingInt(NewsItem::getOrd).reversed());
                 callback.accept(newsList);
                 return Status.OK_STATUS;

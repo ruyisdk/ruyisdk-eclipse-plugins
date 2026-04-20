@@ -12,7 +12,7 @@ import org.ruyisdk.core.util.PluginLogger;
 public class Activator extends AbstractUIPlugin {
     public static final String PLUGIN_ID = "org.ruyisdk.devices";
     private static final PluginLogger LOGGER =
-                    new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
+            new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
 
     // The shared instance
     private static Activator plugin;

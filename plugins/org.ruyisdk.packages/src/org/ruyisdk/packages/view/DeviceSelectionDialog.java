@@ -48,11 +48,11 @@ public class DeviceSelectionDialog extends Dialog {
      *
      * @param parentShell parent shell
      * @param viewModel the device-selection ViewModel
-     * @param onConfirm callback invoked on OK: {@code (selectedDevice, onDone)}. The caller must invoke
-     *        {@code onDone} (on the UI thread) to close the dialog.
+     * @param onConfirm callback invoked on OK: {@code (selectedDevice, onDone)}. The caller must
+     *        invoke {@code onDone} (on the UI thread) to close the dialog.
      */
     public DeviceSelectionDialog(Shell parentShell, DeviceSelectionViewModel viewModel,
-                    BiConsumer<DeviceEntityInfo, Runnable> onConfirm) {
+            BiConsumer<DeviceEntityInfo, Runnable> onConfirm) {
         super(parentShell);
         this.viewModel = viewModel;
         this.onConfirm = onConfirm;
@@ -75,7 +75,7 @@ public class DeviceSelectionDialog extends Dialog {
         container.setLayout(new GridLayout(1, false));
 
         tableViewer = new TableViewer(container,
-                        SWT.BORDER | SWT.FULL_SELECTION | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
+                SWT.BORDER | SWT.FULL_SELECTION | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
         final var table = tableViewer.getTable();
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
@@ -147,7 +147,8 @@ public class DeviceSelectionDialog extends Dialog {
                         result = d1.getEntityId().compareToIgnoreCase(d2.getEntityId());
                         break;
                     case 2:
-                        result = Integer.compare(d1.getRelatedRefs().size(), d2.getRelatedRefs().size());
+                        result = Integer.compare(d1.getRelatedRefs().size(),
+                                d2.getRelatedRefs().size());
                         break;
                     default:
                         result = d1.getLabel().compareToIgnoreCase(d2.getLabel());
@@ -181,7 +182,8 @@ public class DeviceSelectionDialog extends Dialog {
         tableViewer.setInput(viewModel.getDevices());
 
         // Status area for loading/error feedback
-        statusText = new Text(container, SWT.BORDER | SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
+        statusText = new Text(container,
+                SWT.BORDER | SWT.MULTI | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL);
         {
             final var gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
             gridData.heightHint = 50;

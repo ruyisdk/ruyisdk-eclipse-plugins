@@ -35,7 +35,8 @@ public class CheckResult {
      * @param current the currently installed version (may be null)
      * @param latest the latest available version (may be null)
      */
-    private CheckResult(ActionType action, String message, RuyiVersion current, RuyiVersion latest) {
+    private CheckResult(ActionType action, String message, RuyiVersion current,
+            RuyiVersion latest) {
         this.action = action;
         this.message = message;
         this.currentVersion = current;

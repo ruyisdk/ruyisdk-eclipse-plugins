@@ -42,7 +42,8 @@ public class InstallProgressComposite extends Composite {
         logGroup.setLayout(new GridLayout());
         logGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-        logText = new Text(logGroup, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
+        logText = new Text(logGroup,
+                SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY);
         GridData logData = new GridData(SWT.FILL, SWT.FILL, true, true);
         logData.heightHint = 150;
         logText.setLayoutData(logData);

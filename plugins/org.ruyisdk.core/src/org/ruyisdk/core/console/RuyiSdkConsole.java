@@ -29,8 +29,8 @@ public class RuyiSdkConsole {
 
     // 私有构造函数
     private RuyiSdkConsole() {
-        this.console = new MessageConsole(CONSOLE_NAME, CONSOLE_TYPE, ImageDescriptor.getMissingImageDescriptor(),
-                        true);
+        this.console = new MessageConsole(CONSOLE_NAME, CONSOLE_TYPE,
+                ImageDescriptor.getMissingImageDescriptor(), true);
 
         // 初始化消息流
         initStreams();

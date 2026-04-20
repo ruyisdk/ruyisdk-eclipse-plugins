@@ -28,8 +28,10 @@ public class RuyiInstallException extends PluginException {
     }
 
     /** Available disk space is below the required threshold. */
-    public static RuyiInstallException insufficientDiskSpace(String requiredMb, String availableMb) {
-        return new RuyiInstallException(String.format("Insufficient disk space. Required: %s MB, available: %s MB",
+    public static RuyiInstallException insufficientDiskSpace(String requiredMb,
+            String availableMb) {
+        return new RuyiInstallException(
+                String.format("Insufficient disk space. Required: %s MB, available: %s MB",
                         requiredMb, availableMb));
     }
 
@@ -50,8 +52,8 @@ public class RuyiInstallException extends PluginException {
 
     /** Executable permissions could not be verified after setting them. */
     public static RuyiInstallException permissionVerifyFailed(String path) {
-        return new RuyiInstallException(
-                        "Failed to set executable permissions for: " + path + ". You may need root/sudo privileges.");
+        return new RuyiInstallException("Failed to set executable permissions for: " + path
+                + ". You may need root/sudo privileges.");
     }
 
     /** Post-installation validation failed. */

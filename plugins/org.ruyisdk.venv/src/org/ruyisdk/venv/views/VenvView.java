@@ -52,7 +52,8 @@ public class VenvView extends ViewPart {
     @Override
     public void createPartControl(Composite parent) {
         final var activator = Activator.getDefault();
-        venvListViewModel = new VenvListViewModel(activator.getDetectionService(), activator.getConfigService());
+        venvListViewModel = new VenvListViewModel(activator.getDetectionService(),
+                activator.getConfigService());
 
         createLayouts(parent);
         addControls();
@@ -106,7 +107,8 @@ public class VenvView extends ViewPart {
 
         // table
         {
-            tableViewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
+            tableViewer =
+                    new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
             final var tableColumnLayout = new TableColumnLayout();
             {
                 final var column = new TableViewerColumn(tableViewer, SWT.LEFT);
@@ -135,9 +137,9 @@ public class VenvView extends ViewPart {
 
             final var contentProvider = new ObservableListContentProvider<Venv>();
             tableViewer.setContentProvider(contentProvider);
-            tableViewer.setLabelProvider(new ObservableMapLabelProvider(
-                            Properties.observeEach(contentProvider.getKnownElements(), BeanProperties.values(Venv.class,
-                                            "profile", "toolchainPrefix", "sysroot", "projectPath"))));
+            tableViewer.setLabelProvider(new ObservableMapLabelProvider(Properties.observeEach(
+                    contentProvider.getKnownElements(), BeanProperties.values(Venv.class, "profile",
+                            "toolchainPrefix", "sysroot", "projectPath"))));
 
             tableViewer.setInput(venvListViewModel.getVenvList());
         }
@@ -165,14 +167,17 @@ public class VenvView extends ViewPart {
     private void registerEvents() {
         dbc = new DataBindingContext();
 
-        dbc.bindList(ViewerProperties.multipleSelection().observe(tableViewer), venvListViewModel.getSelectedVenvs());
-        dbc.bindValue(WidgetProperties.enabled().observe(deleteButton), BeanProperties
-                        .value(VenvListViewModel.class, "canDelete", Boolean.class).observe(venvListViewModel));
-        dbc.bindValue(WidgetProperties.enabled().observe(applyButton), BeanProperties
-                        .value(VenvListViewModel.class, "canApply", Boolean.class).observe(venvListViewModel));
+        dbc.bindList(ViewerProperties.multipleSelection().observe(tableViewer),
+                venvListViewModel.getSelectedVenvs());
+        dbc.bindValue(WidgetProperties.enabled().observe(deleteButton),
+                BeanProperties.value(VenvListViewModel.class, "canDelete", Boolean.class)
+                        .observe(venvListViewModel));
+        dbc.bindValue(WidgetProperties.enabled().observe(applyButton),
+                BeanProperties.value(VenvListViewModel.class, "canApply", Boolean.class)
+                        .observe(venvListViewModel));
 
-        final var busyStatusObservable =
-                        BeanProperties.value(VenvListViewModel.class, "busy", Boolean.class).observe(venvListViewModel);
+        final var busyStatusObservable = BeanProperties
+                .value(VenvListViewModel.class, "busy", Boolean.class).observe(venvListViewModel);
         final var idleStatusObservable = new ComputedValue<Boolean>() {
             @Override
             protected Boolean calculate() {
@@ -189,10 +194,12 @@ public class VenvView extends ViewPart {
             }
         });
 
-        final var tableAreaMessageValue = BeanProperties
-                        .value(VenvListViewModel.class, "tableAreaMessage", String.class).observe(venvListViewModel);
+        final var tableAreaMessageValue =
+                BeanProperties.value(VenvListViewModel.class, "tableAreaMessage", String.class)
+                        .observe(venvListViewModel);
 
-        dbc.bindValue(WidgetProperties.text().observe(tableAreaMessageLabel), tableAreaMessageValue);
+        dbc.bindValue(WidgetProperties.text().observe(tableAreaMessageLabel),
+                tableAreaMessageValue);
 
         tableAreaMessageValue.addValueChangeListener(e -> {
             if (tableAreaMessageLabel == null || tableAreaMessageLabel.isDisposed()) {
@@ -208,7 +215,8 @@ public class VenvView extends ViewPart {
             public void widgetSelected(SelectionEvent e) {
                 venvListViewModel.onApplySelectedVenvConfig(result -> {
                     container.getDisplay().asyncExec(() -> {
-                        MessageDialog.openInformation(container.getShell(), "Apply Configuration", result.getMessage());
+                        MessageDialog.openInformation(container.getShell(), "Apply Configuration",
+                                result.getMessage());
                     });
                 });
             }
@@ -224,23 +232,24 @@ public class VenvView extends ViewPart {
 
                 final String message;
                 if (venvPaths.size() == 1) {
-                    message = "This will delete the whole directory of the virtual environment:\n\n" + venvPaths.get(0)
-                                    + "\n\nContinue?";
+                    message = "This will delete the whole directory of the virtual environment:\n\n"
+                            + venvPaths.get(0) + "\n\nContinue?";
                 } else {
-                    message = "This will delete the whole directories of the selected virtual environments:\n\n"
+                    message =
+                            "This will delete the whole directories of the selected virtual environments:\n\n"
                                     + String.join("\n", venvPaths) + "\n\nContinue?";
                 }
 
-                final var confirmDeletion =
-                                MessageDialog.openConfirm(container.getShell(), "Delete virtual environment", message);
+                final var confirmDeletion = MessageDialog.openConfirm(container.getShell(),
+                        "Delete virtual environment", message);
                 if (!confirmDeletion) {
                     return;
                 }
 
                 venvListViewModel.onDeleteSelectedVenvDirectories(err -> {
                     if (err != null) {
-                        MessageDialog.openError(container.getShell(), "Delete virtual environment failed",
-                                        err.getMessage());
+                        MessageDialog.openError(container.getShell(),
+                                "Delete virtual environment failed", err.getMessage());
                     }
                 });
             }
@@ -251,9 +260,11 @@ public class VenvView extends ViewPart {
         newButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                final var wizardViewModel = new VenvWizardViewModel(Activator.getDefault().getDetectionService());
+                final var wizardViewModel =
+                        new VenvWizardViewModel(Activator.getDefault().getDetectionService());
                 wizardViewModel.setProjectRootPaths(venvListViewModel.getOpenProjectRootPaths());
-                final var dialog = new WizardDialog(container.getShell(), new VenvWizard(wizardViewModel));
+                final var dialog =
+                        new WizardDialog(container.getShell(), new VenvWizard(wizardViewModel));
                 if (dialog.open() == WizardDialog.OK) {
                     venvListViewModel.onRefreshVenvListAsync();
                 }
@@ -262,8 +273,9 @@ public class VenvView extends ViewPart {
     }
 
     private void updateTableAreaState(boolean showTable) {
-        if (tableArea == null || tableArea.isDisposed() || tableComposite == null || tableComposite.isDisposed()
-                        || tableAreaMessageLabel == null || tableAreaMessageLabel.isDisposed()) {
+        if (tableArea == null || tableArea.isDisposed() || tableComposite == null
+                || tableComposite.isDisposed() || tableAreaMessageLabel == null
+                || tableAreaMessageLabel.isDisposed()) {
             return;
         }
 

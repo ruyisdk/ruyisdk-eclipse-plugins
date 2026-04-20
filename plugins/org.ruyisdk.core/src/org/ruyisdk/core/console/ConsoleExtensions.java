@@ -15,7 +15,7 @@ public class ConsoleExtensions {
      */
     public static void loadExtensions() {
         IConfigurationElement[] configs =
-                        Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_POINT_ID);
+                Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_POINT_ID);
 
         for (IConfigurationElement config : configs) {
             try {
@@ -24,7 +24,8 @@ public class ConsoleExtensions {
                     ((ConsoleExtension) ext).init(RuyiSdkConsole.getInstance());
                 }
             } catch (CoreException e) {
-                RuyiSdkConsole.getInstance().logError("Failed to load console extension: " + e.getMessage());
+                RuyiSdkConsole.getInstance()
+                        .logError("Failed to load console extension: " + e.getMessage());
             }
         }
     }

@@ -48,8 +48,8 @@ public class CustomIntroPart implements IIntroPart {
         if (text == null) {
             return "";
         }
-        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'",
-                        "&#39;");
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                .replace("\"", "&quot;").replace("'", "&#39;");
     }
 
     @Override
@@ -63,17 +63,19 @@ public class CustomIntroPart implements IIntroPart {
         browser = new Browser(parent, SWT.NONE);
 
         Bundle bundle = Activator.getDefault() != null ? Activator.getDefault().getBundle()
-                        : FrameworkUtil.getBundle(getClass());
+                : FrameworkUtil.getBundle(getClass());
         if (bundle == null) {
-            browser.setText("<html><body><h1>Error: Plugin bundle could not be determined.</h1></body></html>");
+            browser.setText(
+                    "<html><body><h1>Error: Plugin bundle could not be determined.</h1></body></html>");
             return;
         }
 
-        List<String> resourcePaths = Arrays.asList("html/welcome.html", "html/style.css", "icons/ruyi_logo.png",
-                        "icons/icon_new.png", "icons/icon_open.png", "icons/icon_settings.png", "icons/icon_matrix.png",
-                        "icons/icon_docs.png", "icons/icon_discussions.png"
-        // Add all other images referenced in welcome.html here
-        );
+        List<String> resourcePaths =
+                Arrays.asList("html/welcome.html", "html/style.css", "icons/ruyi_logo.png",
+                        "icons/icon_new.png", "icons/icon_open.png", "icons/icon_settings.png",
+                        "icons/icon_matrix.png", "icons/icon_docs.png", "icons/icon_discussions.png"
+                // Add all other images referenced in welcome.html here
+                );
 
         URL resolvedWelcomePageUrl = null;
 
@@ -88,19 +90,22 @@ public class CustomIntroPart implements IIntroPart {
                 } catch (IOException ioException) {
                     if (resourcePath.equals("html/welcome.html")) {
                         String errorMessage = ioException.getMessage();
-                        String safeErrorMessage = (errorMessage == null) ? "An unknown error occurred."
+                        String safeErrorMessage =
+                                (errorMessage == null) ? "An unknown error occurred."
                                         : escapeHtml(errorMessage);
-                        String errorHtml =
-                                        "<html><body>" + "<h1>Error: Could not resolve welcome.html to a file URL.</h1>"
-                                                        + "<p>" + safeErrorMessage + "</p></body></html>";
+                        String errorHtml = "<html><body>"
+                                + "<h1>Error: Could not resolve welcome.html to a file URL.</h1>"
+                                + "<p>" + safeErrorMessage + "</p></body></html>";
                         browser.setText(errorHtml);
                         return;
                     }
-                    // For other resources, we might log this error but not necessarily stop loading the intro
+                    // For other resources, we might log this error but not necessarily stop loading
+                    // the intro
                 }
             } else {
                 if (resourcePath.equals("html/welcome.html")) {
-                    browser.setText("<html><body><h1>Error: welcome.html not found in bundle.</h1></body></html>");
+                    browser.setText(
+                            "<html><body><h1>Error: welcome.html not found in bundle.</h1></body></html>");
                     return;
                 }
                 // For other resources, we might log this error
@@ -110,7 +115,8 @@ public class CustomIntroPart implements IIntroPart {
         if (resolvedWelcomePageUrl != null) {
             browser.setUrl(resolvedWelcomePageUrl.toExternalForm());
         } else {
-            String errorMsg = "<html><body>" + "<h1>Error: Welcome page URL could not be determined "
+            String errorMsg =
+                    "<html><body>" + "<h1>Error: Welcome page URL could not be determined "
                             + "after resource processing.</h1></body></html>";
             browser.setText(errorMsg);
         }
@@ -141,21 +147,24 @@ public class CustomIntroPart implements IIntroPart {
                         commandId = commandId.substring(0, commandId.indexOf("&"));
                     }
                     try {
-                        IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+                        IWorkbenchWindow window =
+                                PlatformUI.getWorkbench().getActiveWorkbenchWindow();
                         if (window != null) {
-                            IHandlerService handlerService = window.getService(IHandlerService.class);
+                            IHandlerService handlerService =
+                                    window.getService(IHandlerService.class);
                             if (handlerService != null) {
                                 handlerService.executeCommand(commandId, null);
                             }
                         }
-                    } catch (ExecutionException | NotDefinedException | NotEnabledException | NotHandledException e) {
+                    } catch (ExecutionException | NotDefinedException | NotEnabledException
+                            | NotHandledException e) {
                         LOGGER.logError("Failed to execute command: " + commandId, e);
                     }
                     event.doit = false;
                 } else if (url.startsWith("http:") || url.startsWith("https:")) {
                     try {
                         PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser()
-                                        .openURL(new URI(url).toURL());
+                                .openURL(new URI(url).toURL());
                     } catch (PartInitException | MalformedURLException | URISyntaxException e) {
                         LOGGER.logError("Failed to open URL: " + url, e);
                     }

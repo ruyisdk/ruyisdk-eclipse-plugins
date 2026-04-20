@@ -20,7 +20,8 @@ public class DeviceEntityInfo extends EntityInfo {
      * @param relatedRefs references to related device-variant entities
      * @param reverseRefs reverse references from other entities
      */
-    public DeviceEntityInfo(String entityId, String displayName, List<String> relatedRefs, List<String> reverseRefs) {
+    public DeviceEntityInfo(String entityId, String displayName, List<String> relatedRefs,
+            List<String> reverseRefs) {
         super("device", entityId, displayName, relatedRefs, reverseRefs);
     }
 

@@ -21,7 +21,7 @@ public class Activator extends AbstractUIPlugin {
 
     public static final String PLUGIN_ID = "org.ruyisdk.projectcreator";
     private static final PluginLogger LOGGER =
-                    new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
+            new PluginLogger(Platform.getLog(FrameworkUtil.getBundle(Activator.class)), PLUGIN_ID);
     private static Activator plugin;
     private IResourceChangeListener buildListener;
 
@@ -60,7 +60,7 @@ public class Activator extends AbstractUIPlugin {
             }
         };
         workspace.addResourceChangeListener(buildListener, IResourceChangeEvent.PRE_BUILD
-                        | IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_DELETE);
+                | IResourceChangeEvent.POST_BUILD | IResourceChangeEvent.PRE_DELETE);
 
         LOGGER.logInfo("Build listener registered successfully");
     }

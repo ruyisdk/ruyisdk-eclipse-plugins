@@ -23,11 +23,11 @@ public class UarchEntityInfo extends EntityInfo {
      * @param relatedRefs references to arch entities
      * @param reverseRefs reverse references from CPU entities
      * @param arch the architecture, e.g. {@code "riscv64"}, {@code "riscv32"}
-     * @param isa the full ISA string, e.g. {@code "rv64imafdc_zicntr_zicsr_..."}; may be {@code null}
-     *        for non-RISC-V architectures
+     * @param isa the full ISA string, e.g. {@code "rv64imafdc_zicntr_zicsr_..."}; may be
+     *        {@code null} for non-RISC-V architectures
      */
-    public UarchEntityInfo(String entityId, String displayName, List<String> relatedRefs, List<String> reverseRefs,
-                    String arch, String isa) {
+    public UarchEntityInfo(String entityId, String displayName, List<String> relatedRefs,
+            List<String> reverseRefs, String arch, String isa) {
         super("uarch", entityId, displayName, relatedRefs, reverseRefs);
         this.arch = arch;
         this.isa = isa;

@@ -54,7 +54,7 @@ public class RepoConfigPreference {
         try {
             currentUrl = RuyiCli.getRepoRemote();
             currentUrl = currentUrl != null && !currentUrl.isBlank() ? currentUrl.trim()
-                            : Constants.NetAddress.MAIN_REPO_URL;
+                    : Constants.NetAddress.MAIN_REPO_URL;
         } catch (PluginException e) {
             LOGGER.logWarning("Use default repository URL due to error", e);
             currentUrl = Constants.NetAddress.MAIN_REPO_URL;
@@ -115,7 +115,7 @@ public class RepoConfigPreference {
         try {
             branchValue = RuyiCli.getRepoBranch();
             branchValue = branchValue != null && !branchValue.isBlank() ? branchValue.trim()
-                            : Constants.NetAddress.DEFAULT_BRANCH;
+                    : Constants.NetAddress.DEFAULT_BRANCH;
         } catch (PluginException e) {
             LOGGER.logWarning("Use default branch due to error.", e);
             branchValue = Constants.NetAddress.DEFAULT_BRANCH;
@@ -127,7 +127,8 @@ public class RepoConfigPreference {
 
     private void switchFromCustom(Button selected) {
         if (!customUrlText.getText().trim().isEmpty()) {
-            boolean confirmed = MessageDialog.openConfirm(parent.getShell(), "Deselect Custom Repository",
+            boolean confirmed =
+                    MessageDialog.openConfirm(parent.getShell(), "Deselect Custom Repository",
                             "The custom repository URL will be permanently removed. Continue?");
             if (!confirmed) {
                 selected.setSelection(false);

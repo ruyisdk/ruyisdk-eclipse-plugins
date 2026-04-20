@@ -20,7 +20,8 @@ public class CpuEntityInfo extends EntityInfo {
      * @param relatedRefs references to related uarch entities
      * @param reverseRefs reverse references from device-variant entities
      */
-    public CpuEntityInfo(String entityId, String displayName, List<String> relatedRefs, List<String> reverseRefs) {
+    public CpuEntityInfo(String entityId, String displayName, List<String> relatedRefs,
+            List<String> reverseRefs) {
         super("cpu", entityId, displayName, relatedRefs, reverseRefs);
     }
 }

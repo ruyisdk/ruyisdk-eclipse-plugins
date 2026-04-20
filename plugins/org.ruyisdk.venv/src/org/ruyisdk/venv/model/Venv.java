@@ -18,7 +18,8 @@ public class Venv {
     private String toolchainPath;
     private String toolchainPrefix;
 
-    private Venv(String path, String profile, String sysroot, String projectPath, List<String> quirks) {
+    private Venv(String path, String profile, String sysroot, String projectPath,
+            List<String> quirks) {
         this.path = path;
         this.profile = profile;
         this.sysroot = sysroot;
@@ -29,12 +30,14 @@ public class Venv {
     }
 
     /** Creates a venv model for a standalone venv with quirks. */
-    public static Venv createStandalone(String path, String profile, String sysroot, List<String> quirks) {
+    public static Venv createStandalone(String path, String profile, String sysroot,
+            List<String> quirks) {
         return new Venv(path, profile, sysroot, "", quirks);
     }
 
     /** Creates a venv model for a project venv. */
-    public static Venv createForProject(String path, String profile, String sysroot, String projectPath) {
+    public static Venv createForProject(String path, String profile, String sysroot,
+            String projectPath) {
         return new Venv(path, profile, sysroot, projectPath, List.of());
     }
 
@@ -76,7 +79,7 @@ public class Venv {
     /** Updates the associated project path. */
     public void setProjectPath(String projectPath) {
         pcs.firePropertyChange("projectPath", this.projectPath,
-                        this.projectPath = projectPath == null ? "" : projectPath);
+                this.projectPath = projectPath == null ? "" : projectPath);
     }
 
     /** Registers a listener for property changes. */
@@ -97,7 +100,7 @@ public class Venv {
     /** Updates the quirks list. */
     public void setQuirks(List<String> quirks) {
         pcs.firePropertyChange("quirks", this.quirks,
-                        this.quirks = quirks == null ? new ArrayList<>() : new ArrayList<>(quirks));
+                this.quirks = quirks == null ? new ArrayList<>() : new ArrayList<>(quirks));
     }
 
     /** Returns the toolchain bin directory path (derived from venv). */
@@ -108,7 +111,7 @@ public class Venv {
     /** Updates the toolchain bin directory path. */
     public void setToolchainPath(String toolchainPath) {
         pcs.firePropertyChange("toolchainPath", this.toolchainPath,
-                        this.toolchainPath = toolchainPath == null ? "" : toolchainPath);
+                this.toolchainPath = toolchainPath == null ? "" : toolchainPath);
     }
 
     /** Returns the toolchain prefix (e.g., "riscv64-unknown-elf"). */
@@ -119,6 +122,6 @@ public class Venv {
     /** Updates the toolchain prefix. */
     public void setToolchainPrefix(String toolchainPrefix) {
         pcs.firePropertyChange("toolchainPrefix", this.toolchainPrefix,
-                        this.toolchainPrefix = toolchainPrefix == null ? "" : toolchainPrefix);
+                this.toolchainPrefix = toolchainPrefix == null ? "" : toolchainPrefix);
     }
 }

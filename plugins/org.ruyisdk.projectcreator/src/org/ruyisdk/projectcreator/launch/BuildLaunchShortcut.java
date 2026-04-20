@@ -46,19 +46,22 @@ public class BuildLaunchShortcut implements ILaunchShortcut {
         try {
             ILaunchManager launchManager = DebugPlugin.getDefault().getLaunchManager();
             ILaunchConfigurationType type =
-                            launchManager.getLaunchConfigurationType(ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
+                    launchManager.getLaunchConfigurationType(ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
 
             if (type == null) {
-                LOGGER.logError("Launch configuration type not found: " + ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
+                LOGGER.logError("Launch configuration type not found: "
+                        + ID_PROGRAM_LAUNCH_CONFIGURATION_TYPE);
                 return;
             }
 
-            String configName = launchManager.generateLaunchConfigurationName("Build " + project.getName());
+            String configName =
+                    launchManager.generateLaunchConfigurationName("Build " + project.getName());
             ILaunchConfigurationWorkingCopy wc = type.newInstance(null, configName);
 
-            String toolchainPath =
-                            project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "toolchainPath"));
-            String buildCmd = project.getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "buildCmd"));
+            String toolchainPath = project
+                    .getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "toolchainPath"));
+            String buildCmd = project
+                    .getPersistentProperty(new QualifiedName(Activator.PLUGIN_ID, "buildCmd"));
 
             if (buildCmd == null || toolchainPath == null) {
 

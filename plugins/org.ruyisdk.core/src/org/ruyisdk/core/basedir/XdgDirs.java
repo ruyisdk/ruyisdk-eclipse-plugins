@@ -10,8 +10,8 @@ import java.nio.file.Paths;
 public class XdgDirs {
 
     /**
-     * Gets the XDG config directory path. Resolution order: 1. {@code $XDG_CONFIG_HOME/<app-name>} if
-     * environment variable is set 2. {@code ~/.config/<app-name>} as fallback
+     * Gets the XDG config directory path. Resolution order: 1. {@code $XDG_CONFIG_HOME/<app-name>}
+     * if environment variable is set 2. {@code ~/.config/<app-name>} as fallback
      *
      * @param appName the application name used for subdirectory
      * @return resolved config directory path
@@ -55,8 +55,8 @@ public class XdgDirs {
 
     /**
      * Internal method for resolving XDG directory paths. Follows XDG Base Directory Specification
-     * resolution rules: 1. Checks specified environment variable first 2. Falls back to default path
-     * under user home if not set
+     * resolution rules: 1. Checks specified environment variable first 2. Falls back to default
+     * path under user home if not set
      *
      * @param xdgEnvVar the XDG environment variable name (e.g. "XDG_CONFIG_HOME")
      * @param defaultRelativePath the default path relative to user home (e.g. ".config")

@@ -55,7 +55,7 @@ public class PackageOperationDialog extends Dialog {
         container.setLayout(new GridLayout(1, false));
 
         liveMessage = new Text(container,
-                        SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY | SWT.WRAP);
+                SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL | SWT.READ_ONLY | SWT.WRAP);
         liveMessage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
         vmListener = this::onViewModelChanged;

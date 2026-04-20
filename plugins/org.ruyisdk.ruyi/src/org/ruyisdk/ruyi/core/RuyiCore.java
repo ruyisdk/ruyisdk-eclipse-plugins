@@ -80,7 +80,8 @@ public class RuyiCore {
                     break;
 
                 case UPGRADE:
-                    RuyiInstallWizard.openForUpgrade(result.getCurrentVersion(), result.getLatestVersion());
+                    RuyiInstallWizard.openForUpgrade(result.getCurrentVersion(),
+                            result.getLatestVersion());
                     break;
 
                 case NOTHING:
