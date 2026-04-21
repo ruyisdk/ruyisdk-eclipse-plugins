@@ -30,13 +30,13 @@ public class CheckRuyiJob {
             final var current = getInstalledVersion();
             monitor.worked(1);
 
-            if (current == null) {
-                return CheckResult.needInstall();
-            }
-
             monitor.subTask("Checking latest version");
             final var latest = getLatestRelease();
             monitor.worked(1);
+
+            if (current == null) {
+                return CheckResult.needInstall(latest);
+            }
 
             if (latest != null) {
                 if (!RuyiCliVersionSupport.isSupportedVersion(current)

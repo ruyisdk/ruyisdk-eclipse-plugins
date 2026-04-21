@@ -48,8 +48,8 @@ public class CheckResult {
      *
      * @return new CheckResult instance with INSTALL action
      */
-    public static CheckResult needInstall() {
-        return new CheckResult(ActionType.INSTALL, null, null, null);
+    public static CheckResult needInstall(RuyiVersion latest) {
+        return new CheckResult(ActionType.INSTALL, null, null, latest);
     }
 
     /**

@@ -49,8 +49,8 @@ public class RuyiInstallWizard extends Wizard {
     /**
      * Opens wizard for fresh installation.
      */
-    public static void openForInstall() {
-        new RuyiInstallWizard(Mode.INSTALL, null, null).open();
+    public static void openForInstall(RuyiVersion latest) {
+        new RuyiInstallWizard(Mode.INSTALL, null, latest).open();
     }
 
     /**
