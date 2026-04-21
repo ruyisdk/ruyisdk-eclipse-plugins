@@ -30,6 +30,8 @@ public final class RuyiCliExecutor {
     private static final PluginLogger LOGGER = Activator.getLogger();
     private static final long WAIT_SLICE_MILLIS = 100L;
     private static final long OUTPUT_JOIN_TIMEOUT_MILLIS = 500L;
+    private static final String[] LOCALE_ENV_KEYS = {"LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG"};
+    private static final String DEFAULT_LOCALE = "en_US.UTF-8";
 
     private RuyiCliExecutor() {}
 
@@ -74,13 +76,27 @@ public final class RuyiCliExecutor {
         if (workingDirectory != null) {
             processBuilder.directory(workingDirectory);
         }
-        if (environment != null && !environment.isEmpty()) {
-            processBuilder.environment().putAll(environment);
+        {
+            final var processEnvironment = processBuilder.environment();
+            applyDefaultLocaleEnvironment(processEnvironment);
+            if (environment != null && !environment.isEmpty()) {
+                processEnvironment.putAll(environment);
+            }
         }
         try {
             return processBuilder.start();
         } catch (IOException e) {
             throw RuyiCliException.ioError(e);
+        }
+    }
+
+    /**
+     * Set environment variables to English L10N for Ruyi.
+     * https://github.com/ruyisdk/ruyi/blob/2469683455b45ad1313f11c06e4f68a1d5c8c43d/ruyi/i18n/__init__.py#L34
+     */
+    private static void applyDefaultLocaleEnvironment(Map<String, String> processEnvironment) {
+        for (final var envKey : LOCALE_ENV_KEYS) {
+            processEnvironment.put(envKey, DEFAULT_LOCALE);
         }
     }
 
