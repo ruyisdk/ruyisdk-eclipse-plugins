@@ -1,24 +1,14 @@
 package org.ruyisdk.ruyi.services;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.ruyisdk.core.ruyi.model.RuyiVersion;
 import org.ruyisdk.ruyi.model.TelemetryMode;
 import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
@@ -119,6 +109,153 @@ public class RuyiCli {
         }
     }
 
+    /** Package version information returned by package list porcelain output. */
+    public static class PackageVersionInfo {
+        private final String semver;
+        private final String remark;
+        private final boolean installed;
+
+        /**
+         * Creates an instance.
+         *
+         * @param semver package semantic version
+         * @param remark optional remark associated with this version
+         * @param installed true if this version is installed
+         */
+        public PackageVersionInfo(String semver, String remark, boolean installed) {
+            this.semver = semver;
+            this.remark = remark;
+            this.installed = installed;
+        }
+
+        public String getSemver() {
+            return semver;
+        }
+
+        public String getRemark() {
+            return remark;
+        }
+
+        public boolean isInstalled() {
+            return installed;
+        }
+    }
+
+    /** Package list entry information returned by package list porcelain output. */
+    public static class PackageListEntryInfo {
+        private final String category;
+        private final String name;
+        private final List<PackageVersionInfo> versions;
+
+        /**
+         * Creates an instance.
+         *
+         * @param category package category
+         * @param name package name
+         * @param versions available package versions
+         */
+        public PackageListEntryInfo(String category, String name,
+                List<PackageVersionInfo> versions) {
+            this.category = category;
+            this.name = name;
+            this.versions = versions == null ? new ArrayList<>() : new ArrayList<>(versions);
+        }
+
+        public String getCategory() {
+            return category;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<PackageVersionInfo> getVersions() {
+            return Collections.unmodifiableList(versions);
+        }
+    }
+
+    /** Category node information for package tree rendering. */
+    public static class PackageTreeCategoryInfo {
+        private final String name;
+        private final List<PackageTreePackageInfo> packages;
+
+        /**
+         * Creates an instance.
+         *
+         * @param name category name
+         * @param packages packages in this category
+         */
+        public PackageTreeCategoryInfo(String name, List<PackageTreePackageInfo> packages) {
+            this.name = name;
+            this.packages = packages == null ? new ArrayList<>() : new ArrayList<>(packages);
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<PackageTreePackageInfo> getPackages() {
+            return Collections.unmodifiableList(packages);
+        }
+    }
+
+    /** Package node information for package tree rendering. */
+    public static class PackageTreePackageInfo {
+        private final String name;
+        private final List<PackageTreeVersionInfo> versions;
+
+        /**
+         * Creates an instance.
+         *
+         * @param name package name
+         * @param versions versions under this package
+         */
+        public PackageTreePackageInfo(String name, List<PackageTreeVersionInfo> versions) {
+            this.name = name;
+            this.versions = versions == null ? new ArrayList<>() : new ArrayList<>(versions);
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<PackageTreeVersionInfo> getVersions() {
+            return Collections.unmodifiableList(versions);
+        }
+    }
+
+    /** Version node information for package tree rendering. */
+    public static class PackageTreeVersionInfo {
+        private final String displayName;
+        private final String packageRef;
+        private final boolean installed;
+
+        /**
+         * Creates an instance.
+         *
+         * @param displayName display name shown in the tree
+         * @param packageRef package atom reference used by CLI actions
+         * @param installed true when this version is already installed
+         */
+        public PackageTreeVersionInfo(String displayName, String packageRef, boolean installed) {
+            this.displayName = displayName;
+            this.packageRef = packageRef;
+            this.installed = installed;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public String getPackageRef() {
+            return packageRef;
+        }
+
+        public boolean isInstalled() {
+            return installed;
+        }
+    }
+
     /** Summary information for a news item returned by the ruyi CLI. */
     public static class NewsListItemInfo {
         private final String id;
@@ -206,57 +343,20 @@ public class RuyiCli {
 
     /** Lists available profiles as reported by the ruyi CLI. */
     public static List<ProfileInfo> listProfiles() {
-        final var out = new ArrayList<ProfileInfo>();
-        try {
-            var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
-                    .porcelain(true).list().profiles().end().build();
-            var result = request.execute();
-            var output = result.getOutput();
+        final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
+                .porcelain(true).list().profiles().end().build();
+        final var result = request.execute();
+        return parseProfilesFromString(result.getOutput());
+    }
 
-            if (output == null || output.isEmpty()) {
-                return out;
-            }
-
-            // plain text parsing: lines like "wch-qingke-v2a (needs quirks: {'wch'})"
-            // which quirks are in the form of a Python set literal.
-            final var namePtn = Pattern.compile("^\\s*([^\\s(]+)", Pattern.CASE_INSENSITIVE);
-            final var quirksPtn =
-                    Pattern.compile("needs quirks:\\s*\\{([^}]*)\\}", Pattern.CASE_INSENSITIVE);
-            final var reader = new BufferedReader(
-                    new InputStreamReader(new ByteArrayInputStream(output.getBytes())));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.isEmpty()) {
-                    continue;
-                }
-                final var m = namePtn.matcher(line);
-                String name = null;
-                if (m.find()) {
-                    name = m.group(1);
-                }
-                final var quirks = new ArrayList<String>();
-                final var q = quirksPtn.matcher(line);
-                if (q.find()) {
-                    var raw = q.group(1).trim();
-                    // normalize quotes and whitespace
-                    raw = raw.replaceAll("'", "").replaceAll("\"", "");
-                    for (final var s : raw.split(",")) {
-                        final var t = s.trim();
-                        if (!t.isEmpty()) {
-                            quirks.add(t);
-                        }
-                    }
-                }
-                if (name != null && !name.isEmpty()) {
-                    out.add(new ProfileInfo(name, quirks));
-                }
-            }
-
-        } catch (IOException e) {
-            throw RuyiCliException.ioError(e);
-        }
-        return out;
+    /**
+     * Parses profile list output.
+     *
+     * @param input raw profile list output
+     * @return parsed profile entries
+     */
+    public static List<ProfileInfo> parseProfilesFromString(String input) {
+        return RuyiCliParsingSupport.parseProfilesFromString(input);
     }
 
     /** Lists available news items using the ruyi CLI. */
@@ -286,132 +386,24 @@ public class RuyiCli {
         return parseNewsReadFromString(result.getOutput());
     }
 
-    /** Parses the output of a news list command. */
+    /**
+     * Parses news list output.
+     *
+     * @param input raw news list output
+     * @return parsed news list items
+     */
     public static List<NewsListItemInfo> parseNewsListFromString(String input) {
-        final var out = new ArrayList<NewsListItemInfo>();
-        if (input == null || input.isBlank()) {
-            return out;
-        }
-        for (final var o : parseConcatenatedJsonObjects(input)) {
-            if (o == null) {
-                continue;
-            }
-            final var ty = o.optString("ty", null);
-            if (!"newsitem-v1".equalsIgnoreCase(ty)) {
-                continue;
-            }
-            final var id = o.optString("id", null);
-            final var ord = o.optIntegerObject("ord", null);
-            final var isRead = o.optBooleanObject("is_read", null);
-            final var langs = o.optJSONArray("langs");
-            final var title = chooseNewsDisplayTitle(langs);
-            out.add(new NewsListItemInfo(id, ord, isRead, title));
-        }
-        return out;
+        return RuyiCliParsingSupport.parseNewsListFromString(input);
     }
 
-    /** Parses the output of a news read command. */
+    /**
+     * Parses news read output.
+     *
+     * @param input raw news read output
+     * @return parsed news read result, or null if no item could be parsed
+     */
     public static NewsReadResult parseNewsReadFromString(String input) {
-        if (input == null || input.isBlank()) {
-            return null;
-        }
-        final var objs = parseConcatenatedJsonObjects(input);
-        if (objs.isEmpty()) {
-            return null;
-        }
-        final var o = objs.get(0);
-        if (o == null) {
-            return null;
-        }
-        final var id = o.optString("id", null);
-        final var ord = o.optIntegerObject("ord", null);
-        final var isRead = o.optBooleanObject("is_read", null);
-        final var langs = o.optJSONArray("langs");
-        final var title = chooseNewsDisplayTitle(langs);
-        final var content = chooseNewsContent(langs);
-        return new NewsReadResult(id, ord, isRead, title, content);
-    }
-
-    private static List<JSONObject> parseConcatenatedJsonObjects(String input) {
-        final var out = new ArrayList<JSONObject>();
-        if (input == null) {
-            return out;
-        }
-        final var t = new JSONTokener(input);
-        while (true) {
-            final var c = t.nextClean();
-            if (c == 0) {
-                break;
-            }
-            t.back();
-            final var v = t.nextValue();
-            if (v instanceof JSONObject) {
-                out.add((JSONObject) v);
-            } else if (v instanceof JSONArray) {
-                final var arr = (JSONArray) v;
-                for (int i = 0; i < arr.length(); i++) {
-                    final var el = arr.get(i);
-                    if (el instanceof JSONObject) {
-                        out.add((JSONObject) el);
-                    }
-                }
-            } else {
-                // ignore other values
-            }
-        }
-        return out;
-    }
-
-    private static String chooseNewsDisplayTitle(JSONArray langs) {
-        final var best = chooseBestNewsLang(langs);
-        if (best == null) {
-            return null;
-        }
-        return best.optString("display_title", null);
-    }
-
-    private static String chooseNewsContent(JSONArray langs) {
-        final var best = chooseBestNewsLang(langs);
-        if (best == null) {
-            return null;
-        }
-        return best.optString("content", null);
-    }
-
-    private static JSONObject chooseBestNewsLang(JSONArray langs) {
-        if (langs == null || langs.length() == 0) {
-            return null;
-        }
-
-        // Prefer an explicit English entry if available, else match current locale, else first.
-        JSONObject first = null;
-        final var sysLang = Locale.getDefault() == null ? "" : Locale.getDefault().toString();
-        for (int i = 0; i < langs.length(); i++) {
-            final var o = langs.optJSONObject(i);
-            if (o == null) {
-                continue;
-            }
-            if (first == null) {
-                first = o;
-            }
-            final var lang = o.optString("lang", "");
-            if ("en_US".equalsIgnoreCase(lang)) {
-                return o;
-            }
-        }
-        if (!sysLang.isEmpty()) {
-            for (int i = 0; i < langs.length(); i++) {
-                final var o = langs.optJSONObject(i);
-                if (o == null) {
-                    continue;
-                }
-                final var lang = o.optString("lang", "");
-                if (sysLang.equalsIgnoreCase(lang)) {
-                    return o;
-                }
-            }
-        }
-        return first;
+        return RuyiCliParsingSupport.parseNewsReadFromString(input);
     }
 
     private static String requireInstallPathResult() {
@@ -454,43 +446,6 @@ public class RuyiCli {
         final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
                 .porcelain(true).update().end().build();
         request.execute();
-    }
-
-    /**
-     * Gets installed Ruyi version.
-     *
-     * @return version or null if not available or command fails
-     */
-    public static RuyiVersion getInstalledVersion() {
-        return getInstalledVersion(requireInstallPathResult());
-    }
-
-    /**
-     * Gets installed Ruyi version from the specified install directory.
-     *
-     * @param installDir directory containing the ruyi binary
-     * @return version or null if not available or command fails
-     */
-    public static RuyiVersion getInstalledVersion(String installDir) {
-        final var request = RuyiCliRequest.builder().ruyiInstallDir(installDir).porcelain(false)
-                .args("-V").build();
-        final var result = request.execute();
-        return parseInstalledVersion(result);
-    }
-
-    private static RuyiVersion parseInstalledVersion(RuyiExecResult result) {
-        if (result == null) {
-            return null;
-        }
-
-        final var pattern = Pattern.compile("^Ruyi\\s+(\\d+\\.\\d+\\.\\d+)\\b");
-        final var matcher = pattern.matcher(result.getOutput());
-
-        if (!matcher.find()) {
-            return null;
-        }
-        final var versionStr = matcher.group(1);
-        return RuyiVersion.parse(versionStr);
     }
 
     /**
@@ -676,6 +631,42 @@ public class RuyiCli {
     }
 
     /**
+     * Parses package tree output for tree rendering. This is a simple bridge method.
+     *
+     * @param input raw package tree output
+     * @return parsed category and package information for tree construction
+     */
+    public static List<PackageTreeCategoryInfo> parsePackageTreeFromString(String input) {
+        return RuyiCliParsingSupport.parsePackageTreeFromString(input);
+    }
+
+    /**
+     * Finds installed toolchain package reference for a board.
+     *
+     * @param boardName board name, with or without {@code device:} prefix
+     * @return installed toolchain package reference, or null if none found
+     */
+    public static String findInstalledToolchainForBoard(String boardName) {
+        if (boardName == null || boardName.trim().isEmpty()) {
+            return null;
+        }
+
+        final var entity = boardName.startsWith("device:") ? boardName : "device:" + boardName;
+        final var output = listRelatedToEntity(entity);
+        return parseInstalledToolchainFromRelatedEntityOutput(output);
+    }
+
+    /**
+     * Finds installed toolchain package reference from related-entity output.
+     *
+     * @param output raw output from {@code ruyi list --related-to-entity}
+     * @return installed toolchain package reference, or null if none found
+     */
+    public static String parseInstalledToolchainFromRelatedEntityOutput(String output) {
+        return RuyiCliParsingSupport.findInstalledToolchainFromRelatedEntityOutput(output);
+    }
+
+    /**
      * Lists entities by type.
      *
      * @param type entity type such as device
@@ -782,196 +773,40 @@ public class RuyiCli {
         request.execute();
     }
 
-    // TODO: move to data parsing class
-    // Extract top-level JSON objects from a concatenated stream (handles multiple back-to-back
-    // objects).
-    private static List<String> extractJsonObjects(String s) {
-        final var objs = new ArrayList<String>();
-        if (s == null || s.isEmpty()) {
-            return objs;
-        }
-        int depth = 0;
-        int start = -1;
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (c == '{') {
-                if (depth == 0) {
-                    start = i;
-                }
-                depth++;
-            } else if (c == '}') {
-                depth--;
-                if (depth == 0 && start >= 0) {
-                    objs.add(s.substring(start, i + 1));
-                    start = -1;
-                }
-            }
-        }
-        return objs;
-    }
-
     // Package list helpers: call porcelain `list` and parse its JSON-ish output.
     /** Lists available toolchains as reported by the ruyi CLI. */
     public static List<ToolchainInfo> listToolchains() {
-        final var out = new ArrayList<ToolchainInfo>();
         final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
                 .porcelain(true).list().toolchains().end().build();
         final var result = request.execute();
-        final var output = result.getOutput();
-        if (output == null || output.isEmpty()) {
-            return out;
-        }
-        out.addAll(parseToolchainsFromString(output));
-        return out;
+        return parseToolchainsFromString(result.getOutput());
     }
 
-    // TODO: move to data parsing class
     /**
-     * Parse toolchain package objects from a porcelain output string (may contain concatenated JSON
-     * objects). This helper is public to make parsing testable.
+     * Parses toolchain list output.
+     *
+     * @param input raw toolchain list output
+     * @return parsed toolchain entries
      */
     public static List<ToolchainInfo> parseToolchainsFromString(String input) {
-        final var out = new ArrayList<ToolchainInfo>();
-        if (input == null || input.isEmpty()) {
-            return out;
-        }
-        final var objs = extractJsonObjects(input);
-        for (final var jo : objs) {
-            if (jo == null || jo.isBlank()) {
-                continue;
-            }
-            final var o = new JSONObject(jo);
-            final var category = o.optString("category", "");
-            if (!"toolchain".equalsIgnoreCase(category)) {
-                continue;
-            }
-            final var pkgName = o.optString("name", "").trim();
-            if (pkgName.isEmpty()) {
-                continue;
-            }
-            final var versions = new ArrayList<String>();
-            final var vers = o.optJSONArray("vers");
-            if (vers != null && vers.length() > 0) {
-                for (int vi = 0; vi < vers.length(); vi++) {
-                    final var v = vers.optJSONObject(vi);
-                    if (v == null) {
-                        continue;
-                    }
-                    final var sem = v.optString("semver", v.optString("version", "")).trim();
-                    if (sem != null && !sem.isEmpty()) {
-                        versions.add(sem);
-                    }
-                }
-            }
-            // Extract quirks (flavors) from the first version's metadata
-            final var quirks = extractPackageQuirks(vers, "toolchain");
-            // only expose packages for which we actually know at least one version
-            if (!versions.isEmpty()) {
-                out.add(new ToolchainInfo(pkgName, versions, quirks));
-            }
-        }
-        return out;
+        return RuyiCliParsingSupport.parseToolchainsFromString(input);
     }
 
     /** Lists available emulators as reported by the ruyi CLI. */
     public static List<EmulatorInfo> listEmulators() {
-        final var out = new ArrayList<EmulatorInfo>();
         final var request = RuyiCliRequest.builder().ruyiInstallDir(requireInstallPathResult())
                 .porcelain(true).list().emulators().end().build();
         final var result = request.execute();
-        final var output = result.getOutput();
-        if (output == null || output.isEmpty()) {
-            return out;
-        }
-        out.addAll(parseEmulatorsFromString(output));
-        return out;
+        return parseEmulatorsFromString(result.getOutput());
     }
 
-    // TODO: move to data parsing class
     /**
-     * Parse emulator package objects from a porcelain output string (may contain concatenated JSON
-     * objects). This helper is public to make parsing testable.
+     * Parses emulator list output.
+     *
+     * @param input raw emulator list output
+     * @return parsed emulator entries
      */
     public static List<EmulatorInfo> parseEmulatorsFromString(String input) {
-        final var out = new ArrayList<EmulatorInfo>();
-        if (input == null || input.isEmpty()) {
-            return out;
-        }
-        final var objs = extractJsonObjects(input);
-        for (final var jo : objs) {
-            if (jo == null || jo.isBlank()) {
-                continue;
-            }
-            final var o = new JSONObject(jo);
-            final var category = o.optString("category", "");
-            if (!"emulator".equalsIgnoreCase(category)) {
-                continue;
-            }
-            final var pkgName = o.optString("name", "").trim();
-            if (pkgName.isEmpty()) {
-                continue;
-            }
-            final var versions = new ArrayList<String>();
-            final var vers = o.optJSONArray("vers");
-            if (vers != null && vers.length() > 0) {
-                for (int vi = 0; vi < vers.length(); vi++) {
-                    final var v = vers.optJSONObject(vi);
-                    if (v == null) {
-                        continue;
-                    }
-                    final var sem = v.optString("semver", v.optString("version", "")).trim();
-                    if (sem != null && !sem.isEmpty()) {
-                        versions.add(sem);
-                    }
-                }
-            }
-            // Extract quirks (flavors) from the first version's metadata
-            final var quirks = extractPackageQuirks(vers, "emulator");
-            if (!versions.isEmpty()) {
-                out.add(new EmulatorInfo(pkgName, versions, quirks));
-            }
-        }
-        return out;
-    }
-
-    /**
-     * Extracts quirks (flavors) from the first version entry that contains the given metadata key
-     * (e.g. "toolchain" or "emulator") inside the {@code pm} object.
-     */
-    private static List<String> extractPackageQuirks(JSONArray vers, String metadataKey) {
-        if (vers == null || vers.length() == 0) {
-            return List.of();
-        }
-        final var quirksSet = new LinkedHashSet<String>();
-        for (int vi = 0; vi < vers.length(); vi++) {
-            final var v = vers.optJSONObject(vi);
-            if (v == null) {
-                continue;
-            }
-            final var pm = v.optJSONObject("pm");
-            if (pm == null) {
-                continue;
-            }
-            final var meta = pm.optJSONObject(metadataKey);
-            if (meta == null) {
-                continue;
-            }
-            collectJsonArrayStrings(meta.optJSONArray("quirks"), quirksSet);
-            collectJsonArrayStrings(meta.optJSONArray("flavors"), quirksSet);
-            break; // all versions should have the same quirks, so use first version's metadata
-        }
-        return new ArrayList<>(quirksSet);
-    }
-
-    private static void collectJsonArrayStrings(JSONArray arr, Collection<String> target) {
-        if (arr == null) {
-            return;
-        }
-        for (int i = 0; i < arr.length(); i++) {
-            final var s = arr.optString(i, "").trim();
-            if (!s.isEmpty()) {
-                target.add(s);
-            }
-        }
+        return RuyiCliParsingSupport.parseEmulatorsFromString(input);
     }
 }

@@ -46,11 +46,10 @@ public class CheckResult {
     /**
      * Creates a result indicating Ruyi needs to be installed.
      *
-     * @param msg description of why installation is needed
      * @return new CheckResult instance with INSTALL action
      */
-    public static CheckResult needInstall(String msg) {
-        return new CheckResult(ActionType.INSTALL, msg, null, null);
+    public static CheckResult needInstall() {
+        return new CheckResult(ActionType.INSTALL, null, null, null);
     }
 
     /**
@@ -58,11 +57,10 @@ public class CheckResult {
      *
      * @param current currently installed version
      * @param latest latest available version
-     * @param msg description of why upgrade is needed
      * @return new CheckResult instance with UPGRADE action
      */
-    public static CheckResult needUpgrade(RuyiVersion current, RuyiVersion latest, String msg) {
-        return new CheckResult(ActionType.UPGRADE, msg, current, latest);
+    public static CheckResult needUpgrade(RuyiVersion current, RuyiVersion latest) {
+        return new CheckResult(ActionType.UPGRADE, null, current, latest);
     }
 
     /**

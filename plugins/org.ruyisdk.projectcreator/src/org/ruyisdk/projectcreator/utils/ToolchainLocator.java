@@ -7,8 +7,8 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.osgi.service.prefs.Preferences;
 import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
-import org.ruyisdk.packages.JsonParser;
 import org.ruyisdk.projectcreator.Activator;
+import org.ruyisdk.ruyi.services.RuyiCli;
 
 /**
  * Locates toolchain paths for boards.
@@ -34,11 +34,9 @@ public class ToolchainLocator {
 
         String toolchainName = null;
         try {
-            // 1. jsonParser.findInstalledToolchainForBoard method
-            LOGGER.logInfo("Preparing to call JsonParser.findInstalledToolchainForBoard...");
-            toolchainName = JsonParser.findInstalledToolchainForBoard(boardModel);
+            toolchainName = RuyiCli.findInstalledToolchainForBoard(boardModel);
             LOGGER.logInfo(
-                    "Successfully called JsonParser. Returned toolchainName: " + toolchainName);
+                    String.format("Found toolchain %s for board %s", toolchainName, boardModel));
         } catch (PluginException e) {
             LOGGER.logError("Failed to find installed toolchain for board: " + boardModel, e);
             return null;

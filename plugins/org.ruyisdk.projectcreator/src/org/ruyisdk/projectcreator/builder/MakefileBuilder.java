@@ -25,7 +25,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
-import org.ruyisdk.packages.JsonParser;
 import org.ruyisdk.projectcreator.Activator;
 import org.ruyisdk.projectcreator.RuyiProjectException;
 import org.ruyisdk.ruyi.services.RuyiCli;
@@ -245,7 +244,7 @@ public class MakefileBuilder extends IncrementalProjectBuilder {
                 throw RuyiProjectException.propertyMissing(BOARD_MODEL_PROPERTY);
             }
             try {
-                toolchain = JsonParser.findInstalledToolchainForBoard(boardModel);
+                toolchain = RuyiCli.findInstalledToolchainForBoard(boardModel);
             } catch (PluginException e) {
                 logToFile(project,
                         "Failed to find installed toolchain for board: " + e.getMessage());

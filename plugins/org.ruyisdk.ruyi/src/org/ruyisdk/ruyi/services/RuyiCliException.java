@@ -65,4 +65,18 @@ public class RuyiCliException extends PluginException {
     public static RuyiCliException terminalUnavailable() {
         return new RuyiCliException("Eclipse terminal service is unavailable");
     }
+
+    /** Installed ruyi version is unsupported or cannot be detected. */
+    public static RuyiCliException unsupportedVersion(String minimumVersion,
+            String currentVersion) {
+        if (currentVersion == null) {
+            return new RuyiCliException(String.format(
+                    "Unable to detect installed ruyi version. Minimum required version is %s",
+                    minimumVersion));
+        } else {
+            return new RuyiCliException(String.format(
+                    "Installed ruyi version %s is unsupported. Minimum required version is %s",
+                    currentVersion, minimumVersion));
+        }
+    }
 }

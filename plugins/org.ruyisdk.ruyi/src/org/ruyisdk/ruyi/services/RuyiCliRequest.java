@@ -56,6 +56,8 @@ public class RuyiCliRequest {
             throw RuyiCliException.ruyiNotFound();
         }
 
+        ensureSupportedVersion();
+
         final var cmdArgs = buildCommandArgs();
         final var cmdString = buildCommandString(cmdArgs);
         final var result = RuyiCliExecutor.execute(ruyiInstallDir, environment, workingDirectory,
@@ -77,6 +79,16 @@ public class RuyiCliRequest {
         }
         cmdArgs.addAll(args);
         return cmdArgs;
+    }
+
+    private void ensureSupportedVersion() {
+        final var installedVersion = RuyiCliVersionSupport.getInstalledVersion(ruyiInstallDir);
+        if (RuyiCliVersionSupport.isSupportedVersion(installedVersion)) {
+            return;
+        }
+        throw RuyiCliException.unsupportedVersion(
+                RuyiCliVersionSupport.getMinimumSupportedVersion().toString(),
+                installedVersion == null ? null : installedVersion.toString());
     }
 
     private String buildCommandString(List<String> cmdArgs) {

@@ -14,8 +14,8 @@ import org.eclipse.ui.IWorkbenchPropertyPage;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.core.util.PluginLogger;
-import org.ruyisdk.packages.JsonParser;
 import org.ruyisdk.projectcreator.Activator;
+import org.ruyisdk.ruyi.services.RuyiCli;
 
 /**
  * Property page for build configuration.
@@ -117,7 +117,7 @@ public class BuildPropertyPage extends PropertyPage implements IWorkbenchPropert
 
                 profile = boardModel;
                 try {
-                    toolchain = JsonParser.findInstalledToolchainForBoard(boardModel);
+                    toolchain = RuyiCli.findInstalledToolchainForBoard(boardModel);
                 } catch (PluginException e) {
                     toolchain = null;
                 }
