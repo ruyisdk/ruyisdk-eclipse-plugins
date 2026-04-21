@@ -76,7 +76,7 @@ public class RuyiCore {
         Display.getDefault().asyncExec(() -> {
             switch (result.getAction()) {
                 case INSTALL:
-                    RuyiInstallWizard.openForInstall();
+                    RuyiInstallWizard.openForInstall(result.getLatestVersion());
                     break;
 
                 case UPGRADE:
