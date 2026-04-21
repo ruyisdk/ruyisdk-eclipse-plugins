@@ -91,7 +91,8 @@ public final class RuyiCliExecutor {
     }
 
     /**
-     * Set environment variables to English L10N for Ruyi.
+     * Set environment variables to en_US.UTF-8 locale for Ruyi. No Chinese L10N. Ignore user
+     * settings.
      * https://github.com/ruyisdk/ruyi/blob/2469683455b45ad1313f11c06e4f68a1d5c8c43d/ruyi/i18n/__init__.py#L34
      */
     private static void applyDefaultLocaleEnvironment(Map<String, String> processEnvironment) {
