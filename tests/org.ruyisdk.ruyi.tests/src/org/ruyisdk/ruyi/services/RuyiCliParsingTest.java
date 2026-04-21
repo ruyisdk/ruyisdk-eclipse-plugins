@@ -3,6 +3,7 @@ package org.ruyisdk.ruyi.services;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
@@ -56,6 +57,21 @@ public class RuyiCliParsingTest {
         assertEquals("emu-y", ems.get(1).getName());
         assertEquals(1, ems.get(1).getVersions().size());
         assertEquals("2.1.0", ems.get(1).getVersions().get(0));
+    }
+
+    @Test
+    public void parseProfilesUsesPlainTextNeedsQuirks() {
+        String sample = """
+                        generic (arch: riscv64)
+                        wch-qingke-v2a (arch: riscv32, needs quirks: wch)
+                        """;
+
+        List<RuyiCli.ProfileInfo> profiles = RuyiCli.parseProfilesFromString(sample);
+        assertEquals(2, profiles.size());
+        assertEquals("generic", profiles.get(0).getName());
+        assertTrue(profiles.get(0).getQuirks().isEmpty());
+        assertEquals("wch-qingke-v2a", profiles.get(1).getName());
+        assertEquals(List.of("wch"), profiles.get(1).getQuirks());
     }
 
     /**
@@ -227,6 +243,78 @@ public class RuyiCliParsingTest {
         List<RuyiCli.ToolchainInfo> tcs = RuyiCli.parseToolchainsFromString(sample);
         assertEquals(1, tcs.size());
         assertEquals(List.of("first"), tcs.get(0).getQuirks());
+    }
+
+    @Test
+    public void parsePackageTreeBuildsTreeAndPreservesVersionMetadata() {
+        String sample = """
+                        {"ty":"log-v1","message":"skip"}
+                        {"ty":"pkglistoutput-v1","category":"toolchain","name":"tc-a","vers":[{"semver":"1.0.0","remarks":["recommended"],"is_installed":true},{"semver":"1.1.0"}]}
+                        {"category":"emulator","name":"emu-a","vers":[{"semver":"0.9.0"}]}
+                        """;
+
+        var categories = RuyiCli.parsePackageTreeFromString(sample);
+        assertEquals(2, categories.size());
+
+        var toolchainCategory = categories.get(0);
+        assertEquals("toolchain", toolchainCategory.getName());
+        assertEquals(1, toolchainCategory.getPackages().size());
+
+        var toolchainPackage = toolchainCategory.getPackages().get(0);
+        assertEquals("tc-a", toolchainPackage.getName());
+        assertEquals(2, toolchainPackage.getVersions().size());
+
+        var version100 = toolchainPackage.getVersions().get(0);
+        assertEquals("1.0.0 [recommended]", version100.getDisplayName());
+        assertEquals("tc-a(1.0.0)", version100.getPackageRef());
+        assertTrue(version100.isInstalled());
+
+        var version110 = toolchainPackage.getVersions().get(1);
+        assertEquals("1.1.0", version110.getDisplayName());
+        assertFalse(version110.isInstalled());
+
+        var emulatorCategory = categories.get(1);
+        assertEquals("emulator", emulatorCategory.getName());
+        assertEquals(1, emulatorCategory.getPackages().size());
+        assertEquals("emu-a", emulatorCategory.getPackages().get(0).getName());
+    }
+
+    @Test
+    public void parsePackageTreeMergesPackagesUnderSameCategory() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"toolchain","name":"tc-a","vers":[{"semver":"1.0.0"}]}
+                        {"ty":"pkglistoutput-v1","category":"toolchain","name":"tc-b","vers":[{"semver":"2.0.0"}]}
+                        """;
+
+        var categories = RuyiCli.parsePackageTreeFromString(sample);
+        assertEquals(1, categories.size());
+
+        var toolchainCategory = categories.get(0);
+        assertEquals("toolchain", toolchainCategory.getName());
+        assertEquals(2, toolchainCategory.getPackages().size());
+        assertEquals("tc-a", toolchainCategory.getPackages().get(0).getName());
+        assertEquals("tc-b", toolchainCategory.getPackages().get(1).getName());
+    }
+
+    @Test
+    public void parseInstalledToolchainPrefersInstallCommandValue() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"toolchain","name":"gnu-upstream","vers":[{"semver":"0.2024.08.30","is_installed":true,"install_command":"ruyi install gnu-upstream(0.2024.08.30)"}]}
+                        """;
+
+        String toolchain = RuyiCli.parseInstalledToolchainFromRelatedEntityOutput(sample);
+        assertEquals("gnu-upstream(0.2024.08.30)", toolchain);
+    }
+
+    @Test
+    public void parseInstalledToolchainReturnsNullWhenNoInstalledVersion() {
+        String sample = """
+                        {"ty":"pkglistoutput-v1","category":"toolchain","name":"gnu-plct","vers":[{"semver":"0.2024.01.01","is_installed":false}]}
+                        {"ty":"pkglistoutput-v1","category":"board-image","name":"img-a","vers":[{"semver":"1.0.0","is_installed":true}]}
+                        """;
+
+        String toolchain = RuyiCli.parseInstalledToolchainFromRelatedEntityOutput(sample);
+        assertNull(toolchain);
     }
 
     @Test

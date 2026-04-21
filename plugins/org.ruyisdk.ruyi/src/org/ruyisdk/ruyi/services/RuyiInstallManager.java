@@ -224,7 +224,7 @@ public final class RuyiInstallManager {
     private static void validateInstallation(String installDir, InstallationListener listener) {
         listener.logMessage("Validating installation...");
 
-        final var version = RuyiCli.getInstalledVersion(installDir);
+        final var version = RuyiCliVersionSupport.getInstalledVersion(installDir);
         if (version == null) {
             throw RuyiInstallException
                     .validationFailed("There are problems in the operation ruyi -V.");

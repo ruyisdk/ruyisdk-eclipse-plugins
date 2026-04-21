@@ -1,6 +1,5 @@
 package org.ruyisdk.packages.model;
 
-import org.ruyisdk.packages.JsonParser;
 import org.ruyisdk.ruyi.services.RuyiCli;
 
 /**
@@ -23,6 +22,25 @@ public class PackageTree {
             output = RuyiCli.listAllPackages();
         }
         final var rootLabel = entityId != null ? entityId : "All Packages";
-        return JsonParser.parseRawOutput(output, rootLabel);
+        final var root = new TreeNode(rootLabel, null);
+        final var tree = RuyiCli.parsePackageTreeFromString(output);
+        for (final var category : tree) {
+            final var categoryNode = new TreeNode(category.getName(), null);
+            root.addChild(categoryNode);
+
+            for (final var pkg : category.getPackages()) {
+                final var packageNode = new TreeNode(pkg.getName(), null);
+                categoryNode.addChild(packageNode);
+
+                for (final var version : pkg.getVersions()) {
+                    final var versionNode =
+                            new TreeNode(version.getDisplayName(), null, version.getPackageRef());
+                    versionNode.setLeaf(true);
+                    versionNode.setDownloaded(version.isInstalled());
+                    packageNode.addChild(versionNode);
+                }
+            }
+        }
+        return root;
     }
 }

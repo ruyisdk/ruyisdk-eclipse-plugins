@@ -3,9 +3,12 @@ package org.ruyisdk.ruyi.jobs;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.ruyisdk.core.ruyi.model.CheckResult;
 import org.ruyisdk.core.ruyi.model.RuyiVersion;
+import org.ruyisdk.core.ruyi.model.SystemInfo;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.Activator;
-import org.ruyisdk.ruyi.services.RuyiManager;
+import org.ruyisdk.ruyi.services.RuyiApi;
+import org.ruyisdk.ruyi.services.RuyiCliVersionSupport;
+import org.ruyisdk.ruyi.util.RuyiFileUtils;
 
 /**
  * Job for checking Ruyi environment.
@@ -20,30 +23,26 @@ public class CheckRuyiJob {
      * @return check result
      */
     public CheckResult runCheck(IProgressMonitor monitor) {
+        monitor.beginTask("Checking Ruyi environment", 2);
+
         try {
-            monitor.beginTask("Checking Ruyi environment", 3);
-
-            // Step 1: Check if installed
-            // 步骤1: 检查是否安装
-            monitor.subTask("Checking installation");
-            if (!isInstalled()) {
-                return CheckResult.needInstall("Ruyi is not installed");
-            }
-            monitor.worked(1);
-
-            // 步骤2: 获取当前版本
             monitor.subTask("Detecting current version");
-            RuyiVersion current = getInstalledVersion();
+            final var current = getInstalledVersion();
             monitor.worked(1);
 
-            // 步骤3: 检查新版本
-            monitor.subTask("Checking latest version");
-            RuyiVersion latest = getLatestRelease();
+            if (current == null) {
+                return CheckResult.needInstall();
+            }
 
-            if (latest != null && current.compareTo(latest) < 0) {
-                return CheckResult.needUpgrade(current, latest,
-                        String.format("New version available: %s (current: %s)", latest.toString(),
-                                current.toString()));
+            monitor.subTask("Checking latest version");
+            final var latest = getLatestRelease();
+            monitor.worked(1);
+
+            if (latest != null) {
+                if (!RuyiCliVersionSupport.isSupportedVersion(current)
+                        && current.compareTo(latest) < 0) {
+                    return CheckResult.needUpgrade(current, latest);
+                }
             }
 
             return CheckResult.ok();
@@ -52,20 +51,20 @@ public class CheckRuyiJob {
         }
     }
 
-    private boolean isInstalled() {
-        final var installed = RuyiManager.isRuyiInstalled();
-        LOGGER.logInfo("Ruyi is installed ? " + installed);
-        return installed;
-    }
-
     private RuyiVersion getInstalledVersion() {
-        final var version = RuyiManager.getInstalledVersion();
+        final var installDir = RuyiFileUtils.findInstallPathWithRuyi();
+        if (installDir == null || installDir.isBlank()) {
+            return null;
+        }
+        final var version = RuyiCliVersionSupport.getInstalledVersion(installDir);
         LOGGER.logInfo("Installed Ruyi version: " + version);
         return version;
     }
 
     private RuyiVersion getLatestRelease() {
-        final var latest = RuyiManager.getLatestVersion();
+        final var archSuffix = SystemInfo.detectArchitecture().getSuffix();
+        final var info = RuyiApi.getLatestRelease(archSuffix);
+        final var latest = info.getVersion();
         LOGGER.logInfo("Latest Ruyi version available: " + latest);
         return latest;
     }

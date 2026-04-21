@@ -122,10 +122,17 @@ public class RuyiInstallWizard extends Wizard {
             // 信息展示区域
             Label infoLabel = new Label(container, SWT.WRAP);
             infoLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-            String showtext =
-                    mode == Mode.INSTALL ? "Ruyi package manager (ruyi command) not detected.  \n"
-                            : String.format("New Ruyi version %s available (current: %s).  \n",
-                                    newVersion, currentVersion);
+            final var target = newVersion.toString();
+            final String showtext;
+            if (mode == Mode.INSTALL) {
+                showtext = String.format(
+                        "Ruyi package manager (ruyi command) not detected. Target version: %s",
+                        target);
+            } else {
+                final var current = currentVersion.toString();
+                showtext = String.format("Ruyi upgrade is required. Target: %s (current: %s).",
+                        target, current);
+            }
             infoLabel.setText(showtext);
 
 
