@@ -15,6 +15,7 @@ Require-Bundle:
  org.eclipse.core.runtime,
  org.eclipse.equinox.app,
  org.eclipse.jface,
+ org.eclipse.tm.terminal.connector.process,
  org.eclipse.tm.terminal.view.core,
  org.eclipse.ui,
  org.ruyisdk.core,
