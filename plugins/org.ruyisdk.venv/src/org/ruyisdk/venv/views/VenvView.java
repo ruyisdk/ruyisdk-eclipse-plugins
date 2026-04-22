@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.part.ViewPart;
+import org.ruyisdk.core.util.dialog.DialogBinder;
 import org.ruyisdk.venv.Activator;
 import org.ruyisdk.venv.model.Venv;
 import org.ruyisdk.venv.viewmodel.VenvListViewModel;
@@ -213,12 +214,7 @@ public class VenvView extends ViewPart {
         applyButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                venvListViewModel.onApplySelectedVenvConfig(result -> {
-                    container.getDisplay().asyncExec(() -> {
-                        MessageDialog.openInformation(container.getShell(), "Apply Configuration",
-                                result.getMessage());
-                    });
-                });
+                venvListViewModel.onApplySelectedVenvConfig();
             }
         });
 
@@ -251,12 +247,7 @@ public class VenvView extends ViewPart {
                     return;
                 }
 
-                venvListViewModel.onDeleteSelectedVenvDirectories(err -> {
-                    if (err != null) {
-                        MessageDialog.openError(container.getShell(),
-                                "Delete virtual environment failed", err.getMessage());
-                    }
-                });
+                venvListViewModel.onDeleteSelectedVenvDirectories();
             }
         });
 
@@ -275,6 +266,8 @@ public class VenvView extends ViewPart {
                 }
             }
         });
+
+        DialogBinder.bind(container.getShell(), venvListViewModel, "Venv");
     }
 
     private void updateTableAreaState(boolean showTable) {

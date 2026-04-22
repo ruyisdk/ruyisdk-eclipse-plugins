@@ -4,10 +4,14 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.WritableValue;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.core.util.dialog.IDialogStatusProvider;
 import org.ruyisdk.ruyi.core.workspace.WorkspaceProjectsMonitor;
 import org.ruyisdk.ruyi.core.workspace.WorkspaceProjectsMonitor.EventKind;
 import org.ruyisdk.venv.Activator;
@@ -18,11 +22,12 @@ import org.ruyisdk.venv.model.VenvDetectionService;
 /**
  * View model for the venv list view.
  */
-public class VenvListViewModel {
+public class VenvListViewModel implements IDialogStatusProvider {
 
     private static final PluginLogger LOGGER = Activator.getLogger();
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private final IObservableValue<IStatus> lastStatus = new WritableValue<>(null, IStatus.class);
 
     private boolean fetching = false;
     private boolean canDelete = false;
@@ -236,15 +241,24 @@ public class VenvListViewModel {
 
         setFetching(true);
         final var projectRootPaths = workspaceProjectsMonitor.getOpenProjectRootPaths();
-        detectionService.detectProjectVenvsAsync(projectRootPaths, result -> {
+        detectionService.detectProjectVenvsAsync(projectRootPaths).whenComplete((result, e) -> {
             observableVenvList.getRealm().asyncExec(() -> {
                 observableVenvList.clear();
-                if (result != null) {
-                    observableVenvList.addAll(result);
-                    LOGGER.logInfo("Venv list refreshed; count=" + result.size());
-                } else {
-                    LOGGER.logError("Venv list failed to refresh");
-                }
+            });
+        }).thenAccept(result -> {
+            LOGGER.logInfo("Venv list refreshed; count=" + result.size());
+            observableVenvList.getRealm().asyncExec(() -> {
+                observableVenvList.addAll(result);
+            });
+        }).exceptionally(e -> {
+            // unwrap CompletionException
+            final var cause = e.getCause();
+            lastStatus.getRealm().asyncExec(() -> {
+                lastStatus.setValue(Status.error(null, cause));
+            });
+            return null;
+        }).whenComplete((result, e) -> {
+            observableVenvList.getRealm().asyncExec(() -> {
                 updateHasOpenProjects();
                 setFetching(false);
             });
@@ -262,74 +276,70 @@ public class VenvListViewModel {
 
     /**
      * Deletes the selected venv directories.
-     *
-     * @param callback callback invoked with an error, or {@code null} on success
      */
-    public void onDeleteSelectedVenvDirectories(Consumer<Exception> callback) {
+    public void onDeleteSelectedVenvDirectories() {
         if (busy) {
             return;
         }
 
         final var venvPaths = getSelectedVenvDirectoryPaths();
         if (venvPaths.isEmpty()) {
-            if (callback != null) {
-                callback.accept(null);
-            }
             return;
         }
 
-        LOGGER.logInfo("Deleting selected venv directories: count=" + venvPaths.size());
-
         setFetching(true);
-        detectionService.deleteVenvDirectoriesAsync(venvPaths, err -> {
+        detectionService.deleteVenvDirectoriesAsync(venvPaths).thenAccept(v -> {
+            observableVenvList.getRealm().asyncExec(() -> {
+                onRefreshVenvListAsync();
+            });
+        }).exceptionally(e -> {
+            // unwrap CompletionException
+            final var cause = e.getCause();
+            lastStatus.getRealm().asyncExec(() -> {
+                lastStatus.setValue(Status.error(null, cause));
+            });
+            return null;
+        }).whenComplete((result, e) -> {
             observableVenvList.getRealm().asyncExec(() -> {
                 setFetching(false);
-                if (err == null) {
-                    onRefreshVenvListAsync();
-                }
-                if (callback != null) {
-                    callback.accept(err);
-                }
             });
         });
     }
 
     /**
      * Applies the selected venv's configuration to its associated project.
-     *
-     * @param callback callback invoked with the result
      */
-    public void onApplySelectedVenvConfig(Consumer<VenvConfigurationService.ApplyResult> callback) {
+    public void onApplySelectedVenvConfig() {
         if (busy) {
-            if (callback != null) {
-                callback.accept(
-                        new VenvConfigurationService.ApplyResult(false, "Operation in progress"));
-            }
             return;
         }
 
         if (selectedVenvs.size() != 1) {
-            if (callback != null) {
-                callback.accept(
-                        new VenvConfigurationService.ApplyResult(false, "No venv selected"));
-            }
             return;
         }
 
+        setFetching(true);
         final var selected = selectedVenvs.get(0);
         LOGGER.logInfo("Applying venv configuration to project: venv=" + selected.getPath());
-        setFetching(true);
-        configService.applyToProjectAsync(selected, result -> {
+        configService.applyToProjectAsync(selected).thenAccept(result -> {
+            if (result.isSuccess()) {
+                LOGGER.logInfo("Venv configuration applied successfully");
+            } else {
+                LOGGER.logWarning("Venv configuration failed: " + result.getMessage());
+            }
+            observableVenvList.getRealm().asyncExec(() -> {
+                lastStatus.setValue(Status.info(result.getMessage()));
+            });
+        }).exceptionally(e -> {
+            // unwrap CompletionException
+            final var cause = e.getCause();
+            lastStatus.getRealm().asyncExec(() -> {
+                lastStatus.setValue(Status.error(null, cause));
+            });
+            return null;
+        }).whenComplete((result, e) -> {
             observableVenvList.getRealm().asyncExec(() -> {
                 setFetching(false);
-                if (result.isSuccess()) {
-                    LOGGER.logInfo("Venv configuration applied successfully");
-                } else {
-                    LOGGER.logWarning("Venv configuration failed: " + result.getMessage());
-                }
-                if (callback != null) {
-                    callback.accept(result);
-                }
             });
         });
     }
@@ -391,5 +401,10 @@ public class VenvListViewModel {
     public void dispose() {
         disposed = true;
         workspaceProjectsMonitor.removeListener(workspaceProjectsListener);
+    }
+
+    @Override
+    public IObservableValue<IStatus> getLastStatus() {
+        return lastStatus;
     }
 }

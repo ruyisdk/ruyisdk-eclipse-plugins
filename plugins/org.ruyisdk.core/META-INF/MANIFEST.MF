@@ -12,6 +12,7 @@ Bundle-ClassPath:
  .,
  icons/
 Require-Bundle: 
+ org.eclipse.core.databinding.observable,
  org.eclipse.core.runtime,
  org.eclipse.jface,
  org.eclipse.ui.console,
@@ -22,4 +23,5 @@ Export-Package:
  org.ruyisdk.core.console,
  org.ruyisdk.core.exception,
  org.ruyisdk.core.ruyi.model,
- org.ruyisdk.core.util
+ org.ruyisdk.core.util,
+ org.ruyisdk.core.util.dialog

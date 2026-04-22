@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
@@ -17,6 +17,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.progress.IProgressConstants;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.venv.Activator;
 
@@ -218,20 +219,25 @@ public class VenvConfigurationService {
     }
 
     /** Applies the venv configuration to the project asynchronously. */
-    public void applyToProjectAsync(Venv venv, Consumer<ApplyResult> callback) {
-        final var applyJob = Job.create("Applying venv configuration to CDT project", monitor -> {
+    public CompletableFuture<ApplyResult> applyToProjectAsync(Venv venv) {
+        final var future = new CompletableFuture<ApplyResult>();
+        final var job = Job.create("Applying venv configuration to CDT project", monitor -> {
             try {
                 final var result = applyToProject(venv);
-                callback.accept(result);
-                return result.isSuccess() ? Status.OK_STATUS : Status.warning(result.getMessage());
+                if (!result.isSuccess()) {
+                    throw new RuntimeException(result.getMessage());
+                }
+                future.complete(result);
+                return Status.OK_STATUS;
             } catch (Exception e) {
-                final var msg = "Failed to apply venv configuration";
-                LOGGER.logError(msg, e);
-                callback.accept(new ApplyResult(false, msg));
-                return Status.CANCEL_STATUS; // avoid Eclipse error dialog
+                future.completeExceptionally(e);
+                return Status.error("Failed to apply venv configuration", e);
             }
         });
-        applyJob.schedule();
+        // no error dialog
+        job.setProperty(IProgressConstants.NO_IMMEDIATE_ERROR_PROMPT_PROPERTY, Boolean.TRUE);
+        job.schedule();
+        return future;
     }
 
     /** Finds a project by its file system path, using normalized path comparison. */
