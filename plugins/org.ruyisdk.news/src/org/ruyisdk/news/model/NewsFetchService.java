@@ -23,6 +23,7 @@ public class NewsFetchService {
             try {
                 final var result = RuyiCli.readNewsItem(id);
                 if (result == null || result.getContent() == null) {
+                    // TODO: do not use runtimeException.
                     throw new RuntimeException("News item not found, id=" + id);
                 }
                 LOGGER.logInfo("Fetched news details, id=" + id);

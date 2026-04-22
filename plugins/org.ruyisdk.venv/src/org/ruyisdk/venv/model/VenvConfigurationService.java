@@ -225,6 +225,7 @@ public class VenvConfigurationService {
             try {
                 final var result = applyToProject(venv);
                 if (!result.isSuccess()) {
+                    // TODO: do not use runtimeException.
                     throw new RuntimeException(result.getMessage());
                 }
                 future.complete(result);
