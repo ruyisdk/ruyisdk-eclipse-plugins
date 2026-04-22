@@ -12,7 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.progress.IProgressConstants;
 import org.ruyisdk.core.exception.RuyiConfigException;
 import org.ruyisdk.core.util.PluginLogger;
 import org.ruyisdk.ruyi.services.RuyiCli;
@@ -138,35 +139,32 @@ public class VenvDetectionService {
         return out;
     }
 
-    /**
-     * Detects project venvs asynchronously for the provided project roots and passes them to the
-     * callback.
-     */
-    public void detectProjectVenvsAsync(List<String> projectRootPaths,
-            Consumer<List<Venv>> callback) {
-        final var detectJob = Job.create("Detecting virtual environments", monitor -> {
+    /** Detects project venvs asynchronously for the provided project roots. */
+    public CompletableFuture<List<Venv>> detectProjectVenvsAsync(List<String> projectRootPaths) {
+        final var future = new CompletableFuture<List<Venv>>();
+        final var job = Job.create("Detecting virtual environments", monitor -> {
             LOGGER.logInfo("Detecting project venvs (async)");
-
             try {
                 final var projectPaths = toPathList(projectRootPaths);
                 final var result = detectProjectVenvs(projectPaths);
                 LOGGER.logInfo("Project venv detection finished: count=" + result.size());
-                callback.accept(result);
+                future.complete(result);
                 return Status.OK_STATUS;
             } catch (Exception e) {
+                future.completeExceptionally(e);
                 return Status.error("Failed to detect project venvs", e);
             }
         });
-        detectJob.schedule();
+        // no error dialog
+        job.setProperty(IProgressConstants.NO_IMMEDIATE_ERROR_PROMPT_PROPERTY, Boolean.TRUE);
+        job.schedule();
+        return future;
     }
 
-    /**
-     * Deletes venv directories asynchronously and reports completion or errors through the
-     * callback.
-     */
-    public void deleteVenvDirectoriesAsync(List<String> venvDirectoryPaths,
-            Consumer<Exception> callback) {
-        final var deleteJob = Job.create("Deleting virtual environments", monitor -> {
+    /** Deletes venv directories asynchronously. */
+    public CompletableFuture<Void> deleteVenvDirectoriesAsync(List<String> venvDirectoryPaths) {
+        final var future = new CompletableFuture<Void>();
+        final var job = Job.create("Deleting virtual environments", monitor -> {
             LOGGER.logInfo("Deleting venv directories: count="
                     + (venvDirectoryPaths == null ? 0 : venvDirectoryPaths.size()));
             try {
@@ -176,18 +174,20 @@ public class VenvDetectionService {
                         LOGGER.logInfo("Deleting venv directory: path=" + dir);
                         deleteDirectoryRecursively(dir);
                     }
-
                     refreshWorkspaceProjects(monitor);
                 }
                 LOGGER.logInfo("Venv directories deletion finished");
-                callback.accept(null);
+                future.complete(null);
                 return Status.OK_STATUS;
             } catch (Exception e) {
-                callback.accept(e);
-                return Status.CANCEL_STATUS; // avoid Eclipse error dialog
+                future.completeExceptionally(e);
+                return Status.error("Failed to delete venv directories", e);
             }
         });
-        deleteJob.schedule();
+        // no error dialog
+        job.setProperty(IProgressConstants.NO_IMMEDIATE_ERROR_PROMPT_PROPERTY, Boolean.TRUE);
+        job.schedule();
+        return future;
     }
 
     private static final class DetectedVenvConfig {

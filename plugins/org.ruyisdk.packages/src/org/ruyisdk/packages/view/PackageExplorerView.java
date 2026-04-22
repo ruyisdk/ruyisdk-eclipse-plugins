@@ -103,7 +103,8 @@ public class PackageExplorerView extends ViewPart {
             case PackageExplorerViewModel.PROP_ERROR:
                 final var msg = (String) evt.getNewValue();
                 if (msg != null) {
-                    MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", msg);
+                    MessageDialog.openError(Display.getDefault().getActiveShell(),
+                            "Package Explorer", msg);
                 }
                 break;
             default:

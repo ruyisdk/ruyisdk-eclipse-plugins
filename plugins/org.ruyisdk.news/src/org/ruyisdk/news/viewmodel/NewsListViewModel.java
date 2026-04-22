@@ -7,13 +7,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.observable.value.WritableValue;
+import org.eclipse.core.runtime.IStatus;
+import org.ruyisdk.core.util.dialog.IDialogStatusProvider;
 import org.ruyisdk.news.model.NewsFetchService;
 import org.ruyisdk.news.model.NewsItem;
 
 /**
  * View model for the news list view.
  */
-public class NewsListViewModel {
+public class NewsListViewModel implements IDialogStatusProvider {
     private boolean isFetching = false;
     private String infoText = UpdatingState.notUpdated;
 
@@ -22,6 +26,7 @@ public class NewsListViewModel {
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private final IObservableList<NewsItem> observableNewsList =
             new WritableList<>(new ArrayList<>(), NewsItem.class);
+    private final IObservableValue<IStatus> lastStatus = new WritableValue<>(null, IStatus.class);
 
     private class UpdatingState {
         private static final String notUpdated = "Not Updated, yet";
@@ -114,7 +119,7 @@ public class NewsListViewModel {
         setFetching(true);
         setInfoText(UpdatingState.updating);
 
-        service.fetchNewsListAsync(result -> {
+        service.fetchNewsListAsync().thenAccept(result -> {
             observableNewsList.getRealm().asyncExec(() -> {
                 observableNewsList.clear();
                 if (result != null) {
@@ -125,7 +130,22 @@ public class NewsListViewModel {
                     setInfoText(UpdatingState.updateFailed);
                 }
             });
+        }).exceptionally(e -> {
+            // unwrap CompletionException
+            final var cause = e.getCause();
+            observableNewsList.getRealm().asyncExec(() -> {
+                observableNewsList.clear();
+                setInfoText(UpdatingState.updateFailed);
+                lastStatus.setValue(org.eclipse.core.runtime.Status.error(null, cause));
+            });
+            return null;
+        }).whenComplete((result, e) -> {
             setFetching(false);
         });
+    }
+
+    @Override
+    public IObservableValue<IStatus> getLastStatus() {
+        return lastStatus;
     }
 }

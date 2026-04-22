@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
+import org.ruyisdk.core.util.dialog.DialogBinder;
 import org.ruyisdk.news.Activator;
 import org.ruyisdk.news.model.NewsItem;
 import org.ruyisdk.news.viewmodel.NewsDetailsViewModel;
@@ -263,6 +264,8 @@ public class NewsView extends ViewPart {
                         }
                     });
         }
+
+        DialogBinder.bind(getSite().getShell(), newsListViewModel, "News");
     }
 
     private void toggleDetailControls(Boolean isShow) {

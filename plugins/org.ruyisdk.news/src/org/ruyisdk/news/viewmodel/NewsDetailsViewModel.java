@@ -49,18 +49,27 @@ public class NewsDetailsViewModel {
         selected.setDetailsHtml(MarkdownRenderer.renderToHtml("*fetching news details...*"));
         isFetching = true;
 
-        service.fetchNewsDetailsAsync(selected.getId(), result -> {
-            isFetching = false;
+        service.fetchNewsDetailsAsync(selected.getId()).thenAccept(result -> {
             final var markdown = result == null ? "" : result;
             selected.setDetails(markdown);
             selected.setDetailsHtml(MarkdownRenderer.renderToHtml(markdown));
             selected.setDetailsFetched(true);
-        }, result -> {
-            isFetching = false;
-            final var errorMarkdown = "*failed to fetch news details: " + result + "*";
-            selected.setDetails(errorMarkdown);
-            selected.setDetailsHtml(MarkdownRenderer.renderToHtml(errorMarkdown));
+        }).exceptionally(e -> {
+            // unwrap CompletionException
+            final var cause = e.getCause();
+            final var markdown = String.format("""
+                *failed to fetch news details*
+
+                %s
+
+                See the \"Error Log\" view for details.
+                """, cause.getMessage());
+            selected.setDetails(markdown);
+            selected.setDetailsHtml(MarkdownRenderer.renderToHtml(markdown));
             selected.setDetailsFetched(false);
+            return null;
+        }).whenComplete((result, e) -> {
+            isFetching = false;
         });
     }
 }

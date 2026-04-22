@@ -33,22 +33,6 @@ public class PluginException extends RuntimeException {
      * @param cause the underlying cause
      */
     protected PluginException(String message, Throwable cause) {
-        super(makeMessage(message, cause), cause);
-    }
-
-    private static String makeMessage(String message, Throwable cause) {
-        if (cause == null) {
-            return message;
-        }
-        final var exType = cause.getClass().getSimpleName();
-        final var exMsg = cause.getMessage();
-        if (exMsg != null) {
-            return String.format("""
-                %s
-                %s: %s""", message, exType, exMsg);
-        }
-        return String.format("""
-            %s
-            %s""", message, exType);
+        super(message, cause);
     }
 }
