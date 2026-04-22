@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: RuyiSDK Project Creator
+Bundle-Name: RuyiSDK Plugin - Project Creator
 Bundle-SymbolicName: org.ruyisdk.projectcreator;singleton:=true
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS

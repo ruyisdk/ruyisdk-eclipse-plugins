@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Core
+Bundle-Name: RuyiSDK Plugin - Core
 Bundle-SymbolicName: org.ruyisdk.core;singleton:=true
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
