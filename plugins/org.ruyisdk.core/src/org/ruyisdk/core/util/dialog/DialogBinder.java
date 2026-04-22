@@ -38,11 +38,18 @@ public class DialogBinder {
                 final var spec = constructSpec(s);
 
                 shell.getDisplay().asyncExec(() -> {
-                    try {
-                        PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-                                .showView("org.eclipse.pde.runtime.LogView");
-                    } catch (PartInitException e) {
-                        // ignore
+                    {
+                        final var window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+                        if (window != null) {
+                            final var page = window.getActivePage();
+                            if (page != null) {
+                                try {
+                                    page.showView("org.eclipse.pde.runtime.LogView");
+                                } catch (PartInitException e) {
+                                    // ignore
+                                }
+                            }
+                        }
                     }
                     MessageDialog.open(spec.kind, shell, title, spec.message, SWT.NONE);
                 });
