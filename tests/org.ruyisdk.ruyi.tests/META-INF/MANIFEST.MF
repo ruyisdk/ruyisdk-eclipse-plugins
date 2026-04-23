@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RuyiSDK Plugin - Tests
 Bundle-SymbolicName: org.ruyisdk.ruyi.tests
-Bundle-Version: 0.1.2.qualifier
+Bundle-Version: 0.1.3.qualifier
 Bundle-Vendor: ISCAS
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.ruyisdk.ruyi.tests
