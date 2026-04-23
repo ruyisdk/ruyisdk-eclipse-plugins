@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Ui
+Bundle-Name: RuyiSDK Plugin - Ui
 Bundle-SymbolicName: org.ruyisdk.ui
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS

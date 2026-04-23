@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Ruyi Tests
+Bundle-Name: RuyiSDK Plugin - Tests
 Bundle-SymbolicName: org.ruyisdk.ruyi.tests
 Bundle-Version: 0.1.2.qualifier
 Bundle-Vendor: ISCAS
