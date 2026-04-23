@@ -70,7 +70,7 @@ public class DeviceSelectionViewModel extends BaseViewModel {
      * Replace the current device snapshot and refresh status text.
      *
      * <p>
-     * If the previously selected device is no longer present, selection is cleared.
+     * Always clear the selection.
      */
     public void refreshDevices(List<DeviceEntityInfo> newDevices, String newErrorMessage) {
         devices = List.copyOf(newDevices);
