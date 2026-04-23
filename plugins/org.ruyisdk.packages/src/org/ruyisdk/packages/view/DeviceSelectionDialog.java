@@ -2,6 +2,7 @@ package org.ruyisdk.packages.view;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -34,9 +35,11 @@ import org.ruyisdk.ruyi.model.DeviceEntityInfo;
 public class DeviceSelectionDialog extends Dialog {
 
     private static final int CLEAR_ID = IDialogConstants.CLIENT_ID + 1;
+    private static final int REFRESH_ID = IDialogConstants.CLIENT_ID + 2;
 
     private final DeviceSelectionViewModel viewModel;
     private final BiConsumer<DeviceEntityInfo, Runnable> onConfirm;
+    private final Consumer<Runnable> onRefresh;
 
     private TableViewer tableViewer;
     private Text statusText;
@@ -50,12 +53,15 @@ public class DeviceSelectionDialog extends Dialog {
      * @param viewModel the device-selection ViewModel
      * @param onConfirm callback invoked on OK: {@code (selectedDevice, onDone)}. The caller must
      *        invoke {@code onDone} (on the UI thread) to close the dialog.
+     * @param onRefresh callback invoked on Refresh; caller should reload devices then invoke
+     *        {@code onDone} on the UI thread
      */
     public DeviceSelectionDialog(Shell parentShell, DeviceSelectionViewModel viewModel,
-            BiConsumer<DeviceEntityInfo, Runnable> onConfirm) {
+            BiConsumer<DeviceEntityInfo, Runnable> onConfirm, Consumer<Runnable> onRefresh) {
         super(parentShell);
         this.viewModel = viewModel;
         this.onConfirm = onConfirm;
+        this.onRefresh = onRefresh;
     }
 
     @Override
@@ -227,6 +233,7 @@ public class DeviceSelectionDialog extends Dialog {
 
     @Override
     protected void createButtonsForButtonBar(Composite parent) {
+        createButton(parent, REFRESH_ID, "Refresh", false);
         createButton(parent, CLEAR_ID, "Clear", false);
         createButton(parent, CANCEL, "Cancel", false);
         createButton(parent, OK, "OK", true);
@@ -248,12 +255,39 @@ public class DeviceSelectionDialog extends Dialog {
         }
     }
 
+    private void refreshDevices() {
+        tableViewer.getTable().setEnabled(false);
+        getButton(REFRESH_ID).setEnabled(false);
+        getButton(CLEAR_ID).setEnabled(false);
+        getButton(OK).setEnabled(false);
+        statusText.setText("Refreshing devices...");
+
+        onRefresh.accept(() -> {
+            if (getShell() == null || getShell().isDisposed()) {
+                return;
+            }
+
+            tableViewer.setInput(viewModel.getDevices());
+            tableViewer.refresh();
+
+            statusText.setText(viewModel.getStatusText());
+            tableViewer.getTable().setEnabled(true);
+            getButton(REFRESH_ID).setEnabled(true);
+            getButton(OK).setEnabled(viewModel.hasDevices());
+            getButton(CLEAR_ID).setEnabled(viewModel.getSelectedDevice() != null);
+        });
+    }
+
     @Override
     protected void buttonPressed(int buttonId) {
+        if (buttonId == REFRESH_ID) {
+            refreshDevices();
+            return;
+        }
         if (buttonId == CLEAR_ID) {
             tableViewer.setSelection(StructuredSelection.EMPTY);
-        } else {
-            super.buttonPressed(buttonId);
+            return;
         }
+        super.buttonPressed(buttonId);
     }
 }

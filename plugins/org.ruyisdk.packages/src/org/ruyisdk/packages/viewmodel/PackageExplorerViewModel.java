@@ -94,7 +94,13 @@ public class PackageExplorerViewModel extends BaseViewModel {
     public void initialize() {
         loadPackagesAsync(() -> {
         });
-        loadDevicesAsync();
+        loadDevicesAsync(() -> {
+        });
+    }
+
+    /** Reload available devices. */
+    public void refreshDevices(Runnable onLoaded) {
+        loadDevicesAsync(onLoaded);
     }
 
     /** Reload the package list for the currently chosen device. */
@@ -238,18 +244,27 @@ public class PackageExplorerViewModel extends BaseViewModel {
         job.schedule();
     }
 
-    private void loadDevicesAsync() {
+    private void loadDevicesAsync(Runnable onFinished) {
         final var job = Job.create("Loading device entities", monitor -> {
+            if (monitor.isCanceled()) {
+                uiExecutor.accept(onFinished);
+                return Status.CANCEL_STATUS;
+            }
+
             try {
                 final var fetched = DeviceList.loadDevices();
                 uiExecutor.accept(() -> {
                     setDevices(fetched);
                     setDeviceListErrorMessage(null);
+                    onFinished.run();
                 });
                 return Status.OK_STATUS;
             } catch (Exception e) {
                 final var msg = e.getMessage();
-                uiExecutor.accept(() -> setDeviceListErrorMessage(msg));
+                uiExecutor.accept(() -> {
+                    setDeviceListErrorMessage(msg);
+                    onFinished.run();
+                });
                 return Status.error("Failed to load device data: " + msg, e);
             }
         });

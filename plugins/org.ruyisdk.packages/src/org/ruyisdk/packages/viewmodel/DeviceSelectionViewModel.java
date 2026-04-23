@@ -7,17 +7,18 @@ import org.ruyisdk.ruyi.model.DeviceEntityInfo;
  * ViewModel for the device-selection dialog.
  *
  * <p>
- * Receives an immutable snapshot of the device list and tracks the user's selection. The dialog
- * reads properties from this ViewModel and forwards user-selection changes back into it; it never
- * touches the main {@link PackageExplorerViewModel} directly.
+ * Receives an initial snapshot of the device list, tracks the user's selection, and can refresh its
+ * snapshot after a reload. The dialog reads properties from this ViewModel and forwards
+ * user-selection changes back into it; it never touches the main {@link PackageExplorerViewModel}
+ * directly.
  */
 public class DeviceSelectionViewModel extends BaseViewModel {
 
     public static final String PROP_SELECTED_DEVICE = "selectedDevice";
     public static final String PROP_STATUS_TEXT = "statusText";
 
-    private final List<DeviceEntityInfo> devices;
-    private final String errorMessage;
+    private List<DeviceEntityInfo> devices;
+    private String errorMessage;
     private DeviceEntityInfo selectedDevice;
 
     /**
@@ -63,6 +64,21 @@ public class DeviceSelectionViewModel extends BaseViewModel {
     /** Whether devices are available. */
     public boolean hasDevices() {
         return !devices.isEmpty();
+    }
+
+    /**
+     * Replace the current device snapshot and refresh status text.
+     *
+     * <p>
+     * If the previously selected device is no longer present, selection is cleared.
+     */
+    public void refreshDevices(List<DeviceEntityInfo> newDevices, String newErrorMessage) {
+        devices = List.copyOf(newDevices);
+        errorMessage = newErrorMessage;
+
+        clearSelection();
+
+        firePropertyChange(PROP_STATUS_TEXT, null, getStatusText());
     }
 
     /** Build the status text from the current state. */

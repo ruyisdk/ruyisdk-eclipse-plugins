@@ -196,7 +196,12 @@ public class PackageExplorerView extends ViewPart {
         final var dialogVm = new DeviceSelectionViewModel(viewModel.getDevices(),
                 viewModel.getChosenDevice(), viewModel.getDeviceListErrorMessage());
         final var dialog = new DeviceSelectionDialog(parentShell, dialogVm,
-                (device, onDone) -> viewModel.setChosenDeviceAndReload(device, onDone));
+                (device, onDone) -> viewModel.setChosenDeviceAndReload(device, onDone),
+                onDone -> viewModel.refreshDevices(() -> {
+                    dialogVm.refreshDevices(viewModel.getDevices(),
+                            viewModel.getDeviceListErrorMessage());
+                    onDone.run();
+                }));
         dialog.open();
     }
 
