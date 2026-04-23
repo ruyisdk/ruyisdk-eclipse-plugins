@@ -89,8 +89,14 @@ jobs:
           set -ex
           set -o pipefail
 
-          echo "::notice:: Now, remove the existing release of the tag '$ver_num' in 60 seconds if this workflow run is triggered by creating releases on GitHub Web UI."
-          sleep 60
+          tag_name="v$ver_num"
+
+          echo "::notice:: Now, remove the existing release of the tag '$tag_name' if this workflow run is triggered by creating releases on GitHub Web UI."
+          # https://cli.github.com/manual/gh_release
+          while gh release view "$tag_name" >/dev/null; do
+            echo "::notice::   the release '$tag_name' is still there"
+            sleep 5
+          done
 
           # "0.1.0-SNAPSHOT"
           current_ver="$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)"
@@ -229,10 +235,10 @@ jobs:
           set -ex
 
           # https://cli.github.com/manual/gh_release
-          if gh release view 'continuous'; then
+          if gh release view 'continuous' >/dev/null; then
             gh release delete 'continuous' --cleanup-tag --yes
 
-            while gh release view 'continuous'; do
+            while gh release view 'continuous' >/dev/null; do
               echo 'the release is still there'
               sleep 5
             done
