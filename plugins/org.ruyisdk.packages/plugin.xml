@@ -12,4 +12,18 @@
             class="org.ruyisdk.packages.view.PackageExplorerView"
             category="org.ruyisdk.packages.category"/>
     </extension>
+
+    <extension point="org.eclipse.ui.menus">
+        <menuContribution
+            locationURI="menu:org.ruyisdk.ruyi.menus.main?after=additions">
+            <command
+                commandId="org.eclipse.ui.views.showView"
+                label="Package Explorer"
+                tooltip="Open Ruyi Package Explorer view">
+                <parameter
+                    name="org.eclipse.ui.views.showView.viewId"
+                    value="org.ruyisdk.packages.view" />
+            </command>
+        </menuContribution>
+    </extension>
 </plugin>
