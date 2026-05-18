@@ -12,5 +12,6 @@ Require-Bundle:
  org.ruyisdk.core,
  org.ruyisdk.packages,
  org.ruyisdk.ruyi,
+ org.ruyisdk.venv,
  json,
  wrapped.org.hamcrest.hamcrest-core

@@ -42,7 +42,6 @@ public class VenvView extends ViewPart {
     private Composite tableComposite;
     private Composite buttonBar;
 
-    private Button absPathCheckBox;
     private TableViewer tableViewer;
     private Label tableAreaMessageLabel;
     private Button refreshButton;
@@ -101,11 +100,6 @@ public class VenvView extends ViewPart {
         headerLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         headerLabel.setText("Detected virtual environments in open projects:");
 
-        absPathCheckBox = new Button(header, SWT.CHECK);
-        absPathCheckBox.setText("Show absolute path");
-        absPathCheckBox.setEnabled(false);
-        absPathCheckBox.setSelection(true);
-
         // table
         {
             tableViewer =
@@ -113,23 +107,23 @@ public class VenvView extends ViewPart {
             final var tableColumnLayout = new TableColumnLayout();
             {
                 final var column = new TableViewerColumn(tableViewer, SWT.LEFT);
+                column.getColumn().setText("Project");
+                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(20));
+            }
+            {
+                final var column = new TableViewerColumn(tableViewer, SWT.LEFT);
+                column.getColumn().setText("Venv Path");
+                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(30));
+            }
+            {
+                final var column = new TableViewerColumn(tableViewer, SWT.LEFT);
                 column.getColumn().setText("Profile");
-                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(15, 120));
+                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(20));
             }
             {
                 final var column = new TableViewerColumn(tableViewer, SWT.LEFT);
                 column.getColumn().setText("Toolchain Prefix");
-                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(20, 180));
-            }
-            {
-                final var column = new TableViewerColumn(tableViewer, SWT.LEFT);
-                column.getColumn().setText("Sysroot");
-                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(30, 250));
-            }
-            {
-                final var column = new TableViewerColumn(tableViewer, SWT.LEFT);
-                column.getColumn().setText("Project Path");
-                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(35, 300));
+                tableColumnLayout.setColumnData(column.getColumn(), new ColumnWeightData(30));
             }
             tableComposite.setLayout(tableColumnLayout);
 
@@ -139,8 +133,33 @@ public class VenvView extends ViewPart {
             final var contentProvider = new ObservableListContentProvider<Venv>();
             tableViewer.setContentProvider(contentProvider);
             tableViewer.setLabelProvider(new ObservableMapLabelProvider(Properties.observeEach(
-                    contentProvider.getKnownElements(), BeanProperties.values(Venv.class, "profile",
-                            "toolchainPrefix", "sysroot", "projectPath"))));
+                    contentProvider.getKnownElements(), BeanProperties.values(Venv.class,
+                            "projectPath", "path", "profile", "toolchainPrefix"))) {
+                @Override
+                public String getColumnText(Object element, int columnIndex) {
+                    if (!(element instanceof Venv)) {
+                        return super.getColumnText(element, columnIndex);
+                    }
+                    final var venv = (Venv) element;
+                    if (columnIndex == 0) {
+                        // Project
+                        return VenvListViewModel.getDisplayProjectName(venv);
+                    }
+                    if (columnIndex == 1) {
+                        // Venv Path
+                        return VenvListViewModel.getDisplayPath(venv);
+                    }
+                    if (columnIndex == 2) {
+                        // Profile
+                        return venv.getProfile();
+                    }
+                    if (columnIndex == 3) {
+                        // Toolchain Prefix
+                        return venv.getToolchainPrefix();
+                    }
+                    return super.getColumnText(element, columnIndex);
+                }
+            });
 
             tableViewer.setInput(venvListViewModel.getVenvList());
         }

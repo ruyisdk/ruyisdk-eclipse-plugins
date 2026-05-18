@@ -2,6 +2,7 @@ package org.ruyisdk.venv.viewmodel;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -406,5 +407,69 @@ public class VenvListViewModel implements IDialogStatusProvider {
     @Override
     public IObservableValue<IStatus> getLastStatus() {
         return lastStatus;
+    }
+
+    /**
+     * Returns the project name text for table display.
+     *
+     * @param venv the venv row
+     * @return display text for the project name column
+     */
+    public static String getDisplayProjectName(Venv venv) {
+        return toDisplayProjectName(venv);
+    }
+
+    /**
+     * Returns the relative venv path text for table display.
+     *
+     * @param venv the venv row
+     * @return display text for the path column
+     */
+    public static String getDisplayPath(Venv venv) {
+        return toDisplayRelativePath(venv);
+    }
+
+    /**
+     * Creates display text for the project name column.
+     *
+     * @param venv the venv row
+     * @return display text for the project name column
+     */
+    public static String toDisplayProjectName(Venv venv) {
+        if (venv == null) {
+            return "";
+        }
+
+        return Path.of(venv.getProjectPath().trim()).getFileName().toString();
+    }
+
+    /**
+     * Creates display text for the path column.
+     *
+     * @param venv the venv row
+     * @return relative path display text
+     */
+    public static String toDisplayRelativePath(Venv venv) {
+        if (venv == null) {
+            return "";
+        }
+
+        final var venvPath = venv.getPath();
+        if (venvPath == null || venvPath.isBlank()) {
+            return "";
+        }
+
+        final var relativePath = Path.of(venv.getProjectPath().trim()).relativize(Path.of(venvPath))
+                .toString().replace('\\', '/');
+        if (relativePath.isEmpty()) {
+            return "./";
+        }
+        if (relativePath.equals("..") || relativePath.startsWith("../")) {
+            return relativePath;
+        }
+        if (relativePath.startsWith("./")) {
+            return relativePath;
+        }
+        return "./" + relativePath;
     }
 }
