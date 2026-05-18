@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -30,6 +31,48 @@ import org.ruyisdk.venv.Activator;
 public class VenvDetectionService {
     private static final String VENV_CONFIG_FILE_NAME = "ruyi-venv.toml";
     private static final PluginLogger LOGGER = Activator.getLogger();
+    private final List<VenvInventoryListener> inventoryListeners = new CopyOnWriteArrayList<>();
+
+    /** Listener notified when venv inventory changes (create/delete). */
+    @FunctionalInterface
+    public interface VenvInventoryListener {
+        /** Called after venv inventory has changed successfully. */
+        void onVenvInventoryChanged();
+    }
+
+    /**
+     * Registers a venv inventory listener.
+     *
+     * @param listener listener to register
+     */
+    public void addVenvInventoryListener(VenvInventoryListener listener) {
+        if (listener == null) {
+            return;
+        }
+        inventoryListeners.add(listener);
+    }
+
+    /**
+     * Unregisters a venv inventory listener.
+     *
+     * @param listener listener to unregister
+     */
+    public void removeVenvInventoryListener(VenvInventoryListener listener) {
+        if (listener == null) {
+            return;
+        }
+        inventoryListeners.remove(listener);
+    }
+
+    private void notifyVenvInventoryChanged() {
+        for (final var listener : inventoryListeners) {
+            try {
+                listener.onVenvInventoryChanged();
+            } catch (RuntimeException e) {
+                LOGGER.logWarning("Ignoring venv inventory listener exception", e);
+            }
+        }
+    }
 
     /** Returns unique venv directory paths from the given venv list. */
     public List<String> getVenvDirectoryPathsFromVenvs(List<Venv> venvs) {
@@ -96,6 +139,7 @@ public class VenvDetectionService {
         RuyiCli.createVenv(path, toolchainName, toolchainVersion, profile, emulatorName,
                 emulatorVersion);
         refreshWorkspaceProjects(null);
+        notifyVenvInventoryChanged();
         LOGGER.logInfo("Venv creation finished: path=" + path);
     }
 
@@ -175,6 +219,7 @@ public class VenvDetectionService {
                         deleteDirectoryRecursively(dir);
                     }
                     refreshWorkspaceProjects(monitor);
+                    notifyVenvInventoryChanged();
                 }
                 LOGGER.logInfo("Venv directories deletion finished");
                 future.complete(null);

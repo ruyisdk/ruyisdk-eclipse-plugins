@@ -63,6 +63,16 @@ public class VenvView extends ViewPart {
         updateTableAreaState(false);
 
         // initial data load
+        refreshVenvListAsync();
+    }
+
+    /**
+     * Triggers an asynchronous refresh of the venv list in this view.
+     */
+    private void refreshVenvListAsync() {
+        if (venvListViewModel == null) {
+            return;
+        }
         venvListViewModel.onRefreshVenvListAsync();
     }
 
@@ -210,7 +220,7 @@ public class VenvView extends ViewPart {
         refreshButton.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                venvListViewModel.onRefreshVenvListAsync();
+                refreshVenvListAsync();
             }
         });
 
@@ -280,9 +290,7 @@ public class VenvView extends ViewPart {
                 wizardViewModel.setProjectRootPaths(venvListViewModel.getOpenProjectRootPaths());
                 final var dialog =
                         new WizardDialog(container.getShell(), new VenvWizard(wizardViewModel));
-                if (dialog.open() == WizardDialog.OK) {
-                    venvListViewModel.onRefreshVenvListAsync();
-                }
+                dialog.open();
             }
         });
 

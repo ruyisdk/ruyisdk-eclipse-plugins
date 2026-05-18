@@ -13,6 +13,26 @@
             category="org.ruyisdk.venv.category"/>
     </extension>
 
+    <extension point="org.eclipse.ui.commands">
+        <command
+            id="org.ruyisdk.venv.commands.newProjectVenv"
+            name="New Venv"
+            description="Create a venv under the selected project"/>
+        <command
+            id="org.ruyisdk.venv.commands.applyProjectVenv"
+            name="Apply venv"
+            description="Apply a venv to the selected project"/>
+    </extension>
+
+    <extension point="org.eclipse.ui.handlers">
+        <handler
+            class="org.ruyisdk.venv.handlers.NewProjectVenvHandler"
+            commandId="org.ruyisdk.venv.commands.newProjectVenv"/>
+        <handler
+            class="org.ruyisdk.venv.handlers.ApplyProjectVenvHandler"
+            commandId="org.ruyisdk.venv.commands.applyProjectVenv"/>
+    </extension>
+
     <extension point="org.eclipse.ui.menus">
         <menuContribution
             locationURI="menu:org.ruyisdk.ruyi.menus.main?after=additions">
@@ -24,6 +44,32 @@
                     name="org.eclipse.ui.views.showView.viewId"
                     value="org.ruyisdk.venv.view" />
             </command>
+        </menuContribution>
+
+        <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+            <menu
+                id="org.ruyisdk.venv.menu.projectContext"
+                label="RuyiSDK">
+                <visibleWhen checkEnabled="false">
+                    <with variable="selection">
+                        <count value="1"/>
+                        <iterate ifEmpty="false">
+                            <adapt type="org.eclipse.core.resources.IProject">
+                                <test
+                                    property="org.eclipse.core.resources.open"
+                                    value="true"/>
+                            </adapt>
+                        </iterate>
+                    </with>
+                </visibleWhen>
+                <command
+                    commandId="org.ruyisdk.venv.commands.newProjectVenv"
+                    label="New Venv..."/>
+                <command
+                    commandId="org.ruyisdk.venv.commands.applyProjectVenv"
+                    label="Apply venv..."/>
+            </menu>
         </menuContribution>
     </extension>
 </plugin>

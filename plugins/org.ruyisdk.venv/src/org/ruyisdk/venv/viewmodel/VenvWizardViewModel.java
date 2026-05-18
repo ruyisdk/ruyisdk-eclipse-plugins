@@ -40,6 +40,7 @@ public class VenvWizardViewModel {
     private boolean emulatorEnabled = false;
     private SysrootOption sysrootOption = SysrootOption.DEFAULT_SYSROOT;
     private String venvLocation = "";
+    private boolean venvLocationReadOnly = false;
     private String venvName = "";
     private final IObservableList<String> projectRootPaths =
             new WritableList<>(new ArrayList<>(), String.class);
@@ -443,6 +444,18 @@ public class VenvWizardViewModel {
         final var old = this.venvLocation;
         this.venvLocation = location == null ? "" : location;
         pcs.firePropertyChange("venvLocation", old, this.venvLocation);
+    }
+
+    /** Returns whether the venv parent directory can be edited by users. */
+    public boolean isVenvLocationReadOnly() {
+        return venvLocationReadOnly;
+    }
+
+    /** Sets whether the venv parent directory can be edited by users. */
+    public void setVenvLocationReadOnly(boolean readOnly) {
+        final var old = this.venvLocationReadOnly;
+        this.venvLocationReadOnly = readOnly;
+        pcs.firePropertyChange("venvLocationReadOnly", old, this.venvLocationReadOnly);
     }
 
     /** Returns the list of project root paths. */

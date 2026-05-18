@@ -68,6 +68,22 @@ public class VenvListViewModel implements IDialogStatusProvider {
             }
         });
     };
+    private final VenvDetectionService.VenvInventoryListener venvInventoryListener = () -> {
+        if (disposed) {
+            return;
+        }
+        observableVenvList.getRealm().asyncExec(() -> {
+            if (disposed) {
+                return;
+            }
+            if (fetching) {
+                setRefreshScheduled(true);
+                updateDerivedState();
+                return;
+            }
+            onRefreshVenvListAsync();
+        });
+    };
 
     /**
      * Creates a new view model.
@@ -82,6 +98,7 @@ public class VenvListViewModel implements IDialogStatusProvider {
 
         this.workspaceProjectsMonitor = WorkspaceProjectsMonitor.getInstance();
         this.workspaceProjectsMonitor.addListener(workspaceProjectsListener);
+        this.detectionService.addVenvInventoryListener(venvInventoryListener);
 
         selectedVenvs.addListChangeListener(e -> {
             updateActionStates();
@@ -170,8 +187,16 @@ public class VenvListViewModel implements IDialogStatusProvider {
         this.fetching = isFetching;
         if (this.fetching) {
             setRefreshScheduled(false);
+            updateDerivedState();
+            return;
         }
+
         updateDerivedState();
+
+        if (refreshScheduled) {
+            onRefreshVenvListAsync();
+            return;
+        }
     }
 
     private void setHasOpenProjects(boolean hasOpenProjects) {
@@ -289,11 +314,7 @@ public class VenvListViewModel implements IDialogStatusProvider {
         }
 
         setFetching(true);
-        detectionService.deleteVenvDirectoriesAsync(venvPaths).thenAccept(v -> {
-            observableVenvList.getRealm().asyncExec(() -> {
-                onRefreshVenvListAsync();
-            });
-        }).exceptionally(e -> {
+        detectionService.deleteVenvDirectoriesAsync(venvPaths).exceptionally(e -> {
             // unwrap CompletionException
             final var cause = e.getCause();
             lastStatus.getRealm().asyncExec(() -> {
@@ -401,6 +422,7 @@ public class VenvListViewModel implements IDialogStatusProvider {
      */
     public void dispose() {
         disposed = true;
+        detectionService.removeVenvInventoryListener(venvInventoryListener);
         workspaceProjectsMonitor.removeListener(workspaceProjectsListener);
     }
 
