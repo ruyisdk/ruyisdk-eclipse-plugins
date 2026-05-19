@@ -79,6 +79,7 @@ public final class RuyiCliExecutor {
         {
             final var processEnvironment = processBuilder.environment();
             applyDefaultLocaleEnvironment(processEnvironment);
+            applyDefaultPythonEnvironment(processEnvironment);
             if (environment != null && !environment.isEmpty()) {
                 processEnvironment.putAll(environment);
             }
@@ -99,6 +100,14 @@ public final class RuyiCliExecutor {
         for (final var envKey : LOCALE_ENV_KEYS) {
             processEnvironment.put(envKey, DEFAULT_LOCALE);
         }
+    }
+
+    /**
+     * Set PYTHONIOENCODING to UTF-8 to avoid encoding issues when running Ruyi.
+     * https://github.com/ruyisdk/ruyisdk-eclipse-plugins/issues/154#issuecomment-4326660664
+     */
+    private static void applyDefaultPythonEnvironment(Map<String, String> processEnvironment) {
+        processEnvironment.put("PYTHONIOENCODING", "utf-8");
     }
 
     private static RuyiExecResult executeCommand(List<String> command,
