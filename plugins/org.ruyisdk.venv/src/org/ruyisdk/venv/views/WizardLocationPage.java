@@ -88,13 +88,32 @@ public class WizardLocationPage extends WizardPage {
 
         final var locationLabel = new Label(container, SWT.NONE);
         locationLabel.setText("Venv Path:");
-        venvPathCombo = new Combo(container, SWT.BORDER | SWT.DROP_DOWN);
+        final var locationReadOnly = viewModel.isVenvLocationReadOnly();
+        final var initialLocation = viewModel.getVenvLocation();
+        var comboStyle = SWT.BORDER | SWT.DROP_DOWN;
+        if (locationReadOnly) {
+            comboStyle |= SWT.READ_ONLY;
+        }
+        venvPathCombo = new Combo(container, comboStyle);
         venvPathCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        venvPathCombo.setText("");
+        if (locationReadOnly) {
+            if (initialLocation != null && !initialLocation.isBlank()) {
+                venvPathCombo.add(initialLocation);
+                venvPathCombo.select(0);
+            }
+        } else {
+            if (initialLocation != null && !initialLocation.isBlank()) {
+                venvPathCombo.setText(initialLocation);
+            } else {
+                venvPathCombo.setText("");
+            }
+        }
+        venvPathCombo.setEnabled(!locationReadOnly);
         venvPathComboViewer = new ComboViewer(venvPathCombo);
 
         browseButton = new Button(container, SWT.PUSH);
         browseButton.setText("Browse...");
+        browseButton.setEnabled(!locationReadOnly);
     }
 
     private void registerEvents() {
@@ -117,8 +136,10 @@ public class WizardLocationPage extends WizardPage {
         dbc.bindValue(WidgetProperties.text().observe(summaryText), BeanProperties
                 .value(VenvWizardViewModel.class, "summaryText", String.class).observe(viewModel));
 
-        ViewerSupport.bind(venvPathComboViewer, viewModel.getProjectRootPaths(),
-                Properties.selfValue(String.class));
+        if (!viewModel.isVenvLocationReadOnly()) {
+            ViewerSupport.bind(venvPathComboViewer, viewModel.getProjectRootPaths(),
+                    Properties.selfValue(String.class));
+        }
 
         browseButton.addListener(SWT.Selection, e -> {
             final var directoryDialog = new DirectoryDialog(getShell());
