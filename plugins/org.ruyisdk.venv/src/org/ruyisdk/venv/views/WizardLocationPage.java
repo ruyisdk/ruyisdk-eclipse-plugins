@@ -102,7 +102,11 @@ public class WizardLocationPage extends WizardPage {
                 venvPathCombo.select(0);
             }
         } else {
-            venvPathCombo.setText(initialLocation);
+            if (initialLocation != null && !initialLocation.isBlank()) {
+                venvPathCombo.setText(initialLocation);
+            } else {
+                venvPathCombo.setText("");
+            }
         }
         venvPathCombo.setEnabled(!locationReadOnly);
         venvPathComboViewer = new ComboViewer(venvPathCombo);
