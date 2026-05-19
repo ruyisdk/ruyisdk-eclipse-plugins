@@ -31,6 +31,11 @@ public class VenvListViewModelDisplayTest {
     }
 
     @Test
+    public void toDisplayProjectNameNullVenvReturnsEmptyString() {
+        assertEquals("", VenvListViewModel.toDisplayProjectName(null));
+    }
+
+    @Test
     public void relativePathInsideProjectStartsWithDotSlash() {
         final var venv = Venv.createForProject("/workspace/riscv-app/.venv/debug", "p", "s",
                 "/workspace/riscv-app");
@@ -44,6 +49,25 @@ public class VenvListViewModelDisplayTest {
                 Venv.createForProject("/workspace/venv", "p", "s", "/workspace/project-a");
 
         assertEquals("../venv", VenvListViewModel.toDisplayRelativePath(venv));
+    }
+
+    @Test
+    public void toDisplayRelativePathNullVenvReturnsEmptyString() {
+        assertEquals("", VenvListViewModel.toDisplayRelativePath(null));
+    }
+
+    @Test
+    public void toDisplayRelativePathNullOrBlankPathReturnsEmptyString() {
+        final var nullPathVenv =
+                Venv.createForProject("/workspace/project-a/.venv", "p", "s", "/workspace/demo");
+        nullPathVenv.setPath(null);
+
+        final var blankPathVenv =
+                Venv.createForProject("/workspace/project-b/.venv", "p", "s", "/workspace/demo");
+        blankPathVenv.setPath("   ");
+
+        assertEquals("", VenvListViewModel.toDisplayRelativePath(nullPathVenv));
+        assertEquals("", VenvListViewModel.toDisplayRelativePath(blankPathVenv));
     }
 
     @Test(expected = IllegalArgumentException.class)
