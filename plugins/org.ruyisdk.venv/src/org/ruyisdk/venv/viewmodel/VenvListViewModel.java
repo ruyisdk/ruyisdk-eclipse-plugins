@@ -462,7 +462,21 @@ public class VenvListViewModel implements IDialogStatusProvider {
             return "";
         }
 
-        return Path.of(venv.getProjectPath().trim()).getFileName().toString();
+        return toDisplayProjectNameFromPath(venv.getProjectPath());
+    }
+
+    /**
+     * Creates display text for a project path.
+     *
+     * @param projectPath the project root path
+     * @return display text for the project name column
+     */
+    private static String toDisplayProjectNameFromPath(String projectPath) {
+        if (projectPath == null || projectPath.isBlank()) {
+            return "";
+        }
+
+        return Path.of(projectPath.trim()).getFileName().toString();
     }
 
     /**

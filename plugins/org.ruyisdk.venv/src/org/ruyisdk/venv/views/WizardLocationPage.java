@@ -11,10 +11,8 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.ruyisdk.venv.viewmodel.VenvWizardViewModel;
@@ -33,7 +31,6 @@ public class WizardLocationPage extends WizardPage {
     private Text venvNameText;
     private Combo venvPathCombo;
     private ComboViewer venvPathComboViewer;
-    private Button browseButton;
 
 
     WizardLocationPage(VenvWizardViewModel viewModel) {
@@ -53,7 +50,7 @@ public class WizardLocationPage extends WizardPage {
 
     private void createLayouts(Composite parent) {
         container = new Composite(parent, SWT.NONE);
-        container.setLayout(new GridLayout(3, false));
+        container.setLayout(new GridLayout(2, false));
 
         setControl(container);
     }
@@ -62,7 +59,7 @@ public class WizardLocationPage extends WizardPage {
         final var summaryLabel = new Label(container, SWT.NONE);
         {
             final var gridData = new GridData(GridData.FILL_HORIZONTAL);
-            gridData.horizontalSpan = 3;
+            gridData.horizontalSpan = 2;
             summaryLabel.setLayoutData(gridData);
         }
         summaryLabel.setText("Summary:");
@@ -70,7 +67,7 @@ public class WizardLocationPage extends WizardPage {
         summaryText = new Text(container, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
         {
             final var gridData = new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
-            gridData.horizontalSpan = 3;
+            gridData.horizontalSpan = 2;
             summaryText.setLayoutData(gridData);
         }
         summaryText.setText(viewModel.getSummaryText());
@@ -80,20 +77,13 @@ public class WizardLocationPage extends WizardPage {
         nameLabel.setText("Venv Name:");
 
         venvNameText = new Text(container, SWT.BORDER);
-        {
-            var gridData = new GridData(GridData.FILL_HORIZONTAL);
-            gridData.horizontalSpan = 2;
-            venvNameText.setLayoutData(gridData);
-        }
+        venvNameText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         final var locationLabel = new Label(container, SWT.NONE);
-        locationLabel.setText("Venv Path:");
+        locationLabel.setText("Project:");
         final var locationReadOnly = viewModel.isVenvLocationReadOnly();
         final var initialLocation = viewModel.getVenvLocation();
-        var comboStyle = SWT.BORDER | SWT.DROP_DOWN;
-        if (locationReadOnly) {
-            comboStyle |= SWT.READ_ONLY;
-        }
+        final var comboStyle = SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY;
         venvPathCombo = new Combo(container, comboStyle);
         venvPathCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         if (locationReadOnly) {
@@ -110,10 +100,6 @@ public class WizardLocationPage extends WizardPage {
         }
         venvPathCombo.setEnabled(!locationReadOnly);
         venvPathComboViewer = new ComboViewer(venvPathCombo);
-
-        browseButton = new Button(container, SWT.PUSH);
-        browseButton.setText("Browse...");
-        browseButton.setEnabled(!locationReadOnly);
     }
 
     private void registerEvents() {
@@ -140,15 +126,6 @@ public class WizardLocationPage extends WizardPage {
             ViewerSupport.bind(venvPathComboViewer, viewModel.getProjectRootPaths(),
                     Properties.selfValue(String.class));
         }
-
-        browseButton.addListener(SWT.Selection, e -> {
-            final var directoryDialog = new DirectoryDialog(getShell());
-            directoryDialog.setFilterPath(venvPathCombo.getText());
-            final var selectedPath = directoryDialog.open();
-            if (selectedPath != null) {
-                venvPathCombo.setText(selectedPath);
-            }
-        });
 
         final var completeObservable = new ComputedValue<Boolean>() {
             @Override
