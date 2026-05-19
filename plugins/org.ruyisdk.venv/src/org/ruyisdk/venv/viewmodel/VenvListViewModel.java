@@ -454,10 +454,11 @@ public class VenvListViewModel implements IDialogStatusProvider {
             return "";
         }
 
-        final var venvPath = venv.getPath();
+        var venvPath = venv.getPath();
         if (venvPath == null || venvPath.isBlank()) {
             return "";
         }
+        venvPath = venvPath.trim();
 
         final var relativePath = Path.of(venv.getProjectPath().trim()).relativize(Path.of(venvPath))
                 .toString().replace('\\', '/');
