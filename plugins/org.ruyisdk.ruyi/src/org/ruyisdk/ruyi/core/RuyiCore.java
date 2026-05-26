@@ -3,6 +3,7 @@ package org.ruyisdk.ruyi.core;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.ruyisdk.core.ruyi.model.CheckResult;
 import org.ruyisdk.core.util.PluginLogger;
@@ -25,35 +26,54 @@ public class RuyiCore {
      * Starts background environment check.
      */
     public static void startBackgroundCheck() {
-        check(2000); // 延迟2秒检测以避免影响IDE启动性能
+        check(false, 2000); // 延迟2秒检测以避免影响IDE启动性能
     }
 
     /**
      * Runs manual check.
      */
     public static void runManualCheck() {
-        check(0);
+        check(true, 0);
     }
 
-    private static void check(int delayMillis) {
+    private static void check(boolean isManual, int delayMillis) {
+        final var checkType = isManual ? "Manual" : "Background";
+
         if (isChecking.compareAndSet(false, true)) {
-            Job.create("Ruyi Environment Check", monitor -> {
+            LOGGER.logInfo(String.format("Ruyi environment check starting (%s)", checkType));
+
+            final var checkJob = Job.create("Ruyi Environment Check", monitor -> {
                 try {
-                    CheckResult result = CheckRuyiJob.runCheck(monitor);
-                    handleCheckResult(result);
+                    final var result = CheckRuyiJob.runCheck(monitor);
+                    handleCheckResult(result, isManual);
                     return Status.OK_STATUS;
                 } catch (Exception e) {
                     return Status.error("Ruyi environment check failed", e);
                 } finally {
+                    LOGGER.logInfo(
+                            String.format("Ruyi environment check finished (%s)", checkType));
                     isChecking.set(false);
                 }
-            }).schedule(delayMillis);
+            });
+
+            if (isManual) {
+                checkJob.setUser(true);
+            }
+
+            checkJob.schedule(delayMillis);
+        } else {
+            LOGGER.logInfo("Ruyi environment check is already running");
         }
     }
 
-    private static void handleCheckResult(CheckResult result) {
+    private static void handleCheckResult(CheckResult result, boolean isManual) {
+        final var action = result.getAction();
+        final var message = result.getMessage();
+        LOGGER.logInfo(String.format("Ruyi environment check result: action: %s, message: %s",
+                action, message));
+
         Display.getDefault().asyncExec(() -> {
-            switch (result.getAction()) {
+            switch (action) {
                 case INSTALL:
                     RuyiInstallWizard.openForInstall(result.getLatestVersion());
                     break;
@@ -64,7 +84,10 @@ public class RuyiCore {
                     break;
 
                 case NOTHING:
-                    LOGGER.logInfo(result.getMessage());
+                    if (isManual) {
+                        MessageDialog.openInformation(Display.getDefault().getActiveShell(),
+                                "Ruyi Environment Check", message);
+                    }
                     break;
 
                 default:
