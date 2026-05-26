@@ -8,7 +8,6 @@ import org.eclipse.core.databinding.conversion.Converter;
 import org.eclipse.core.databinding.observable.value.SelectObservableValue;
 import org.eclipse.jface.databinding.swt.typed.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -27,7 +26,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.ruyisdk.core.exception.PluginException;
 import org.ruyisdk.ruyi.services.PackageIndexUpdater;
 import org.ruyisdk.venv.model.Emulator;
 import org.ruyisdk.venv.model.Profile;
@@ -102,7 +100,8 @@ public class WizardConfigPage extends WizardPage {
             }
 
             final var hintLabel = new Label(refreshComposite, SWT.NONE);
-            hintLabel.setText("If lists are empty, update the package index first.");
+            hintLabel.setText(
+                    "If lists are empty or contain outdated information, update the package index first.");
             hintLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
             final var refreshButton = new Button(refreshComposite, SWT.PUSH);
@@ -637,14 +636,7 @@ public class WizardConfigPage extends WizardPage {
     }
 
     private void performUpdateAndRefresh() {
-        try {
-            PackageIndexUpdater.updateWithProgress(getShell());
-        } catch (PluginException e) {
-            final var msg = "Failed to update the package index";
-            MessageDialog.openError(getShell(), msg, String.format("""
-                Unable to update the Ruyi package index.
-
-                %s""", e.getMessage()));
+        if (!PackageIndexUpdater.updateWithProgress(getShell())) {
             return;
         }
 
