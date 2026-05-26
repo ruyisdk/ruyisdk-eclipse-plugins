@@ -37,9 +37,10 @@ public class RuyiCore {
     }
 
     private static void check(boolean isManual, int delayMillis) {
+        final var checkType = isManual ? "Manual" : "Background";
+
         if (isChecking.compareAndSet(false, true)) {
-            LOGGER.logInfo(String.format("Ruyi environment check starting (%s)",
-                    isManual ? "Manual" : "Background"));
+            LOGGER.logInfo(String.format("Ruyi environment check starting (%s)", checkType));
 
             final var checkJob = Job.create("Ruyi Environment Check", monitor -> {
                 try {
@@ -49,8 +50,8 @@ public class RuyiCore {
                 } catch (Exception e) {
                     return Status.error("Ruyi environment check failed", e);
                 } finally {
-                    LOGGER.logInfo(String.format("Ruyi environment check finished (%s)",
-                            isManual ? "Manual" : "Background"));
+                    LOGGER.logInfo(
+                            String.format("Ruyi environment check finished (%s)", checkType));
                     isChecking.set(false);
                 }
             });
@@ -61,13 +62,14 @@ public class RuyiCore {
 
             checkJob.schedule(delayMillis);
         } else {
-            LOGGER.logError("Ruyi environment check is already running", null);
+            LOGGER.logInfo("Ruyi environment check is already running");
         }
     }
 
     private static void handleCheckResult(CheckResult result, boolean isManual) {
         final var action = result.getAction();
-        LOGGER.logInfo(String.format("Ruyi environment check result action: %s", action));
+        LOGGER.logInfo(String.format("Ruyi environment check result: action: %s, message: %s",
+                action, result.getMessage()));
 
         Display.getDefault().asyncExec(() -> {
             switch (action) {
