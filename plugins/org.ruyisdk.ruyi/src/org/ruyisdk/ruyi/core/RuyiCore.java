@@ -68,8 +68,9 @@ public class RuyiCore {
 
     private static void handleCheckResult(CheckResult result, boolean isManual) {
         final var action = result.getAction();
+        final var message = result.getMessage();
         LOGGER.logInfo(String.format("Ruyi environment check result: action: %s, message: %s",
-                action, result.getMessage()));
+                action, message));
 
         Display.getDefault().asyncExec(() -> {
             switch (action) {
@@ -85,7 +86,7 @@ public class RuyiCore {
                 case NOTHING:
                     if (isManual) {
                         MessageDialog.openInformation(Display.getDefault().getActiveShell(),
-                                "Ruyi Environment Check", "Ruyi environment is up to date.");
+                                "Ruyi Environment Check", message);
                     }
                     break;
 
