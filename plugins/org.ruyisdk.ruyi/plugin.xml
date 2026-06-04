@@ -70,15 +70,18 @@
 					tooltip="Verify Ruyi installation">
 				</command>
 				<command
-					commandId="org.ruyisdk.ruyi.commands.flashDeviceProvision"
-					label="Flash (Device Provision)"
-					tooltip="Run ruyi device provision in the built-in terminal">
-				</command>
-				<command
 					commandId="org.ruyisdk.ruyi.commands.updatePackageIndex"
 					label="Update Package Index"
 					tooltip="Update the Ruyi package index">
 				</command>
+				<separator name="additions" visible="true" />
+				<menu id="org.ruyisdk.ruyi.menus.views" label="Views">
+					<command
+						commandId="org.ruyisdk.ruyi.commands.flashDeviceProvision"
+						label="Flash (Device Provision)"
+						tooltip="Run ruyi device provision in the built-in terminal">
+					</command>
+				</menu>
 			</menu>
 		</menuContribution>
 	</extension>
