@@ -26,4 +26,7 @@
             class="org.ruyisdk.promotion.views.WebsiteView"
             category="org.ruyisdk.promotion.category"/>
     </extension>
+    <extension point="org.eclipse.ui.startup">
+        <startup class="org.ruyisdk.promotion.PromotionStartup"/>
+    </extension>
 </plugin>

@@ -86,4 +86,37 @@
 		</menuContribution>
 	</extension>
 
+	<extension point="org.eclipse.ui.perspectiveExtensions">
+		<perspectiveExtension targetID="org.eclipse.cdt.ui.CPerspective">
+			<!-- Position Package Explorer on the top left (stacked with standard Project Explorer) -->
+			<view
+				id="org.ruyisdk.packages.view"
+				relative="org.eclipse.ui.navigator.ProjectExplorer"
+				relationship="stack"
+				visible="true" />
+			
+			<!-- Position Venv View on the bottom left (below the Project Explorer) -->
+			<view
+				id="org.ruyisdk.venv.view"
+				relative="org.eclipse.ui.navigator.ProjectExplorer"
+				relationship="bottom"
+				ratio="0.5"
+				visible="true" />
+			
+			<!-- Stack the Ruyi News View directly with standard Outline view on the far right -->
+			<view
+				id="org.ruyisdk.news.view"
+				relative="org.eclipse.ui.views.ContentOutline"
+				relationship="stack"
+				visible="true" />
+			
+			<!-- Stack the RuyiSDK Website View directly with the News View on the far right -->
+			<view
+				id="org.ruyisdk.promotion.view"
+				relative="org.ruyisdk.news.view"
+				relationship="stack"
+				visible="true" />
+		</perspectiveExtension>
+	</extension>
+
 </plugin>
