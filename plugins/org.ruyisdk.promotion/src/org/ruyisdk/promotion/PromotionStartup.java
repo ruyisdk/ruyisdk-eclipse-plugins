@@ -13,6 +13,8 @@ import org.ruyisdk.promotion.views.WebsiteView;
  */
 public class PromotionStartup implements IStartup {
 
+    private static final PluginLogger LOGGER = Activator.getLogger();
+
     @Override
     public void earlyStartup() {
         PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
@@ -30,7 +32,7 @@ public class PromotionStartup implements IStartup {
                     try {
                         page.showView(WebsiteView.ID);
                     } catch (PartInitException e) {
-                        // ignore or log
+                        LOGGER.logInfo("Failed to open RuyiSDK Website View", e);
                     }
                 }
             }
