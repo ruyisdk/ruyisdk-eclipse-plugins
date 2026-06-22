@@ -15,7 +15,7 @@
 
     <extension point="org.eclipse.ui.menus">
         <menuContribution
-            locationURI="menu:org.ruyisdk.ruyi.menus.main?after=additions">
+            locationURI="menu:org.ruyisdk.ruyi.menus.views?after=additions">
             <command
                 commandId="org.eclipse.ui.views.showView"
                 label="Package Explorer"
