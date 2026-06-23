@@ -600,6 +600,9 @@ public class VenvWizardViewModel {
                     projectRootPaths.add(path);
                 }
             }
+            if (venvLocation.isBlank() && projectRootPaths.size() == 1) {
+                setVenvLocation(projectRootPaths.get(0));
+            }
         };
         if (projectRootPaths.getRealm().isCurrent()) {
             update.run();

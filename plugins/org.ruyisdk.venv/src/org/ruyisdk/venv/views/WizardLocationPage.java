@@ -81,24 +81,10 @@ public class WizardLocationPage extends WizardPage {
 
         final var locationLabel = new Label(container, SWT.NONE);
         locationLabel.setText("Project:");
-        final var locationReadOnly = viewModel.isVenvLocationReadOnly();
-        final var initialLocation = viewModel.getVenvLocation();
+
         final var comboStyle = SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY;
         venvPathCombo = new Combo(container, comboStyle);
         venvPathCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        if (locationReadOnly) {
-            if (initialLocation != null && !initialLocation.isBlank()) {
-                venvPathCombo.add(initialLocation);
-                venvPathCombo.select(0);
-            }
-        } else {
-            if (initialLocation != null && !initialLocation.isBlank()) {
-                venvPathCombo.setText(initialLocation);
-            } else {
-                venvPathCombo.setText("");
-            }
-        }
-        venvPathCombo.setEnabled(!locationReadOnly);
         venvPathComboViewer = new ComboViewer(venvPathCombo);
     }
 
@@ -114,18 +100,25 @@ public class WizardLocationPage extends WizardPage {
 
         final var nameObservable = WidgetProperties.text(SWT.Modify).observe(venvNameText);
         final var pathObservable = WidgetProperties.comboSelection().observe(venvPathCombo);
+        final var pathReadOnlyObservable = BeanProperties
+                .value(VenvWizardViewModel.class, "venvLocationReadOnly", Boolean.class)
+                .observe(viewModel);
+        final var locationEnabledObservable = new ComputedValue<Boolean>() {
+            @Override
+            protected Boolean calculate() {
+                return !Boolean.TRUE.equals(pathReadOnlyObservable.getValue());
+            }
+        };
 
+        ViewerSupport.bind(venvPathComboViewer, viewModel.getProjectRootPaths(),
+                Properties.selfValue(String.class));
         dbc.bindValue(pathObservable, BeanProperties
                 .value(VenvWizardViewModel.class, "venvLocation", String.class).observe(viewModel));
         dbc.bindValue(nameObservable, BeanProperties
                 .value(VenvWizardViewModel.class, "venvName", String.class).observe(viewModel));
         dbc.bindValue(WidgetProperties.text().observe(summaryText), BeanProperties
                 .value(VenvWizardViewModel.class, "summaryText", String.class).observe(viewModel));
-
-        if (!viewModel.isVenvLocationReadOnly()) {
-            ViewerSupport.bind(venvPathComboViewer, viewModel.getProjectRootPaths(),
-                    Properties.selfValue(String.class));
-        }
+        dbc.bindValue(WidgetProperties.enabled().observe(venvPathCombo), locationEnabledObservable);
 
         final var completeObservable = new ComputedValue<Boolean>() {
             @Override
