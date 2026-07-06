@@ -324,19 +324,13 @@ public class PackageExplorerViewModel extends BaseViewModel {
             if (node.getPackageRef() != null) {
                 sb.append("Reference: ").append(node.getPackageRef()).append("\n");
             }
-            sb.append("Status: ").append(node.isDownloaded() ? "Installed" : "Not installed")
-                    .append("\n");
         } else {
             sb.append("Name: ").append(node.getName()).append("\n");
             final var children = node.getChildren();
             if (children != null && !children.isEmpty()) {
                 sb.append("Children: ").append(children.size()).append("\n\n");
                 for (final var child : children) {
-                    sb.append("  - ").append(child.getName());
-                    if (child.isLeaf()) {
-                        sb.append(child.isDownloaded() ? "  [installed]" : "");
-                    }
-                    sb.append("\n");
+                    sb.append("  - ").append(child.getName()).append("\n");
                 }
             }
         }

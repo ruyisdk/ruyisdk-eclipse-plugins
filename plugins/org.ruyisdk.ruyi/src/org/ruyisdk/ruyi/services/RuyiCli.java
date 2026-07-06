@@ -112,19 +112,19 @@ public class RuyiCli {
     /** Package version information returned by package list porcelain output. */
     public static class PackageVersionInfo {
         private final String semver;
-        private final String remark;
+        private final List<String> remarks;
         private final boolean installed;
 
         /**
          * Creates an instance.
          *
          * @param semver package semantic version
-         * @param remark optional remark associated with this version
+         * @param remarks optional remarks associated with this version
          * @param installed true if this version is installed
          */
-        public PackageVersionInfo(String semver, String remark, boolean installed) {
+        public PackageVersionInfo(String semver, List<String> remarks, boolean installed) {
             this.semver = semver;
-            this.remark = remark;
+            this.remarks = remarks == null ? List.of() : new ArrayList<>(remarks);
             this.installed = installed;
         }
 
@@ -132,8 +132,8 @@ public class RuyiCli {
             return semver;
         }
 
-        public String getRemark() {
-            return remark;
+        public List<String> getRemarks() {
+            return Collections.unmodifiableList(remarks);
         }
 
         public boolean isInstalled() {

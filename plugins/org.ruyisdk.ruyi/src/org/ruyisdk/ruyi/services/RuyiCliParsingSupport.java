@@ -9,6 +9,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -101,7 +103,7 @@ final class RuyiCliParsingSupport {
                 final var packageRef =
                         String.format("%s(%s)", packageEntry.getName(), version.getSemver());
                 versions.add(new RuyiCli.PackageTreeVersionInfo(
-                        formatVersionLabel(version.getSemver(), version.getRemark()), packageRef,
+                        formatVersionLabel(version.getSemver(), version.getRemarks()), packageRef,
                         version.isInstalled()));
             }
             packages.add(new RuyiCli.PackageTreePackageInfo(packageEntry.getName(), versions));
@@ -254,29 +256,29 @@ final class RuyiCliParsingSupport {
                 continue;
             }
 
-            final var remark = extractPrimaryRemark(versionObj.optJSONArray("remarks"));
+            final var remarks = extractRemarks(versionObj.optJSONArray("remarks"));
             final var isInstalled =
                     Boolean.TRUE.equals(optBooleanOrNull(versionObj, "is_installed"));
-            out.add(new RuyiCli.PackageVersionInfo(semver, remark, isInstalled));
+            out.add(new RuyiCli.PackageVersionInfo(semver, remarks, isInstalled));
         }
 
         return out;
     }
 
-    private static String extractPrimaryRemark(JSONArray remarksArray) {
+    private static List<String> extractRemarks(JSONArray remarksArray) {
         if (remarksArray == null || remarksArray.length() == 0) {
-            return null;
+            return List.of();
         }
 
-        final var remark = remarksArray.optString(0, "").trim();
-        return remark.isEmpty() ? null : remark;
+        return IntStream.range(0, remarksArray.length())
+                .mapToObj(i -> remarksArray.optString(i, "")).filter(remark -> !remark.isBlank())
+                .collect(Collectors.toList());
     }
 
-    private static String formatVersionLabel(String semver, String remark) {
-        if (remark == null || remark.isBlank()) {
-            return semver;
-        }
-        return semver + " [" + remark + "]";
+    private static String formatVersionLabel(String semver, List<String> remarks) {
+        final var remarksString = remarks.stream().map(remark -> String.format("[%s]", remark))
+                .collect(Collectors.joining());
+        return remarksString.isBlank() ? semver : String.format("%s %s", semver, remarksString);
     }
 
     private static List<String> extractVersions(JSONArray versionsArray) {
