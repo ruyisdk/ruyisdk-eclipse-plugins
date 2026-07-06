@@ -3,6 +3,8 @@ package org.ruyisdk.venv.viewmodel;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -18,6 +20,9 @@ import org.ruyisdk.venv.model.VenvDetectionService;
 
 /** View model backing the venv creation wizard UI. */
 public class VenvWizardViewModel {
+
+    private static final DateTimeFormatter VENV_NAME_TIMESTAMP_FORMAT =
+            DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private final VenvDetectionService service;
@@ -418,7 +423,8 @@ public class VenvWizardViewModel {
         }
         // https://github.com/ruyisdk/ruyisdk-vscode-extension/blob/0.1.4/src/venv/create.command.ts#L217-L229
         // b7b4ab08ea1907db517c27993e857c300fc4a983
-        return "ruyi-venv-" + profile.getName().replaceAll("\\s+", "-");
+        return "ruyi-venv-" + profile.getName().replaceAll("\\s+", "-") + "-"
+                + ZonedDateTime.now().format(VENV_NAME_TIMESTAMP_FORMAT);
     }
 
     private void applyDefaultVenvNameForSelectedProfile() {
@@ -429,7 +435,8 @@ public class VenvWizardViewModel {
         if (defaultName.isBlank()) {
             return;
         }
-        setVenvName(defaultName);
+        // Time ticks. It should not be considered as a manual override.
+        setVenvNameInternal(defaultName, false);
     }
 
     /** Returns available toolchains. */
@@ -645,12 +652,16 @@ public class VenvWizardViewModel {
 
     /** Sets the venv directory name. */
     public void setVenvName(String name) {
+        setVenvNameInternal(name, true);
+    }
+
+    private void setVenvNameInternal(String name, boolean manualOverride) {
         final var normalizedName = name == null ? "" : name;
-        if (!venvNameManuallyOverridden) {
-            final var defaultName = buildDefaultVenvNameForSelectedProfile();
-            if (!normalizedName.equals(defaultName)) {
-                venvNameManuallyOverridden = true;
-            }
+        if (normalizedName.equals(this.venvName)) {
+            return;
+        }
+        if (manualOverride) {
+            venvNameManuallyOverridden = true;
         }
         final var old = this.venvName;
         this.venvName = normalizedName;

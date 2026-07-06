@@ -41,7 +41,8 @@ public class VenvWizard extends Wizard {
 
     @Override
     public boolean canFinish() {
-        return locationPage != null && locationPage.isPageComplete();
+        return locationPage != null && locationPage.isPageComplete()
+                && (getContainer() != null && getContainer().getCurrentPage() == locationPage);
     }
 
     @Override
