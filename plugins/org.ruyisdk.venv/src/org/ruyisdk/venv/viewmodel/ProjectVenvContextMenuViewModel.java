@@ -60,6 +60,16 @@ public class ProjectVenvContextMenuViewModel {
     }
 
     /**
+     * Deletes the given venvs.
+     *
+     * @param venvs venvs to delete
+     */
+    public void deleteVenvs(List<Venv> venvs) {
+        final var venvPaths = detectionService.getVenvDirectoryPathsFromVenvs(venvs);
+        detectionService.deleteVenvDirectoriesAsync(venvPaths).join();
+    }
+
+    /**
      * Returns display text for the apply-venv selection list.
      *
      * @param venv venv row

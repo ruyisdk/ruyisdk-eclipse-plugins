@@ -22,6 +22,10 @@
             id="org.ruyisdk.venv.commands.applyProjectVenv"
             name="Apply venv"
             description="Apply a venv to the selected project"/>
+        <command
+            id="org.ruyisdk.venv.commands.deleteProjectVenv"
+            name="Delete Venv"
+            description="Delete a venv under the selected project"/>
     </extension>
 
     <extension point="org.eclipse.ui.handlers">
@@ -31,6 +35,9 @@
         <handler
             class="org.ruyisdk.venv.handlers.ApplyProjectVenvHandler"
             commandId="org.ruyisdk.venv.commands.applyProjectVenv"/>
+        <handler
+            class="org.ruyisdk.venv.handlers.DeleteProjectVenvHandler"
+            commandId="org.ruyisdk.venv.commands.deleteProjectVenv"/>
     </extension>
 
     <extension point="org.eclipse.ui.menus">
@@ -65,10 +72,13 @@
                 </visibleWhen>
                 <command
                     commandId="org.ruyisdk.venv.commands.newProjectVenv"
-                    label="New Venv..."/>
+                    label="New venv..."/>
                 <command
                     commandId="org.ruyisdk.venv.commands.applyProjectVenv"
                     label="Apply venv..."/>
+                <command
+                    commandId="org.ruyisdk.venv.commands.deleteProjectVenv"
+                    label="Delete venv..."/>
             </menu>
         </menuContribution>
     </extension>
