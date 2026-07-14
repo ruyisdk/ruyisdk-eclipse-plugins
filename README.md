@@ -71,7 +71,7 @@ Contributions are welcome! Please refer to [CONTRIBUTING.md](docs/developer/CONT
 
 ## Update Site (更新站点)
 
-The update site will be updated when final versions (`vX.Y.Z`) release.
+The update site will be updated when final versions (`vX.Y.Z`) are released.
 
 更新站点将在正式版本（`vX.Y.Z`）发布时更新。
 

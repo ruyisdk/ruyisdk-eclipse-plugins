@@ -1,7 +1,7 @@
 <details>
 <summary>English</summary>
 
-This is not a final version, but a beta one produced by CI for testing purpose.
+This is not a final version, but a beta one produced by CI for testing purposes.
 
 ## Environment Requirements
 
