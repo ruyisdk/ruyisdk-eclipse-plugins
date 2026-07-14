@@ -69,6 +69,12 @@ Contributions are welcome! Please refer to [CONTRIBUTING.md](docs/developer/CONT
 
 欢迎贡献！请参阅 [CONTRIBUTING.md](docs/developer/CONTRIBUTING.md) 了解详细信息。
 
+## Update Site (更新站点)
+
+The update site will be updated when final versions (`vX.Y.Z`) release.
+
+更新站点将在正式版本（`vX.Y.Z`）发布时更新。
+
 ## See Also (另请参阅)
 
 RuyiSDK IDE: https://github.com/ruyisdk/ruyisdk-eclipse-packages/

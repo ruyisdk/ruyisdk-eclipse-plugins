@@ -1,21 +1,48 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  push:  # Creating releases on GitHub Web UI will trigger a push event.
+  pull_request:
+  workflow_dispatch:  # manual release trigger
+    inputs:
+      version:
+        description: The version number to release. Use "vX.Y.Z-beta.N" for beta releases, or "vX.Y.Z" for final releases.
+        required: true
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
 env:
-  output_file_name: "ruyisdk-eclipse-plugins.site.zip"
+  OUTPUT_FILE_NAME: "ruyisdk-eclipse-plugins.site.zip"
+  MAIN_BRANCH_NAME: "main"
 
 jobs:
+  workflow_check:
+    name: Workflow Sanity Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if the manual workflow is triggered on the main branch
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -exu
+
+          if [[ "$GITHUB_REF_NAME" != "$MAIN_BRANCH_NAME" ]]; then
+            echo "::error:: The workflow is triggered on branch '$GITHUB_REF_NAME', but it should be triggered on the main branch '$MAIN_BRANCH_NAME'."
+            exit 1
+          fi
+
   dco:
     name: DCO Compliance
+    needs: workflow_check
     runs-on: ubuntu-latest
     steps:
       - name: Run christophebedard/dco-check
-        if: ${{ github.ref_type != 'tag' }}  # tagging does not produce any commits
+        # tagging does not produce any commits
+        if: ${{ (github.event_name == 'push' || github.event_name == 'pull_request') && github.ref_type != 'tag' }}
         uses: christophebedard/dco-check@7b0205d25ead0f898e0b706b58227dd5fa7e3f55  # 0.5.0
         with:
           args: "--verbose"
@@ -24,116 +51,216 @@ jobs:
 
   config_and_check:
     name: Configuration and Check
+    needs: workflow_check
     runs-on: ubuntu-latest
     timeout-minutes: 2
     env:
       # e.g. "ruyisdk-eclipse-plugins-0.1.0.zip". no "v" prefixes.
-      released_file_name_template: "ruyisdk-eclipse-plugins-%VERSION_NUMBER%.zip"
+      RELEASED_FILE_NAME_TEMPLATE: "ruyisdk-eclipse-plugins-%VERSION_NUMBER%.zip"
     outputs:
-      datetime: ${{ steps.info_extraction.outputs.datetime }}
-      # if main branch updates, publish continuous releases
-      make_continuous_release: ${{ steps.info_extraction.outputs.is_continuous }}
-      # if tag added, publish versioning releases
-      make_versioning_release: ${{ steps.info_extraction.outputs.is_versioning }}
-      version_number: ${{ steps.info_extraction.outputs.ver_num }}
-      released_file_name: ${{ steps.info_extraction.outputs.ver_file_name }}
+      datetime: ${{ steps.input_check.outputs.datetime }}
+      release_type: ${{ steps.input_check.outputs.release_type }}
+      version_number: ${{ steps.input_check.outputs.ver_num }}
+      released_file_name: ${{ steps.input_check.outputs.ver_file_name }}
+      latest_final_ver: ${{ steps.version_check.outputs.latest_final_ver }}
     steps:
       - name: Extract information
-        id: info_extraction
+        id: input_check
+        shell: python
+        env:
+          GITHUB_REF_TYPE: ${{ github.ref_type }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          set -exu
+          import datetime
+          import os
+          import re
+          import sys
 
-          echo "datetime=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S %z')" >> "$GITHUB_OUTPUT"
+          github_ref_type = os.environ["GITHUB_REF_TYPE"]
+          github_ref_name = os.environ["GITHUB_REF_NAME"]
+          released_file_name_template = os.environ["RELEASED_FILE_NAME_TEMPLATE"]
+          input_version = os.environ["INPUT_VERSION"]
+          github_output_file = os.environ["GITHUB_OUTPUT"]
+          main_branch_name = os.environ["MAIN_BRANCH_NAME"]
 
-          echo 'is_continuous=${{ github.ref_type == 'tag' || (github.ref_type == 'branch' && github.ref_name == 'main') }}' >> "$GITHUB_OUTPUT"
+          if github_ref_type == "tag" or input_version:
+              ver_num = input_version if input_version else github_ref_name
 
-          is_versioning="${{ github.ref_type == 'tag' }}"
-          echo "is_versioning=$is_versioning" >> "$GITHUB_OUTPUT"
+              m = re.fullmatch(r"v\d+\.\d+\.\d+(-beta\.\d+)?", ver_num)
+              if m:
+                if m.group(1):
+                    release_type = "beta"
+                else:
+                    release_type = "final"
+              else:
+                  sys.exit(
+                      "::error:: Unsupported version number format "
+                      f"'{ver_num}'. Use 'vX.Y.Z-beta.N' for beta releases "
+                      "or 'vX.Y.Z' for final releases."
+                  )
+          elif github_ref_type == "branch" and github_ref_name == main_branch_name:
+              release_type = "continuous"
+              ver_num = "continuous"  # unused
+          else:
+              release_type = "none"
+              ver_num = ""  # unused
 
-          git_tag='${{ github.ref_name }}'
+          outputs = {
+              "datetime": datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S %z"),
+              "release_type": release_type,
+              "ver_num": ver_num,
+              "ver_file_name": released_file_name_template.replace("%VERSION_NUMBER%", ver_num[1:] if ver_num.startswith("v") else ver_num),
+          }
 
-          if [[ "$is_versioning" = 'true' ]]; then
-            # "v0.1.0" -> "0.1.0"
-            ver_num="${git_tag#v}"
-          else
-            # continuous
-            ver_num='continuous'
-          fi
-
-          echo "ver_num=$ver_num" >> "$GITHUB_OUTPUT"
-
-          ver_file_name="$(sed "s/%VERSION_NUMBER%/$ver_num/" <<<"$released_file_name_template")"
-
-          echo "ver_file_name=$ver_file_name" >> "$GITHUB_OUTPUT"
+          with open(github_output_file, "a", encoding="utf-8") as f:
+              for key, value in outputs.items():
+                  print(f"Setting output {key}={value}")
+                  f.write(f"{key}={value}\n")
 
       - name: Checkout to Prepare the Environment for GitHub CLI
-        if: ${{ steps.info_extraction.outputs.is_versioning == 'true' }}
+        if: ${{ steps.input_check.outputs.release_type != 'none' }}
         uses: actions/checkout@v6.0.1
         with:
           fetch-depth: 1
 
       - name: Set up JDK 21
-        if: ${{ steps.info_extraction.outputs.is_versioning == 'true' }}
+        if: ${{ steps.input_check.outputs.release_type != 'none' }}
         uses: actions/setup-java@v5.2.0
         with:
           distribution: 'temurin'
           java-version: 21
           cache: 'maven'
 
-      - name: Check version numbers for versioning release
-        if: ${{ steps.info_extraction.outputs.is_versioning == 'true' }}
+      - name: Make sure version number matches POM and all version numbers should be monotonic.
+        id: version_check
+        if: ${{ steps.input_check.outputs.release_type != 'none' }}
+        shell: python
         env:
           GH_TOKEN: ${{ github.token }}
-          ver_num: ${{ steps.info_extraction.outputs.ver_num }}
+          VERSION_NUMBER: ${{ steps.input_check.outputs.ver_num }}
+          RELEASE_TYPE: ${{ steps.input_check.outputs.release_type }}
         run: |
-          set -ex
-          set -o pipefail
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+          import time
 
-          tag_name="v$ver_num"
+          def run(cmd: list[str]) -> subprocess.CompletedProcess:
+              return subprocess.run(cmd, check=True, text=True, capture_output=True)
 
-          echo "::notice:: Now, remove the existing release of the tag '$tag_name' if this workflow run is triggered by creating releases on GitHub Web UI."
-          # https://cli.github.com/manual/gh_release
-          while gh release view "$tag_name" >/dev/null; do
-            echo "::notice::   the release '$tag_name' is still there"
-            sleep 5
-          done
+          # 0.1.0-SNAPSHOT -> (0, 1, 0, sys.maxsize);
+          # v0.1.0 -> (0, 1, 0, sys.maxsize);
+          # v0.1.0-beta.1 -> (0, 1, 0, 1).
+          def semver_tuple(version: str) -> tuple[int, int, int, int]:
+              version = version.removesuffix("-SNAPSHOT")
+              m = re.fullmatch(r"v?(\d+)\.(\d+)\.(\d+)(?:-beta\.(\d+))?", version)
+              if not m:
+                  raise ValueError(f"invalid semver: {version}")
+              major, minor, micro, beta = m.groups()
+              return tuple(int(x) for x in (major, minor, micro, beta if beta is not None else sys.maxsize))
 
-          # "0.1.0-SNAPSHOT"
-          current_ver="$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)"
-          # "0.1.0"
-          current_ver_num="${current_ver%-SNAPSHOT}"
+          ver_num_raw = os.environ["VERSION_NUMBER"]
+          release_type = os.environ["RELEASE_TYPE"]
+          github_output_file = os.environ["GITHUB_OUTPUT"]
 
-          # "v0.1.0", or empty string if no releases (not tags) have been made
-          latest_ver="$( \
-            gh release list \
-              --json 'tagName' \
-              --exclude-drafts \
-              --exclude-pre-releases | \
-            jq --raw-output '.[].tagName' | \
-            sort --reverse --version-sort | \
-            head -n1 \
-          )"
-          # "0.1.0"
-          if [[ -z "$latest_ver" ]]; then
-            latest_ver_num='0.0.0'
-          else
-            latest_ver_num="${latest_ver#v}"
-          fi
+          if release_type in ("beta", "final"):
+            print(
+                "::notice:: Now, remove the existing release of the tag "
+                f"'{ver_num_raw}' if this workflow run is triggered by creating releases on GitHub Web UI."
+            )
 
-          # check locally
-          if [[ "$ver_num" != "$current_ver_num" ]]; then
-            echo "::error:: Version '$ver_num' does not match the version '$current_ver' in pom.xml."
-            exit 1
-          fi
+            # will be killed if the job times out.
+            while True:
+                exists = subprocess.run(
+                    ["gh", "release", "view", ver_num_raw],
+                    text=True,
+                    capture_output=True,
+                ).returncode == 0
+                if not exists:
+                    break
+                print(f"::notice::   the release '{ver_num_raw}' is still there")
+                time.sleep(5)
 
-          # check remotely
-          if printf '%s\n%s' "$current_ver_num" "$latest_ver_num" | \
-              sort --reverse --version-sort | \
-              head -n1 | \
-              grep -q "$latest_ver_num"; then
-            echo "::error:: Version '$current_ver' is not newer than the latest published version '$latest_ver'."
-            exit 1
-          fi
+          # the latest final release.
+          final_release_list_raw = run([
+              "gh",
+              "release",
+              "list",
+              "--json",
+              "tagName",
+              "--exclude-drafts",
+              "--exclude-pre-releases",
+          ]).stdout
+          final_release_list = json.loads(final_release_list_raw)
+          print(f"Found remote final versions '{final_release_list}'")
+          remote_latest_final_ver = max(
+              [semver_tuple(release.get("tagName", "")) for release in final_release_list],
+              default=None,
+          )
+          if remote_latest_final_ver is None:
+              print("No latest remote final version found")
+          else:
+              latest_final_ver = 'v%s.%s.%s' % remote_latest_final_ver[0:3]
+              print(f"Found latest remote final version '{latest_final_ver}' from '{remote_latest_final_ver}'")
+              with open(github_output_file, "a", encoding="utf-8") as f:
+                  f.write(f"latest_final_ver={latest_final_ver}\n")
+
+          if release_type == "continuous":
+              print("Continuous release, no further version number check is needed, exiting...")
+              sys.exit(0)
+
+          ver_num = semver_tuple(ver_num_raw)
+
+          pom_ver_raw = run([
+              "./mvnw",
+              "help:evaluate",
+              "-Dexpression=project.version",
+              "-q",
+              "-DforceStdout",
+          ]).stdout.strip()
+          pom_ver = semver_tuple(pom_ver_raw)
+          print(f"Found local version '{pom_ver}' from pom.xml with number '{pom_ver_raw}'")
+
+          # won't be always a full list due to missing "--limit ...",
+          #   but newer ones will always be there, so it's enough.
+          release_list_raw = run([
+              "gh",
+              "release",
+              "list",
+              "--json",
+              "tagName",
+              "--exclude-drafts",
+          ]).stdout
+          release_list = json.loads(release_list_raw)
+          print(f"Found remote versions '{release_list}'")
+
+          remote_ver_list = []
+          for release in release_list:
+              tag = release.get("tagName", "")
+              try:
+                  ver = semver_tuple(tag)
+                  print(f"Found remote version '{ver}' with tag '{tag}'")
+                  remote_ver_list.append(ver)
+              except ValueError:
+                  continue
+          remote_latest_ver = max(remote_ver_list) if remote_ver_list else None
+
+          # matchness with dropping beta number.
+          if ver_num[0:3] != pom_ver[0:3]:
+              sys.exit(
+                  "::error:: Version "
+                  f"'{ver_num[0:3]}' does not match the version '{pom_ver[0:3]}' in pom.xml."
+              )
+
+          # uniqueness and monotonicity.
+          if remote_latest_ver is not None and ver_num <= remote_latest_ver:
+              sys.exit(
+                  "::error:: Version "
+                  f"'{ver_num}' is not newer than the latest published version '{remote_latest_ver}'."
+              )
 
   build_and_upload:
     name: Build and Upload
@@ -149,7 +276,7 @@ jobs:
         java_version: [21, 25]
     env:
       # https://github.com/eclipse-packaging/packages/blob/2024-12_R/packages/org.eclipse.epp.package.embedcpp/META-INF/MANIFEST.MF#L7
-      java_version_for_release: 21
+      JAVA_VERSION_FOR_RELEASE: 21
     outputs:
       output_file_list: ${{ steps.packaging.outputs.output_file_list }}
     steps:
@@ -167,18 +294,18 @@ jobs:
 
       - name: Build
         run: |
-          set -ex
+          set -exu
 
           ./mvnw clean verify
 
       - name: Package for Release
-        if: ${{ env.java_version_for_release == matrix.java_version }}
+        if: ${{ env.JAVA_VERSION_FOR_RELEASE == matrix.java_version }}
         id: packaging
         run: |
-          set -ex
+          set -exu
 
           input_dir_path="$PWD/sites/repository/target/repository/"
-          output_file_path="$(mktemp -d)/${{ env.output_file_name }}"
+          output_file_path="$(mktemp -d)/$OUTPUT_FILE_NAME"
           pushd "$input_dir_path"
             echo 'output_file_list<<EOF' >> $GITHUB_OUTPUT
               find . -type f >> $GITHUB_OUTPUT
@@ -191,14 +318,14 @@ jobs:
         if: ${{ steps.packaging.outcome == 'success' }}
         uses: actions/upload-artifact@v6.0.0
         with:
-          name: ${{ env.output_file_name }}
+          name: ${{ env.OUTPUT_FILE_NAME }}
           path: ${{ steps.packaging.outputs.output_file_path }}
           compression-level: 0
           if-no-files-found: error
 
   publish_releases:
     name: Publish Releases
-    if: ${{ needs.config_and_check.outputs.make_continuous_release == 'true' || needs.config_and_check.outputs.make_versioning_release == 'true' }}
+    if: ${{ needs.config_and_check.outputs.release_type != 'none' }}
     needs:
       - config_and_check
       - build_and_upload
@@ -207,37 +334,44 @@ jobs:
     permissions:
       contents: write
     env:
-      output_file_list: ${{ needs.build_and_upload.outputs.output_file_list }}
-      released_file_name: ${{ needs.config_and_check.outputs.released_file_name }}
+      OUTPUT_FILE_LIST: ${{ needs.build_and_upload.outputs.output_file_list }}
+      RELEASED_FILE_NAME: ${{ needs.config_and_check.outputs.released_file_name }}
+      VERSION_NUMBER: ${{ needs.config_and_check.outputs.version_number }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.1
+        with:
+          fetch-depth: 1
 
       - name: Download the Artifact
         uses: actions/download-artifact@v7.0.0
         with:
-          name: ${{ env.output_file_name }}
+          name: ${{ env.OUTPUT_FILE_NAME }}
 
       - name: Prepare Release Notes
+        env:
+          RELEASE_NOTE_DIR: ${{ github.workspace }}/.github/resources/release/
         run: |
-          set -ex
+          set -exu
 
-          for f in $(find '${{ github.workspace }}/.github/resources/release/' -name '*.md'); do
+          # https://stackoverflow.com/questions/7039130/iterate-over-a-list-of-files-with-spaces
+          find "$RELEASE_NOTE_DIR" -name '*.md' -print0 | while IFS= read -r -d '' f; do
             # https://stackoverflow.com/questions/10107459/replace-a-word-with-multiple-lines-using-sed/10108037#10108037
-            perl -i.bak -pe 's/%FILE_LIST%/$ENV{"output_file_list"}/g' "$f" && rm "$f.bak"
+            perl -i.bak -pe 's/%FILE_LIST%/$ENV{"OUTPUT_FILE_LIST"}/g' "$f" && rm "$f.bak"
           done
 
       - name: Delete Old Continuous Releases
-        if: ${{ needs.config_and_check.outputs.make_continuous_release == 'true' }}
+        if: ${{ needs.config_and_check.outputs.release_type == 'continuous' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -ex
+          set -exu
 
           # https://cli.github.com/manual/gh_release
           if gh release view 'continuous' >/dev/null; then
             gh release delete 'continuous' --cleanup-tag --yes
 
+            # will be killed if the job times out.
             while gh release view 'continuous' >/dev/null; do
               echo 'the release is still there'
               sleep 5
@@ -245,39 +379,60 @@ jobs:
           fi
 
       - name: Publish a Continuous Release
-        if: ${{ needs.config_and_check.outputs.make_continuous_release == 'true' }}
-        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090  # v2.4.1
+        if: ${{ needs.config_and_check.outputs.release_type == 'continuous' }}
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # v3.0.0
         with:
           name: Continuous
           tag_name: continuous
+          target_commitish: ${{ env.MAIN_BRANCH_NAME }}
           make_latest: false
           prerelease: true
           generate_release_notes: true
+          previous_tag: ${{ needs.config_and_check.outputs.latest_final_ver }}
           body_path: ${{ github.workspace }}/.github/resources/release/release_note_continuous.md
           files: |
-            ${{ env.output_file_name }}
+            ${{ env.OUTPUT_FILE_NAME }}
 
-      - name: Rename versioning released files
-        if: ${{ needs.config_and_check.outputs.make_versioning_release == 'true' }}
+      - name: Rename tagged released files
+        if: ${{ needs.config_and_check.outputs.release_type == 'beta' || needs.config_and_check.outputs.release_type == 'final' }}
         run: |
-          set -ex
+          set -exu
 
-          mv '${{ env.output_file_name }}' '${{ env.released_file_name }}'
+          mv "$OUTPUT_FILE_NAME" "$RELEASED_FILE_NAME"
 
-      - name: Publish a Versioning Release
-        if: ${{ needs.config_and_check.outputs.make_versioning_release == 'true' }}
-        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090  # v2.4.1
+      - name: Publish a Beta Release
+        if: ${{ needs.config_and_check.outputs.release_type == 'beta' }}
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # v3.0.0
         with:
+          name: ${{ env.VERSION_NUMBER }}
+          tag_name: ${{ env.VERSION_NUMBER }}
+          target_commitish: ${{ env.MAIN_BRANCH_NAME }}
+          make_latest: false
+          prerelease: true
+          generate_release_notes: true
+          previous_tag: ${{ needs.config_and_check.outputs.latest_final_ver }}
+          body_path: ${{ github.workspace }}/.github/resources/release/release_note_beta.md
+          files: |
+            ${{ env.RELEASED_FILE_NAME }}
+
+      - name: Publish a Final Release
+        if: ${{ needs.config_and_check.outputs.release_type == 'final' }}
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda  # v3.0.0
+        with:
+          name: ${{ env.VERSION_NUMBER }}
+          tag_name: ${{ env.VERSION_NUMBER }}
+          target_commitish: ${{ env.MAIN_BRANCH_NAME }}
           make_latest: true
           prerelease: false
           generate_release_notes: true
-          body_path: ${{ github.workspace }}/.github/resources/release/release_note_versioning.md
+          previous_tag: ${{ needs.config_and_check.outputs.latest_final_ver }}
+          body_path: ${{ github.workspace }}/.github/resources/release/release_note_final.md
           files: |
-            ${{ env.released_file_name }}
+            ${{ env.RELEASED_FILE_NAME }}
 
   publish_github_pages:
-    name: Publish GitHub Pages for Versioning Release
-    if: ${{ needs.config_and_check.outputs.make_versioning_release == 'true' }}
+    name: Publish GitHub Pages for Final Release
+    if: ${{ needs.config_and_check.outputs.release_type == 'final' }}
     needs:
       - config_and_check
       - build_and_upload
@@ -290,8 +445,8 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     env:
-      output_file_list: ${{ needs.build_and_upload.outputs.output_file_list }}
-      datetime: ${{ needs.config_and_check.outputs.datetime }}
+      OUTPUT_FILE_LIST: ${{ needs.build_and_upload.outputs.output_file_list }}
+      DATETIME: ${{ needs.config_and_check.outputs.datetime }}
     steps:
       - name: Checkout to Prepare the Environment for Resources Used by GitHub Pages
         uses: actions/checkout@v6.0.1
@@ -302,24 +457,26 @@ jobs:
         id: download
         uses: actions/download-artifact@v7.0.0
         with:
-          name: ${{ env.output_file_name }}
+          name: ${{ env.OUTPUT_FILE_NAME }}
 
       - name: Extract Artifact Content and Prepare Index Page
         id: extraction
+        env:
+          OUTPUT_DIR_PATH: ${{ github.workspace }}/.github/resources/website/
+          OUTPUT_FILE_PATH: ${{ steps.download.outputs.download-path }}/${{ env.OUTPUT_FILE_NAME }}
         run: |
-          set -ex
+          set -exu
 
-          output_dir_path='${{ github.workspace }}/.github/resources/website/'
-          pushd "$output_dir_path"
-            unzip '${{ steps.download.outputs.download-path }}/${{ env.output_file_name }}'
+          pushd "$OUTPUT_DIR_PATH"
+            unzip "$OUTPUT_FILE_PATH"
             for f in 'index.html' 'index.zh_Hans.html'; do
               # update datetime
-              sed -i "s!%PUBLISH_DATE%!$datetime!g" "$f"
+              sed -i "s!%PUBLISH_DATE%!$DATETIME!g" "$f"
               # https://stackoverflow.com/questions/10107459/replace-a-word-with-multiple-lines-using-sed/10108037#10108037
-              perl -i.bak -pe 's/%FILE_LIST%/$ENV{"output_file_list"}/g' "$f" && rm "$f.bak"
+              perl -i.bak -pe 's/%FILE_LIST%/$ENV{"OUTPUT_FILE_LIST"}/g' "$f" && rm "$f.bak"
             done
           popd
-          echo "output_dir_path=$output_dir_path" >> "$GITHUB_OUTPUT"
+          echo "output_dir_path=$OUTPUT_DIR_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Upload static files as artifact
         uses: actions/upload-pages-artifact@v4.0.0
