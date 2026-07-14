@@ -1,7 +1,7 @@
 <details>
 <summary>English</summary>
 
-This is not a final version, but a continuous one produced by CI and based on the main branch for testing purpose.
+This is not a final version, but a beta one produced by CI for testing purposes.
 
 ## Environment Requirements
 
@@ -11,7 +11,7 @@ This is not a final version, but a continuous one produced by CI and based on th
 
 ## Installation Steps
 
-1. Download `ruyisdk-eclipse-plugins.site.zip`, no need to extract it.
+1. Download `ruyisdk-eclipse-plugins-X.Y.Z-beta.N.zip`, no need to extract it.
 1. Launch the IDE, open the "Help" menu at the top menu bar, and click "Install New Software...".
 1. In the opened window, click the "Add..." button to open the "Add Repository" dialog.
 1. Click the "Archive..." button and locate the downloaded zip file.
@@ -46,7 +46,7 @@ If you have any questions:
 <details open>
 <summary>中文</summary>
 
-这不是正式版本，而是由持续集成环境在主分支更新时自动产出的测试版本。
+这不是正式版本，而是由持续集成环境产出的测试版本。
 
 ## 环境要求
 
@@ -56,7 +56,7 @@ If you have any questions:
 
 ## 安装步骤
 
-1. 下载 `ruyisdk-eclipse-plugins.site.zip`，不需要解压缩。
+1. 下载 `ruyisdk-eclipse-plugins-X.Y.Z-beta.N.zip`，不需要解压缩。
 1. 启动 IDE，打开顶部菜单栏的 "Help" ，单击 "Install New Software..."。
 1. 在打开的窗口中单击 "Add..." 按钮打开 "Add Repository" 对话框。
 1. 单击 "Archive..." 按钮，在打开的窗口中找到刚才下载的 zip 文件。
