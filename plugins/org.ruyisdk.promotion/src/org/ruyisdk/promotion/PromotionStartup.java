@@ -7,6 +7,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.ruyisdk.core.util.PluginLogger;
+import org.ruyisdk.promotion.dialogs.QuestionnaireDialog;
 import org.ruyisdk.promotion.views.WebsiteView;
 
 /**
@@ -36,6 +37,8 @@ public class PromotionStartup implements IStartup {
                         LOGGER.logError("Failed to open RuyiSDK Website View", e);
                     }
                 }
+
+                new QuestionnaireDialog(window.getShell()).open();
             }
         });
     }
