@@ -6,7 +6,7 @@ on:
   workflow_dispatch:  # manual release trigger
     inputs:
       version:
-        description: The version number to release. Use "vX.Y.Z-beta.N" for beta releases, or "vX.Y.Z" for final releases.
+        description: The version number to release. Use "vX.Y.Z-beta.N" for beta releases, or "vX.Y.Z" for final releases. For beta releases, N is compared as an integer (for example, vX.Y.Z-beta.10 is greater than vX.Y.Z-beta.2).
         required: true
         type: string
 
