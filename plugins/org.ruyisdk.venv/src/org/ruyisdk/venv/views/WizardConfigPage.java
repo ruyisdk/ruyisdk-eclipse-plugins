@@ -712,14 +712,20 @@ public class WizardConfigPage extends WizardPage {
             }
             final var sysrootOptionObservable = BeanProperties.value(VenvWizardViewModel.class,
                     "sysrootOption", VenvWizardViewModel.SysrootOption.class).observe(viewModel);
+            final var defaultSysrootOptionAvailableObservable =
+                    BeanProperties.value(VenvWizardViewModel.class, "defaultSysrootOptionAvailable",
+                            Boolean.class).observe(viewModel);
             final var displayTextObservable = BeanProperties
                     .value(VenvWizardViewModel.class, "sysrootPackageDisplayText", String.class)
                     .observe(viewModel);
             final var sysrootDirectoryObservable = BeanProperties
                     .value(VenvWizardViewModel.class, "sysrootDirectoryPath", String.class)
                     .observe(viewModel);
+            final var sysrootDefaultEnabled =
+                    WidgetProperties.enabled().observe(sysrootDefaultRadio);
 
             dbc.bindValue(sysrootSelection, sysrootOptionObservable);
+            dbc.bindValue(sysrootDefaultEnabled, defaultSysrootOptionAvailableObservable);
             dbc.bindValue(WidgetProperties.text(SWT.Modify).observe(sysrootDirectoryText),
                     sysrootDirectoryObservable);
 
