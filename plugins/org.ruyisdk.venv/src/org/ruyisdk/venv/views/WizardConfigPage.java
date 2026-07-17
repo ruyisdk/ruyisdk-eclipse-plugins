@@ -148,6 +148,22 @@ public class WizardConfigPage extends WizardPage {
             profileComposite.setLayout(gridLayout);
         }
 
+        emulatorHeader = new Composite(leftColumn, SWT.NONE);
+        emulatorHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        {
+            final var gridLayout = new GridLayout(2, false);
+            gridLayout.marginWidth = 0;
+            emulatorHeader.setLayout(gridLayout);
+        }
+
+        emulatorComposite = new Composite(leftColumn, SWT.NONE);
+        emulatorComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        {
+            final var gridLayout = new GridLayout(2, false);
+            gridLayout.marginWidth = 0;
+            emulatorComposite.setLayout(gridLayout);
+        }
+
         toolchainComposite = new Composite(rightColumn, SWT.NONE);
         toolchainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         {
@@ -156,25 +172,9 @@ public class WizardConfigPage extends WizardPage {
             toolchainComposite.setLayout(gridLayout);
         }
 
-        emulatorHeader = new Composite(rightColumn, SWT.NONE);
-        emulatorHeader.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-        {
-            final var gridLayout = new GridLayout(2, false);
-            gridLayout.marginWidth = 0;
-            emulatorHeader.setLayout(gridLayout);
-        }
-
-        emulatorComposite = new Composite(rightColumn, SWT.NONE);
-        emulatorComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-        {
-            final var gridLayout = new GridLayout(2, false);
-            gridLayout.marginWidth = 0;
-            emulatorComposite.setLayout(gridLayout);
-        }
-
-        sysrootGroup = new Group(leftColumn, SWT.NONE);
+        sysrootGroup = new Group(rightColumn, SWT.NONE);
         sysrootGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        sysrootGroup.setText("");
+        sysrootGroup.setText("Sysroot Provisioning Options");
         {
             // columns: radio buttons, a package info link.
             final var gridLayout = new GridLayout(2, false);
