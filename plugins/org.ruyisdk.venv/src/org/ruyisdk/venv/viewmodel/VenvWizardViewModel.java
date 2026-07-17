@@ -28,6 +28,7 @@ public class VenvWizardViewModel {
     private final VenvDetectionService service;
 
     private boolean configurationPageComplete;
+    private boolean defaultSysrootOptionAvailable;
     private String summaryText = "";
 
     private final List<Profile> profiles = new ArrayList<>();
@@ -60,7 +61,10 @@ public class VenvWizardViewModel {
 
     /** Available sysroot selection strategies. */
     public enum SysrootOption {
-        /** Do not include a sysroot. */
+        /**
+         * Do not include a sysroot. Don't use this as fallback, otherwise new users may be
+         * confused.
+         */
         NONE_SYSROOT,
         /** Use the sysroot included with the selected toolchain. */
         DEFAULT_SYSROOT,
@@ -89,8 +93,25 @@ public class VenvWizardViewModel {
     }
 
     private void recomputeDerivedState() {
+        recomputeDefaultSysrootOptionAvailable();
+        enforceDefaultSysrootOptionAvailable();
         updateSummaryText();
         recomputeConfigurationPageComplete();
+    }
+
+    private void recomputeDefaultSysrootOptionAvailable() {
+        final var old = this.defaultSysrootOptionAvailable;
+        this.defaultSysrootOptionAvailable =
+                selectedToolchainIndex >= 0 && selectedToolchainIndex < toolchains.size()
+                        && toolchains.get(selectedToolchainIndex).hasIncludedSysroot();
+        pcs.firePropertyChange("defaultSysrootOptionAvailable", old,
+                this.defaultSysrootOptionAvailable);
+    }
+
+    private void enforceDefaultSysrootOptionAvailable() {
+        if (sysrootOption == SysrootOption.DEFAULT_SYSROOT && !defaultSysrootOptionAvailable) {
+            setSysrootOption(SysrootOption.FOREIGN_TOOLCHAIN);
+        }
     }
 
     private void updateSummaryText() {
@@ -591,8 +612,16 @@ public class VenvWizardViewModel {
         return sysrootOption;
     }
 
+    /** Returns whether the selected toolchain can provide the default sysroot. */
+    public boolean isDefaultSysrootOptionAvailable() {
+        return defaultSysrootOptionAvailable;
+    }
+
     /** Sets the sysroot selection option. */
     public void setSysrootOption(SysrootOption option) {
+        if (option == SysrootOption.DEFAULT_SYSROOT && !defaultSysrootOptionAvailable) {
+            option = SysrootOption.FOREIGN_TOOLCHAIN;
+        }
         final var old = this.sysrootOption;
         this.sysrootOption = option;
         pcs.firePropertyChange("sysrootOption", old, this.sysrootOption);
