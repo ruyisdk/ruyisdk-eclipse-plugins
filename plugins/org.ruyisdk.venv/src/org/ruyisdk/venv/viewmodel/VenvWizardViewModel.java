@@ -103,7 +103,7 @@ public class VenvWizardViewModel {
         final var old = this.defaultSysrootOptionAvailable;
         this.defaultSysrootOptionAvailable =
                 selectedToolchainIndex >= 0 && selectedToolchainIndex < toolchains.size()
-                        && toolchains.get(selectedToolchainIndex).hasIncludedSysroot();;
+                        && toolchains.get(selectedToolchainIndex).hasIncludedSysroot();
         pcs.firePropertyChange("defaultSysrootOptionAvailable", old,
                 this.defaultSysrootOptionAvailable);
     }
