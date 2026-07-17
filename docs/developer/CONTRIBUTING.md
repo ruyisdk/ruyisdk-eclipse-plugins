@@ -27,7 +27,7 @@
 Steps:
 
 - Update hard-coded version number by running `./mvnw tycho-versions:set-version -DnewVersion=X.Y.Z-SNAPSHOT` and make a commit:
-  - Use tag `vX.Y.Z-beta.N` for beta versions. N is considered in natural sort order during comparison.
+  - Use tag `vX.Y.Z-beta.N` for beta versions. N is compared as an integer (for example, vX.Y.Z-beta.10 is greater than vX.Y.Z-beta.2).
   - Use tag `vX.Y.Z` for final versions.
   - The tag `continuous` is used by the CI, so developers should NOT touch it.
   - Do NOT use any other string as the tag name.
