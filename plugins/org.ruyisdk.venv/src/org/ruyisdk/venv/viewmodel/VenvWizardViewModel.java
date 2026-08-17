@@ -442,20 +442,14 @@ public class VenvWizardViewModel {
         service.installPackage(name, version);
     }
 
-    /** Data required by the finalization operations, resolved on the realm thread in advance. */
-    private static final class FinalizationData {
-        private String toolchainName;
-        private String toolchainVersion;
-        private String profile;
-        private SysrootOption sysrootOption;
-        private String sysrootPackageName;
-        private String sysrootPackageVersion;
-        private String sysrootDirectory;
-        private boolean emulatorEnabled;
-        private String emulatorName;
-        private String emulatorVersion;
-        private String venvLocation;
-        private String venvName;
+    /**
+     * Data required by the finalization operations, resolved on the realm thread in advance. A null
+     * String component means the corresponding wizard option was not selected.
+     */
+    private static record FinalizationData(String toolchainName, String toolchainVersion,
+            String profile, SysrootOption sysrootOption, String sysrootPackageName,
+            String sysrootPackageVersion, String sysrootDirectory, boolean emulatorEnabled,
+            String emulatorName, String emulatorVersion, String venvLocation, String venvName) {
     }
 
     private FinalizationData finalizationData;
@@ -466,58 +460,60 @@ public class VenvWizardViewModel {
      * from another thread.
      */
     public void buildFinalizationData() {
-        final var data = new FinalizationData();
-
         if (venvLocation == null || venvLocation.isBlank()) {
             throw RuyiCliException.invalidArgument("Venv parent path is empty");
         }
-        data.venvLocation = venvLocation;
         if (venvName == null || venvName.isBlank()) {
             throw RuyiCliException.invalidArgument("Venv name is empty");
         }
-        data.venvName = venvName;
 
         if (selectedToolchainIndex < 0 || selectedToolchainIndex >= toolchains.size()
                 || selectedToolchainVersionIndex < 0) {
             throw RuyiCliException.invalidArgument("No toolchain selected");
         }
         final var toolchain = toolchains.get(selectedToolchainIndex);
-        data.toolchainName = toolchain.getName();
-        data.toolchainVersion = toolchain.getVersions().get(selectedToolchainVersionIndex);
+        final var toolchainName = toolchain.getName();
+        final var toolchainVersion = toolchain.getVersions().get(selectedToolchainVersionIndex);
 
+        String profile = null;
         if (selectedProfileIndex >= 0 && selectedProfileIndex < profiles.size()) {
-            data.profile = profiles.get(selectedProfileIndex).getName();
+            profile = profiles.get(selectedProfileIndex).getName();
         }
 
-        data.sysrootOption = sysrootOption;
+        String sysrootPackageName = null;
+        String sysrootPackageVersion = null;
+        String sysrootDirectory = null;
         if (sysrootOption == SysrootOption.FOREIGN_TOOLCHAIN) {
             if (!isSysrootPackageSelected()) {
                 throw RuyiCliException
                         .invalidArgument("Sysroot from package selected but no package chosen");
             }
             final var pkg = getSysrootToolchains().get(selectedSysrootPackageIndex);
-            data.sysrootPackageName = pkg.getName();
-            data.sysrootPackageVersion = pkg.getVersions().get(selectedSysrootPackageVersionIndex);
+            sysrootPackageName = pkg.getName();
+            sysrootPackageVersion = pkg.getVersions().get(selectedSysrootPackageVersionIndex);
         } else if (usesSysrootDirectory(sysrootOption)) {
             if (sysrootDirectoryPath == null || sysrootDirectoryPath.isBlank()) {
                 throw RuyiCliException
                         .invalidArgument("Sysroot directory option selected but no path set");
             }
-            data.sysrootDirectory = sysrootDirectoryPath;
+            sysrootDirectory = sysrootDirectoryPath;
         }
 
-        data.emulatorEnabled = emulatorEnabled;
+        String emulatorName = null;
+        String emulatorVersion = null;
         if (emulatorEnabled) {
             if (selectedEmulatorIndex < 0 || selectedEmulatorIndex >= emulators.size()
                     || selectedEmulatorVersionIndex < 0) {
                 throw RuyiCliException.invalidArgument("Emulator enabled but not selected");
             }
             final var emulator = emulators.get(selectedEmulatorIndex);
-            data.emulatorName = emulator.getName();
-            data.emulatorVersion = emulator.getVersions().get(selectedEmulatorVersionIndex);
+            emulatorName = emulator.getName();
+            emulatorVersion = emulator.getVersions().get(selectedEmulatorVersionIndex);
         }
 
-        finalizationData = data;
+        finalizationData = new FinalizationData(toolchainName, toolchainVersion, profile,
+                sysrootOption, sysrootPackageName, sysrootPackageVersion, sysrootDirectory,
+                emulatorEnabled, emulatorName, emulatorVersion, venvLocation, venvName);
     }
 
     /**
@@ -537,16 +533,16 @@ public class VenvWizardViewModel {
         finalizationData = null;
 
         stepReporter.accept("install toolchain");
-        installToolchain(data.toolchainName, data.toolchainVersion);
+        installToolchain(data.toolchainName(), data.toolchainVersion());
 
-        if (data.sysrootOption == SysrootOption.FOREIGN_TOOLCHAIN) {
+        if (data.sysrootOption() == SysrootOption.FOREIGN_TOOLCHAIN) {
             stepReporter.accept("install package for sysroot");
-            installPackageForSysroot(data.sysrootPackageName, data.sysrootPackageVersion);
+            installPackageForSysroot(data.sysrootPackageName(), data.sysrootPackageVersion());
         }
 
-        if (data.emulatorEnabled) {
+        if (data.emulatorEnabled()) {
             stepReporter.accept("install emulator");
-            installEmulator(data.emulatorName, data.emulatorVersion);
+            installEmulator(data.emulatorName(), data.emulatorVersion());
         }
 
         stepReporter.accept("create venv");
@@ -556,25 +552,25 @@ public class VenvWizardViewModel {
         String copySysrootFromDir = null;
         String symlinkSysrootFromDir = null;
         String projectSysrootFromRootfs = null;
-        if (data.sysrootOption == SysrootOption.DEFAULT_SYSROOT) {
+        if (data.sysrootOption() == SysrootOption.DEFAULT_SYSROOT) {
             withSysroot = true;
-        } else if (data.sysrootOption == SysrootOption.NONE_SYSROOT) {
+        } else if (data.sysrootOption() == SysrootOption.NONE_SYSROOT) {
             withSysroot = false;
-        } else if (data.sysrootOption == SysrootOption.FOREIGN_TOOLCHAIN) {
-            sysrootFromPackage =
-                    String.format("%s(%s)", data.sysrootPackageName, data.sysrootPackageVersion);
-        } else if (data.sysrootOption == SysrootOption.COPY_FROM_DIRECTORY) {
-            copySysrootFromDir = data.sysrootDirectory;
-        } else if (data.sysrootOption == SysrootOption.SYMLINK_FROM_DIRECTORY) {
-            symlinkSysrootFromDir = data.sysrootDirectory;
-        } else if (data.sysrootOption == SysrootOption.PROJECT_FROM_ROOTFS) {
-            projectSysrootFromRootfs = data.sysrootDirectory;
+        } else if (data.sysrootOption() == SysrootOption.FOREIGN_TOOLCHAIN) {
+            sysrootFromPackage = String.format("%s(%s)", data.sysrootPackageName(),
+                    data.sysrootPackageVersion());
+        } else if (data.sysrootOption() == SysrootOption.COPY_FROM_DIRECTORY) {
+            copySysrootFromDir = data.sysrootDirectory();
+        } else if (data.sysrootOption() == SysrootOption.SYMLINK_FROM_DIRECTORY) {
+            symlinkSysrootFromDir = data.sysrootDirectory();
+        } else if (data.sysrootOption() == SysrootOption.PROJECT_FROM_ROOTFS) {
+            projectSysrootFromRootfs = data.sysrootDirectory();
         }
 
-        final var path = new File(data.venvLocation, data.venvName).getPath();
-        service.createVenv(path, data.toolchainName, data.toolchainVersion, data.profile,
+        final var path = new File(data.venvLocation(), data.venvName()).getPath();
+        service.createVenv(path, data.toolchainName(), data.toolchainVersion(), data.profile(),
                 withSysroot, sysrootFromPackage, copySysrootFromDir, symlinkSysrootFromDir,
-                projectSysrootFromRootfs, data.emulatorName, data.emulatorVersion);
+                projectSysrootFromRootfs, data.emulatorName(), data.emulatorVersion());
     }
 
     /** Returns available profiles as an observable list. */
