@@ -48,25 +48,21 @@ public class VenvWizard extends Wizard {
 
     @Override
     public boolean performFinish() {
+        // Prepare data here, then use data in the worker thread.
+        // Forked runnable must not touch observables.
+        try {
+            viewModel.buildFinalizationData();
+        } catch (PluginException e) {
+            StatusManager.getManager()
+                    .handle(new Status(IStatus.ERROR, "org.ruyisdk.venv",
+                            "Unable to complete virtual environment setup.", e),
+                            StatusManager.LOG | StatusManager.BLOCK);
+            return false;
+        }
         try {
             getContainer().run(true, true, monitor -> {
                 try {
-                    monitor.subTask("install toolchain");
-                    viewModel.installToolchain();
-
-                    if (viewModel
-                            .getSysrootOption() == VenvWizardViewModel.SysrootOption.FOREIGN_TOOLCHAIN) {
-                        monitor.subTask("install package for sysroot");
-                        viewModel.installPackageForSysroot();
-                    }
-
-                    if (viewModel.isEmulatorEnabled()) {
-                        monitor.subTask("install emulator");
-                        viewModel.installEmulator();
-                    }
-
-                    monitor.subTask("create venv");
-                    viewModel.createVenv();
+                    viewModel.doFinalization(monitor::subTask);
                 } catch (PluginException e) {
                     throw new InvocationTargetException(e);
                 }
